@@ -4,7 +4,7 @@
     <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="1 0 0 0 0 0 1 camera_frame link1 100" />
     <arg name="left_cam_name" value="left" />
 
-    <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video0 ! video/x-raw-yuv,framerate=15/1,width=320,height=240 ! ffmpegcolorspace " />
+    <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video1 ! video/x-raw-yuv,framerate=15/1,width=320,height=240 ! ffmpegcolorspace " />
     <node pkg="gscam" type="gscam" name="$(arg left_cam_name)">
         <param name="camera_name" value="$(arg left_cam_name)" />
 
@@ -28,7 +28,7 @@
     <!-- Set this to your camera's name -->
     <arg name="right_cam_name" value="right" />
 
-    <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video1 ! video/x-raw-yuv,framerate=15/1,width=320,height=240 ! ffmpegcolorspace " />
+    <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video0 ! video/x-raw-yuv,framerate=15/1,width=320,height=240 ! ffmpegcolorspace " />
     <node pkg="gscam" type="gscam" name="$(arg right_cam_name)">
         <param name="camera_name" value="$(arg right_cam_name)" />
 
@@ -56,7 +56,10 @@
     </node> -->
 
     </group>
-    <!--<node pkg="irobotcreate2" name="irobotcreate2" type="irobotcreate2" />-->
+    <node pkg="irobotcreate2" name="irobotcreate2" type="irobotcreate2" />
     <node pkg="create_driver" name="create_state_machine" type="create_state_machine.py" />
     <node pkg="ball_detect" name="ball_detect2" type="ball_detect2.py" />
+    <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen">
+     <param name="autosize" value="true" />
+    </node>
 </launch>

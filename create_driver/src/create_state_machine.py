@@ -13,6 +13,10 @@ from std_msgs.msg import String
 import sys, select, termios, tty
 import random
 
+FAST_TURN_SPEED = 0.5
+SLOW_TURN_SPEED = 0.1
+FAST_DRIVE_SPEED= 0.2
+SLOW_DRIVE_SPEED = 0.1
 state = "stop"
 twist_msg = Twist()
 twist_msg.linear.x = 0.0
@@ -22,13 +26,18 @@ twist_msg.angular.x = 0.0
 twist_msg.angular.y = 0.0
 twist_msg.angular.z = 0.0
 ball_in_sight = False
+lower_cam_ball_in_sight = False
 ball_in_sight_changed = False
+lower_cam_ball_in_sight_changed = False
 done_avoiding_obstacle = True
 ball_coords = Vector3()
 ball_coords.x = 0
 ball_coords.y = 0
 ball_coords.z = 0
-
+lower_cam_ball_coords = Vector3()
+lower_cam_ball_coords.x = 0
+lower_cam_ball_coords.y = 0
+lower_cam_ball_coords.z = 0
 
 command_start_time = 0.0
 explore_duration = 5.0
@@ -42,10 +51,10 @@ rate1 = rospy.Rate(1.0) # 1 sec
 rate2 = rospy.Rate(2.0) #0.5 sec
 
 
-def drive():
+def drive(speed = FAST_DRIVE_SPEED):
     global last_command, command_start_time
     forward_msg = twist_msg
-    forward_msg.linear.x = 0.2
+    forward_msg.linear.x = speed
     pub.publish(forward_msg)
     last_command = "drive"
     command_start_time = rospy.get_time()
@@ -60,19 +69,19 @@ def back_up():
     command_start_time = rospy.get_time()
     twist_msg.linear.x = 0.0
 
-def turn_left():
+def turn_left(speed=FAST_TURN_SPEED):
     global last_command, command_start_time
     left_msg = twist_msg
-    left_msg.angular.z = 0.5
+    left_msg.angular.z = speed
     pub.publish(left_msg)
     last_command = "turn_left"
     command_start_time = rospy.get_time()
     twist_msg.angular.z = 0.0
 
-def turn_right():
+def turn_right(speed=FAST_TURN_SPEED):
     global last_command, command_start_time
     right_msg = twist_msg
-    right_msg.angular.z = -0.5
+    right_msg.angular.z = -1*speed
     pub.publish(right_msg)
     last_command = "turn_right"
     command_start_time = rospy.get_time()
@@ -101,6 +110,20 @@ def explore():
             explore_state = "explore_turn"
 
 
+def fine_position():
+	global last_command, command_start_time
+	if abs(lower_cam_ball_coords.x) < 0.5:
+		if lower_cam_ball_coords.y < 0.7:
+			stop()
+		else:
+			drive(speed=SLOW_DRIVE_SPEED)
+	elif lower_cam_ball_coords. x >= 0.5:
+		turn_right(speed=SLOW_TURN_SPEED)
+	else:
+		turn_left(speed = SLOW_TURN_SPEED)
+	command_start_time = rospy.get_time()
+
+
 
 def ir_bumper_callback(msg):
     global done_avoiding_obstacle, state
@@ -123,12 +146,33 @@ def ball_in_sight_callback(msg):
             state = "find_ball"
             ball_in_sight = True
             ball_in_sight_changed = True
+            
+def lower_cam_ball_in_sight_callback(msg):
+    global lower_cam_ball_in_sight, lower_cam_ball_in_sight_changed,state
+    if msg.data == "false":
+        if lower_cam_ball_in_sight == True:
+            lower_cam_ball_in_sight = False
+            lower_cam_ball_in_sight_changed = True
+    elif msg.data == "true":
+        if lower_cam_ball_in_sight == True:
+            a = 1
+            #do nothing
+        else:
+            state = "fine_position"
+            lower_cam_ball_in_sight = True
+            lower_cam_ball_in_sight_changed = True
 
 def ball_coords_callback(msg):
     global ball_coords
     ball_coords.x = msg.x
     ball_coords.y = msg.y
     ball_coords.z = msg.z
+
+def lower_cam_ball_coords_callback(msg):
+	global lower_cam_ball_coords_callback
+	lower_cam_ball_coords.x = msg.x
+	lower_cam_ball_coords.y = msg.y
+	lower_cam_ball_coords.z = msg.z
 
 
 
@@ -156,6 +200,9 @@ def state_change_callback(data):
     elif data.data == "z":
         state = "explore"
         last_command = "explore"
+    elif data.data == "c":
+		state = "fine_position"
+		last_command = "fine_position"
     else:
         stop()
         state = "stop"
@@ -197,6 +244,11 @@ def run_state_machine():
         done_avoiding_obstacle = True
     elif state == "explore":
         explore()
+    elif state == "fine_position":
+		if not lower_cam_ball_in_sight:
+			state = "turn_left"
+		else:
+			fine_position()
 
 
 
@@ -205,10 +257,12 @@ def run_state_machine():
             stop()
 
 
-rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
+#rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
 rospy.Subscriber("/state_cmds", String, state_change_callback)
 rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
+rospy.Subscriber("/lower_cam_is_ball_in_sight", String, lower_cam_ball_in_sight_callback)
 rospy.Subscriber("/ball_coords", Vector3, ball_coords_callback)
+rospy.Subscriber("/lower_cam_ball_coords", Vector3, lower_cam_ball_coords_callback)
 try:
     while not rospy.is_shutdown():
         run_state_machine()

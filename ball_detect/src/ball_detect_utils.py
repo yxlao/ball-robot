@@ -15,14 +15,6 @@ orange_hsv_highs = (16, 255, 255)
 green_hsv_lows = (30, 80, 80)
 green_hsv_highs = (50, 255, 255)
 
-def get_green_hsv_extremes():
-	global green_hsv_lows, green_hsv_highs
-	return green_hsv_lows, green_hsv_highs
-
-def get_orange_hsv_extremes():
-	global orange_hsv_lows, orange_hsv_highs
-	return orange_hsv_lows, orange_hsv_highs
-
 
 def hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs):
     """
@@ -145,9 +137,9 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
     return (x, y, z)
 
 def get_ball_coordinates(center, radius):
-    x = center[0] - 320.0
+    x = center[0] - 160.0
     y = 100. / radius
-    z = center[1] - 240.0
+    z = center[1] - 120.0
 
     x = x / 100.
     y = y * 0.3
@@ -157,7 +149,7 @@ def get_ball_coordinates(center, radius):
 
 if __name__ == '__main__':
     # set camera
-    camera = cv2.VideoCapture(3)
+    camera = cv2.VideoCapture(1)
 
     # main loop
     while(True):
