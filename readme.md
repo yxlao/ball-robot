@@ -6,6 +6,8 @@ Assume your `workspace` is `~/robot`.
 
         # replace with your own git address, must clone to the src folder
         git clone git@bitbucket.org:ucsd_team_one/robot-central.git ~/robot/src
+        git submodule init
+        git submodule update
 
 3. Make multiple times (to get rid of make errors).
 
