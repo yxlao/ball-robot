@@ -7,6 +7,3 @@
 [submodule "usb_cam"]
 	path = usb_cam
 	url = https://github.com/bosch-ros-pkg/usb_cam.git
-[submodule "image_pipeline"]
-	path = image_pipeline
-	url = https://github.com/ros-perception/image_pipeline.git
