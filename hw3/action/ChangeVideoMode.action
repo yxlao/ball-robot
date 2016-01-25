@@ -1,0 +1,6 @@
+uint32 video_mode_id 
+uint32 visualization_mode_id
+---
+uint32 video_mode_changed 
+uint32 visualization_mode_changed
+---
