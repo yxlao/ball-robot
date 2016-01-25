@@ -19,7 +19,7 @@ Assume your `workspace` is `~/robot`.
 ## Calibration
 
         # for stero camera
-        rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.0254 left:=/left_cam/image_raw left_camera:=/left_cam right:=/right_cam/image_raw right_camera:=/right_cam --approximate=0.05s
+        rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.0254 left:=/left_cam/image_raw left_camera:=/left_cam right:=/right_cam/image_raw right_camera:=/right_cam --approximate=0.1
 
         # for single camera
         rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.0254 image:=/left_cam/image_raw camera:=/left_cam
