@@ -18,8 +18,7 @@
 
 using namespace team6_project;
 
-class Team6
-{
+class Team6 {
   ros::NodeHandle nh_;
   image_transport::ImageTransport it_;
   image_transport::Subscriber upper_image_sub_;
@@ -47,7 +46,7 @@ class Team6
   bool irBumperFlag;
   bool playSongs;
 
-public:
+ public:
   Team6(std::string name) :
     as_(nh_, name, boost::bind(&Team6::stateChangedCallback, this, _1), false),
     action_name_(name),
@@ -61,16 +60,20 @@ public:
 
     ROS_INFO("team6 ready");
 
-    upper_image_sub_ = it_.subscribe("/upper_cam/image_raw", 1, &Team6::upperFrameCallback, this);
-    lower_image_sub_ = it_.subscribe("/lower_cam/image_raw", 1, &Team6::lowerFrameCallback, this);
+    upper_image_sub_ = it_.subscribe("/upper_cam/image_raw", 1,
+                                     &Team6::upperFrameCallback, this);
+    lower_image_sub_ = it_.subscribe("/lower_cam/image_raw", 1,
+                                     &Team6::lowerFrameCallback, this);
 
-    upper_image_pub_= it_.advertise("/upper_cam/image",1);
-    lower_image_pub_= it_.advertise("/lower_cam/image",1);
+    upper_image_pub_ = it_.advertise("/upper_cam/image", 1);
+    lower_image_pub_ = it_.advertise("/lower_cam/image", 1);
 
     vel_pub_ = nh_.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
     play_song_pub_ = nh_.advertise<irobotcreate2::PlaySong>("/play_song", 1);
-    ir_bumper_sub_ = nh_.subscribe<irobotcreate2::RoombaIR>("/ir_bumper", 1, &Team6::irBumperCallback, this);
-    bumper_sub_ = nh_.subscribe<irobotcreate2::Bumper>("/bumper", 1, &Team6::bumperCallback, this);
+    ir_bumper_sub_ = nh_.subscribe<irobotcreate2::RoombaIR>("/ir_bumper", 1,
+                     &Team6::irBumperCallback, this);
+    bumper_sub_ = nh_.subscribe<irobotcreate2::Bumper>("/bumper", 1,
+                  &Team6::bumperCallback, this);
 
     playSongs = true;
     currentState_.state_mode_id = FOLLOW_OWNER;
@@ -78,89 +81,83 @@ public:
     stateAction();
   }
 
-  ~Team6(void)
-  {
+  ~Team6(void) {
   }
 
-  void stateAction()
-  {
+  void stateAction() {
     ROS_INFO("stateAction(): %d", currentState_.state_mode_id);
     ros::Rate r(10);
 
-    // echo state change via beep 
+    // echo state change via beep
     if (playSongs && oldState_.state_mode_id != currentState_.state_mode_id) {
-        ROS_INFO("Playing State Change Song %d", currentState_.state_mode_id);
-    oldState_.state_mode_id = currentState_.state_mode_id;
+      ROS_INFO("Playing State Change Song %d", currentState_.state_mode_id);
+      oldState_.state_mode_id = currentState_.state_mode_id;
 
-        irobotcreate2::PlaySong play_song;
-        play_song.song_number = currentState_.state_mode_id;
-        try {
+      irobotcreate2::PlaySong play_song;
+      play_song.song_number = currentState_.state_mode_id;
+      try {
         play_song_pub_.publish(play_song);
-        } catch (std::exception& e) {
-           ROS_INFO("Failed to Play Song");
-        }
-    
+      } catch (std::exception& e) {
+        ROS_INFO("Failed to Play Song");
+      }
+
     }
 
-    switch(currentState_.state_mode_id) {
-      case FOLLOW_OWNER:
-        if (!ownerFlag) {
-          move(0, 0.25); //turn and look for owner
-        }
-        else {
-          move(0.25, 0); //move forward to owner
-        }
-        break;
-      case FIND_BALL:
-        if (!ballFlag) {
-          move(0, 0.10); //turn and look for ball
-        }
-        else {
-          move(0.15, 0); //move forward to ball
-        }
-        break;
-      case FETCH_BALL:
-        if (!ownerFlag) {
-          move(0, 0.50);
-        }
-        else {
-          move(0.25, 0);
-        }
-        break;
+    switch (currentState_.state_mode_id) {
+    case FOLLOW_OWNER:
+      if (!ownerFlag) {
+        move(0, 0.25); //turn and look for owner
+      } else {
+        move(0.25, 0); //move forward to owner
+      }
+      break;
+    case FIND_BALL:
+      if (!ballFlag) {
+        move(0, 0.10); //turn and look for ball
+      } else {
+        move(0.15, 0); //move forward to ball
+      }
+      break;
+    case FETCH_BALL:
+      if (!ownerFlag) {
+        move(0, 0.50);
+      } else {
+        move(0.25, 0);
+      }
+      break;
 
-      //cases below used for testing
-      case 10:
-        ROS_INFO("CASE 10");
-        ownerFlag = true;
-        irBumperFlag = true;
-        currentState_.state_mode_id = FOLLOW_OWNER;
-        stateAction();
-        break;
-      case 11:
-        ROS_INFO("CASE 11");
-        ballFlag = true;
-        irBumperFlag = true;
-        currentState_.state_mode_id = FIND_BALL;
-        stateAction();
-        break;
-      case 12:
-        ROS_INFO("CASE 12");
-        irBumperFlag = false;
-        currentState_.state_mode_id = FETCH_BALL;
-        stateAction();
-        break;
-      default:
-        ROS_INFO("RESET");
-        ownerFlag = false;
-        ballFlag = false;
-        irBumperFlag = true;
-    currentState_.state_mode_id = -1; 
-        break;
+    //cases below used for testing
+    case 10:
+      ROS_INFO("CASE 10");
+      ownerFlag = true;
+      irBumperFlag = true;
+      currentState_.state_mode_id = FOLLOW_OWNER;
+      stateAction();
+      break;
+    case 11:
+      ROS_INFO("CASE 11");
+      ballFlag = true;
+      irBumperFlag = true;
+      currentState_.state_mode_id = FIND_BALL;
+      stateAction();
+      break;
+    case 12:
+      ROS_INFO("CASE 12");
+      irBumperFlag = false;
+      currentState_.state_mode_id = FETCH_BALL;
+      stateAction();
+      break;
+    default:
+      ROS_INFO("RESET");
+      ownerFlag = false;
+      ballFlag = false;
+      irBumperFlag = true;
+      currentState_.state_mode_id = -1;
+      break;
     }
   }
 
-  void move(float distance, float angle)
-  {
+  void move(float distance, float angle) {
     geometry_msgs::Twist msg;
     msg.linear.x = distance;
     msg.angular.z = angle;
@@ -175,7 +172,8 @@ public:
     bool ownerRecognized = false;
     sensor_msgs::Image::Ptr out_msg;
     cv::Mat element;
-    cv::Mat img_smooth, frame_result, hsv, img_result, mask, masked_result, img_edge_gray_y;
+    cv::Mat img_smooth, frame_result, hsv, img_result, mask, masked_result,
+    img_edge_gray_y;
     cv::Mat img_contour, drawing;
 
     std::vector<std::vector<cv::Point> > contours;
@@ -197,14 +195,14 @@ public:
       //The following looks for skin
       //cv::inRange(hsv, cv::Scalar(100, 0.1*256, 0.1*256, 0),
       //            cv::Scalar(130, 0.9*256, 0.8*256, 0), mask);
-      cv::inRange(hsv, cv::Scalar(150, 0.0*256, 0.0*256, 0),
-                  cv::Scalar(190, 1.0*256, 1.0*256, 0), mask);
+      cv::inRange(hsv, cv::Scalar(150, 0.0 * 256, 0.0 * 256, 0),
+                  cv::Scalar(190, 1.0 * 256, 1.0 * 256, 0), mask);
       //cv::cvtColor(mask, img_result, CV_HSV2BGR);
 
-      cv::findContours( mask, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_TC89_KCOS, cv::Point(0, 0) );
+      cv::findContours( mask, contours, hierarchy, CV_RETR_TREE,
+                        CV_CHAIN_APPROX_TC89_KCOS, cv::Point(0, 0) );
 
-      for( int i = 0; i< contours.size(); i++ )
-      {
+      for ( int i = 0; i < contours.size(); i++ ) {
         //ROS_INFO("%d", i);
         cv::approxPolyDP( cv::Mat(contours[i]), contours_poly[i], 3, true );
         boundRect[i] = cv::boundingRect( cv::Mat(contours_poly[i]) );
@@ -212,8 +210,8 @@ public:
 
       drawing = cv::Mat::zeros( mask.size(), CV_8UC3 );
 
-      for( int i = 0; i< contours.size(); i++ ) {
-        cv::Scalar color = cv::Scalar( 107,222, 46 );
+      for ( int i = 0; i < contours.size(); i++ ) {
+        cv::Scalar color = cv::Scalar( 107, 222, 46 );
         //cv::drawContours( drawing, contours_poly, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
         if (boundRect[i].area() > 12000) {
           cv::rectangle( drawing, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
@@ -224,10 +222,12 @@ public:
       frame.copyTo(masked_result, mask);
       cv::add(drawing, masked_result, masked_result);
 
-      out_msg = cv_bridge::CvImage(msg->header, msg->encoding, masked_result).toImageMsg();
+      out_msg = cv_bridge::CvImage(msg->header, msg->encoding,
+                                   masked_result).toImageMsg();
       upper_image_pub_.publish(out_msg);
     } catch (cv::Exception &e) {
-      ROS_INFO("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
+      ROS_INFO("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(),
+               e.file.c_str(), e.line);
     }
 
     if (ownerRecognized) {
@@ -237,7 +237,7 @@ public:
 
         if (currentState_.state_mode_id != FIND_BALL) {
           move(0, 0);
-      move(0, 0.35);
+          move(0, 0.35);
           stateAction();
         }
       }
@@ -248,7 +248,8 @@ public:
     bool ballRecognized = false;
     sensor_msgs::Image::Ptr out_msg;
     cv::Mat element;
-    cv::Mat img_smooth, frame_result, hsv, img_result, mask, masked_result, img_edge_gray_y;
+    cv::Mat img_smooth, frame_result, hsv, img_result, mask, masked_result,
+    img_edge_gray_y;
     cv::Mat img_contour, drawing;
 
     std::vector<std::vector<cv::Point> > contours;
@@ -267,14 +268,14 @@ public:
       //cv::inRange(f, cv::Scalar(159, 135, 135), cv::Scalar(179, 255, 255), mask);
       //cv::inRange(hsv, cv::Scalar(0.11*256, 0.60*256, 0.20*256, 0),
       //            cv::Scalar(0.14*256, 1.00*256, 1.00*256, 0), mask);
-      cv::inRange(hsv, cv::Scalar(75, 0.4*256, 0.4*256, 0),
-                  cv::Scalar(90, 0.9*256, 0.8*256, 0), mask);
+      cv::inRange(hsv, cv::Scalar(75, 0.4 * 256, 0.4 * 256, 0),
+                  cv::Scalar(90, 0.9 * 256, 0.8 * 256, 0), mask);
       //cv::cvtColor(mask, img_result, CV_HSV2BGR);
 
-      cv::findContours( mask, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_TC89_KCOS, cv::Point(0, 0) );
+      cv::findContours( mask, contours, hierarchy, CV_RETR_TREE,
+                        CV_CHAIN_APPROX_TC89_KCOS, cv::Point(0, 0) );
 
-      for( int i = 0; i< contours.size(); i++ )
-      {
+      for ( int i = 0; i < contours.size(); i++ ) {
         //ROS_INFO("%d", i);
         cv::approxPolyDP( cv::Mat(contours[i]), contours_poly[i], 3, true );
         boundRect[i] = cv::boundingRect( cv::Mat(contours_poly[i]) );
@@ -282,8 +283,8 @@ public:
 
       drawing = cv::Mat::zeros( mask.size(), CV_8UC3 );
 
-      for( int i = 0; i< contours.size(); i++ ) {
-        cv::Scalar color = cv::Scalar( 107,222, 46 );
+      for ( int i = 0; i < contours.size(); i++ ) {
+        cv::Scalar color = cv::Scalar( 107, 222, 46 );
         //cv::drawContours( drawing, contours_poly, i, color, 1, 8, std::vector<cv::Vec4i>(), 0, cv::Point() );
         if (boundRect[i].area() > 900) {
           cv::rectangle( drawing, boundRect[i].tl(), boundRect[i].br(), color, 2, 8, 0 );
@@ -294,10 +295,12 @@ public:
       frame.copyTo(masked_result, mask);
       cv::add(drawing, masked_result, masked_result);
 
-      out_msg = cv_bridge::CvImage(msg->header, msg->encoding, masked_result).toImageMsg();
+      out_msg = cv_bridge::CvImage(msg->header, msg->encoding,
+                                   masked_result).toImageMsg();
       lower_image_pub_.publish(out_msg);
     } catch (cv::Exception &e) {
-      ROS_INFO("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(), e.file.c_str(), e.line);
+      ROS_INFO("Image processing error: %s %s %s %i", e.err.c_str(), e.func.c_str(),
+               e.file.c_str(), e.line);
     }
 
     if (ballRecognized) {
@@ -307,7 +310,7 @@ public:
 
         if (currentState_.state_mode_id == FIND_BALL) {
           move(0, 0);
-      move(0, 0.20);
+          move(0, 0.20);
           stateAction();
         }
       }
@@ -315,9 +318,11 @@ public:
   }
 
   void irBumperCallback(const irobotcreate2::RoombaIR::ConstPtr& msg) {
-    if (currentState_.state_mode_id != FETCH_BALL && irBumperFlag && msg->signal > 10 && msg->header.frame_id != "base_irbumper_right") {
-        ROS_INFO("STATE: %d, IR_BUMPER SIGNAL: [%d]", currentState_.state_mode_id, msg->signal);
-        move(0, 0);
+    if (currentState_.state_mode_id != FETCH_BALL && irBumperFlag
+        && msg->signal > 10 && msg->header.frame_id != "base_irbumper_right") {
+      ROS_INFO("STATE: %d, IR_BUMPER SIGNAL: [%d]", currentState_.state_mode_id,
+               msg->signal);
+      move(0, 0);
 
       if (currentState_.state_mode_id == FIND_BALL) {
         ownerFlag = false;
@@ -330,15 +335,12 @@ public:
 
   void bumperCallback(const irobotcreate2::Bumper::ConstPtr& msg) {
     if (msg->left.state || msg->right.state) {
-      if (currentState_.state_mode_id == FOLLOW_OWNER)
-      {
+      if (currentState_.state_mode_id == FOLLOW_OWNER) {
         ballFlag = false;
         currentState_.state_mode_id = FIND_BALL;
         stateAction();
-      }
-      else if (currentState_.state_mode_id == FETCH_BALL)
-      {
-    move(0, 0.20);
+      } else if (currentState_.state_mode_id == FETCH_BALL) {
+        move(0, 0.20);
         ownerFlag = false;
         currentState_.state_mode_id = FOLLOW_OWNER;
         stateAction();
@@ -346,18 +348,17 @@ public:
     }
   }
 
-  void stateChangedCallback(const ChangeStateModeGoalConstPtr &goal)
-  {
+  void stateChangedCallback(const ChangeStateModeGoalConstPtr &goal) {
     // helper variables
     ros::Rate r(1);
     bool success = true;
 
     // publish info to the console for the user
-    ROS_INFO("LOWER_CAM: Executing, changing State Mode to %d.", goal->state_mode_id);
+    ROS_INFO("LOWER_CAM: Executing, changing State Mode to %d.",
+             goal->state_mode_id);
 
     // check that preempt has not been requested by the client
-    if (as_.isPreemptRequested() || !ros::ok())
-    {
+    if (as_.isPreemptRequested() || !ros::ok()) {
       ROS_INFO("%s: Preempted", action_name_.c_str());
       // set the action state to preempted
       as_.setPreempted();
@@ -370,8 +371,7 @@ public:
     // this sleep is not necessary, the sequence is computed at 1 Hz for demonstration purposes
     r.sleep();
 
-    if (success)
-    {
+    if (success) {
       result_.state_mode_changed = 1;
       //ROS_INFO("%s: Succeeded", action_name_.c_str());
       // set the action state to succeeded
@@ -384,8 +384,7 @@ public:
   }
 };
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   ros::init(argc, argv, "team6");
   Team6 Team6(ros::this_node::getName());
   ros::spin();

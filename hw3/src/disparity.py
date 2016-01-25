@@ -18,10 +18,12 @@ bridge = CvBridge()
 rightReady = False
 leftReady = False
 
+
 def left_image_callback(msg):
     global leftImg, leftReady
     leftReady = True
     leftImg = bridge.imgmsg_to_cv2(msg, desired_encoding="passthrough")
+
 
 def right_image_callback(msg):
     global rightImg, rightReady
@@ -30,6 +32,7 @@ def right_image_callback(msg):
 
 rospy.Subscriber("left_cam/image_raw", Image, left_image_callback)
 rospy.Subscriber("right_cam/image_raw", Image, right_image_callback)
+
 
 def getDisparity(imgLeft, imgRight, method="BM"):
 
@@ -47,7 +50,7 @@ def getDisparity(imgLeft, imgRight, method="BM"):
         sbm.minDisparity = -39
         sbm.numberOfDisparities = 112
         sbm.textureThreshold = 507
-        sbm.uniquenessRatio= 0
+        sbm.uniquenessRatio = 0
         sbm.speckleRange = 8
         sbm.speckleWindowSize = 0
 
@@ -61,18 +64,19 @@ def getDisparity(imgLeft, imgRight, method="BM"):
 
     elif method == "SGBM":
         sbm = cv2.StereoSGBM()
-        sbm.SADWindowSize = 9;
-        sbm.numberOfDisparities = 96;
-        sbm.preFilterCap = 63;
-        sbm.minDisparity = -21;
-        sbm.uniquenessRatio = 7;
-        sbm.speckleWindowSize = 0;
-        sbm.speckleRange = 8;
-        sbm.disp12MaxDiff = 1;
-        sbm.fullDP = False;
+        sbm.SADWindowSize = 9
+        sbm.numberOfDisparities = 96
+        sbm.preFilterCap = 63
+        sbm.minDisparity = -21
+        sbm.uniquenessRatio = 7
+        sbm.speckleWindowSize = 0
+        sbm.speckleRange = 8
+        sbm.disp12MaxDiff = 1
+        sbm.fullDP = False
 
         disparity = sbm.compute(gray_left, gray_right)
-        disparity_visual = cv2.normalize(disparity, alpha=0, beta=255, norm_type=cv2.cv.CV_MINMAX, dtype=cv2.cv.CV_8U)
+        disparity_visual = cv2.normalize(
+            disparity, alpha=0, beta=255, norm_type=cv2.cv.CV_MINMAX, dtype=cv2.cv.CV_8U)
 
     return disparity_visual
 
@@ -82,7 +86,7 @@ while True:
         continue
     disparity = getDisparity(leftImg, rightImg, "BM")
     disparity_msg = bridge.cv2_to_imgmsg(disparity, "8UC1")
-    
+
     pub.publish(disparity_msg)
 
 # imgLeft = cv2.imread(sys.argv[1])
