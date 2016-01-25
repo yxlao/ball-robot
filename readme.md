@@ -1,3 +1,4 @@
+## Running
 Assume your `workspace` is `~/robot`.
 
 1. Backup and remove your `~/robot/src` folder.
@@ -11,3 +12,8 @@ Assume your `workspace` is `~/robot`.
         # In your workspace `~/robot`
         catkin_make
         catkin_make
+
+## Conventions
+1. To add a new repository, use `git add submodule`, for example camera calibration
+
+        git submodule add  https://github.com/ros-perception/image_pipeline.git
