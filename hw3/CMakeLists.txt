@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   image_transport
   cv_bridge
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -199,3 +200,5 @@ add_executable(motion_node src/motion_node.cpp)
 target_link_libraries(motion_node ${catkin_LIBRARIES})
 add_dependencies(motion_node motion_node_generate_messages_cpp)
 
+add_executable(my_tf_broadcaster src/broadcast_fixed_frame.cpp)
+target_link_libraries(my_tf_broadcaster ${catkin_LIBRARIES})
