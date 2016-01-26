@@ -7,3 +7,6 @@
 [submodule "usb_cam"]
 	path = usb_cam
 	url = https://github.com/bosch-ros-pkg/usb_cam.git
+[submodule "cmvision"]
+	path = cmvision
+	url = https://github.com/utexas-bwi/cmvision.git

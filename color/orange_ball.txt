@@ -1,0 +1,5 @@
+[colors]
+(74,  30, 18) 0.000000 7 ResearchRobotRed
+
+[thresholds]
+(41:96, 93:114, 150:180)
