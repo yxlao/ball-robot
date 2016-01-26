@@ -28,3 +28,54 @@ Assume your `workspace` is `~/robot`.
 1. To add a new repository, use `git add submodule`, for example camera calibration
 
         git submodule add  https://github.com/ros-perception/image_pipeline.git
+
+
+## 1 Devices used
+
+* Robotics arm
+
+* Odroid XU4
+
+* Mbed
+
+* Arduino
+
+* Motor shield
+
+* Variable resister
+
+
+
+## 2 Design choices: communications
+
+* Variable resister -> Mbed: Analog in
+
+* Mbed <-> Odroid: Via USB serial.  we used UART pins on odroid before (which was presented in the video), but it was less stable then a USB. We added a USB hub and make sure its compatibility and power usage.
+
+* Odroid <-> Arduino: Via USB cable.
+
+* Arduino -> Motor shield: I2C, soldered pin connection on motor shield.
+
+
+
+## 3 Implementation steps:
+
+1. Setup robotic arm, mount variable resister on robotic arm
+
+2. Measure voltage using mbed
+
+3. Control motor via arduino
+
+4. Writeup ROS node for motor control
+
+5. System intergration
+
+
+
+Assignment Submission videos:
+
+
+
+Assignment 1 https://youtu.be/UvxVTmcM6as
+
+Assignment 2 https://youtu.be/iocWSl63kQ8
