@@ -7,7 +7,9 @@
     <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video0 ! video/x-raw-yuv,framerate=30/1,width=640,height=480 ! ffmpegcolorspace " />
     <node pkg="gscam" type="gscam" name="$(arg left_cam_name)">
         <param name="camera_name" value="$(arg left_cam_name)" />
-        <param name="camera_info_url" value="package://hw3/calibration/${NAME}.yaml" />
+
+        <param name="camera_info_url" value="package://hw3/calibrations/20160125_1036_yixing/left.yaml" />
+
         <remap from="camera/image_raw" to="$(arg left_cam_name)/image_raw" />
         <remap from="/set_camera_info" to="$(arg left_cam_name)/set_camera_info" />
     </node>
@@ -29,7 +31,8 @@
     <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video1 ! video/x-raw-yuv,framerate=30/1,width=640,height=480 ! ffmpegcolorspace " />
     <node pkg="gscam" type="gscam" name="$(arg right_cam_name)">
         <param name="camera_name" value="$(arg right_cam_name)" />
-        <param name="camera_info_url" value="package://hw3/calibration/${NAME}.yaml" />
+
+        <param name="camera_info_url" value="package://hw3/calibrations/20160125_1036_yixing/right.yaml" />
         <remap from="camera/image_raw" to="$(arg right_cam_name)/image_raw" />
         <remap from="/set_camera_info" to="$(arg right_cam_name)/set_camera_info" />
     </node>
