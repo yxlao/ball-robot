@@ -29,6 +29,17 @@ Assume your `workspace` is `~/robot`.
 
         git submodule add  https://github.com/ros-perception/image_pipeline.git
 
+## Disparity Map
+1. The launch file should set up the cameras to start recording automatically. Then, to calculate the disparity map, run
+
+       ROS_NAMESCE=/stereo rosrun stereo_image_proc stereo_image_proc
+
+If everything works correctly, it should broadcast to the /stereo/disparity topic. Also, refreshing the image view should show a lot more topics to view images from.
+
+2). Then, to view the left and right rectified images and the disparity map run
+
+rosrun image_view stereo_view stereo:=/stereo image:=image_rect_color _approximate_sync:=True
+
 
 ## 1 Devices used
 
