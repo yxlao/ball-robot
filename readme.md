@@ -29,9 +29,15 @@ To add a new repository, use `git add submodule`, for example camera calibration
         git submodule add  https://github.com/ros-perception/image_pipeline.git
 
 ## Ball tracking
-1. First launch hw3 `$ oslaunch hw3 start_hw3.launch`
-2. Then run `ball_detect node` by `$ rosrun ball_detect ball_detect.py`
-3. In the hw3 `rqt_image_view` window, refresh, can view the `/stereo/left/image_raw` topic
+* To run without ROS for testing, run the `ball_detect_utils.py`
+
+        cd ball_detect/src
+        python ball_detect_utils.py
+
+* To run with ROS
+    1. First launch hw3 `$ oslaunch hw3 start_hw3.launch`
+    2. Then run `ball_detect node` by `$ rosrun ball_detect ball_detect.py`
+    3. In the hw3 `rqt_image_view` window, refresh, can view the `/stereo/left/image_raw` topic
 
 ## Disparity Map
 1. The launch file should set up the cameras to start recording automatically. Then, to calculate the disparity map, run
