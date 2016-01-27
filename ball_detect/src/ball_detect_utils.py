@@ -1,13 +1,21 @@
+"""
+To run this:
+    $ python ball_detect_utils.py
+"""
+
 import numpy as np
 import cv2
 
-# hsv_lows = (0, 165, 60)
-# hsv_highs = (16, 218, 255)
+hsv_lows_default = (0, 146, 120)
+hsv_highs_default = (16, 255, 255)
 
-hsv_lows = (0, 146, 120)
-hsv_highs = (16, 255, 255)
 
-def bgr_to_center_radius(im_bgr):
+def bgr_to_center_radius(im_bgr,
+                         hsv_lows=hsv_lows_default,
+                         hsv_highs=hsv_highs_default):
+    """
+    Detect ball of from bgr image, returns centers and radius for circles
+    """
     # resize
     im_bgr = cv2.resize(im_bgr, (640, 480), interpolation=cv2.INTER_CUBIC)
 
@@ -37,6 +45,18 @@ def bgr_to_center_radius(im_bgr):
 
     return (centers, radiuses)
 
+
+def plot_center_radius(im, centers, radiuses):
+    """
+    Plot circles of centers and radius to im
+    """
+    # plot center and radius
+    for center, radius in zip(centers, radiuses):
+        if radius > 2:
+            cv2.circle(im, center, radius, (0, 255, 0), 2)
+    return im
+
+
 if __name__ == '__main__':
     # set camera
     camera = cv2.VideoCapture(0)
@@ -50,9 +70,7 @@ if __name__ == '__main__':
         centers, radiuses = bgr_to_center_radius(im_bgr)
 
         # plot center and radius
-        for center, radius in zip(centers, radiuses):
-            if radius > 2:
-                cv2.circle(im_bgr, center, radius, (0, 255, 0), 2)
+        im_bgr = plot_center_radius(im_bgr, centers, radiuses)
 
         # display the resulting frame
         cv2.imshow('frame', im_bgr)
