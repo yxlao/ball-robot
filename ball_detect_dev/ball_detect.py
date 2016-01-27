@@ -1,20 +1,18 @@
 import numpy as np
 import cv2
 
-camera = cv2.VideoCapture(0)
-hsv_lows = (0, 165, 60)
-hsv_highs = (16, 218, 255)
+# hsv_lows = (0, 165, 60)
+# hsv_highs = (16, 218, 255)
 
-while(True):
-    # read frame
-    (_, im_bgr) = camera.read()
+hsv_lows = (0, 146, 120)
+hsv_highs = (16, 255, 255)
 
+def bgr_to_center_radius(im_bgr):
     # resize
     im_bgr = cv2.resize(im_bgr, (640, 480), interpolation=cv2.INTER_CUBIC)
 
     # convert to hsv
     im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
-    im_hsv = cv2.GaussianBlur(im_hsv, (11, 11), 0)
 
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
@@ -36,17 +34,31 @@ while(True):
         centers.append((int(center[0]), int(center[1])))  # a tuple
         radiuses.append(int(radius))  # an int
 
-    # plot center and radius
-    for center, radius in zip(centers, radiuses):
-        if radius > 2:
-            cv2.circle(im_bgr, center, radius, (0, 255, 0), 2)
+    return (centers, radiuses)
 
-    # display the resulting frame
-    cv2.imshow('frame', im_bgr)
-    key = cv2.waitKey(10)
-    if key == 27:
-        break
+if __name__ == '__main__':
+    # set camera
+    camera = cv2.VideoCapture(0)
 
-# when everything done, release the camera
-camera.release()
-cv2.destroyAllWindows()
+    # main loop
+    while(True):
+        # read frame
+        (_, im_bgr) = camera.read()
+
+        # get centers and radiuses
+        centers, radiuses = bgr_to_center_radius(im_bgr)
+
+        # plot center and radius
+        for center, radius in zip(centers, radiuses):
+            if radius > 2:
+                cv2.circle(im_bgr, center, radius, (0, 255, 0), 2)
+
+        # display the resulting frame
+        cv2.imshow('frame', im_bgr)
+        key = cv2.waitKey(10)
+        if key == 27:
+            break
+
+    # when everything done, release the camera
+    camera.release()
+    cv2.destroyAllWindows()
