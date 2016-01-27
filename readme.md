@@ -25,7 +25,7 @@ Assume your `workspace` is `~/robot`.
         rosrun camera_calibration cameracalibrator.py --size 8x6 --square 0.0254 image:=/left_cam/image_raw camera:=/left_cam
 
 ## Conventions
-1. To add a new repository, use `git add submodule`, for example camera calibration
+To add a new repository, use `git add submodule`, for example camera calibration
 
         git submodule add  https://github.com/ros-perception/image_pipeline.git
 
@@ -34,7 +34,7 @@ Assume your `workspace` is `~/robot`.
 
         ROS_NAMESCE=/stereo rosrun stereo_image_proc stereo_image_proc
 
-If everything works correctly, it should broadcast to the /stereo/disparity topic. Also, refreshing the image view should show a lot more topics to view images from.
+    If everything works correctly, it should broadcast to the /stereo/disparity topic. Also, refreshing the image view should show a lot more topics to view images from.
 
 2. Then, to view the left and right rectified images and the disparity map run
 
