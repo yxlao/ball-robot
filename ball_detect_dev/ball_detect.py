@@ -16,6 +16,7 @@ def bgr_to_center_radius(im_bgr):
 
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+    im_mask = cv2.medianBlur(im_mask, 5)
     # erode
     im_mask = cv2.erode(im_mask, None, iterations=2)
     # dilate
