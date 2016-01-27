@@ -46,17 +46,13 @@ def bgr_to_center_radius(im_bgr,
 
     if surpress_when_large and len(radiuses) > 0:
         max_radius = max(radiuses)
-        # print(im_hsv.shape[0])
-        print max_radius * 2
         if max_radius * 2 > im_hsv.shape[0] * 0.4:
-            print "start surpress_when_large"
             centers_new = []
             radiuses_new = []
             for center, radius in zip(centers, radiuses):
                 if radius * 2 > im_hsv.shape[0] * 0.05:
                     centers_new.append(center)
                     radiuses_new.append(radius)
-            print len(centers_new), len(centers)
             centers = centers_new
             radiuses = radiuses_new
 
