@@ -2,19 +2,19 @@ import numpy as np
 import cv2
 
 camera = cv2.VideoCapture(0)
-hsv_lows = (0, 153, 72)
-hsv_highs = (16, 218, 146)
+hsv_lows = (0, 165, 60)
+hsv_highs = (16, 218, 255)
 
 while(True):
     # read frame
-    im_bgr = camera.read()
+    (_, im_bgr) = camera.read()
+
+    # resize
+    im_bgr = cv2.resize(im_bgr, (640, 480), interpolation=cv2.INTER_CUBIC)
 
     # convert to hsv
     im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
     im_hsv = cv2.GaussianBlur(im_hsv, (11, 11), 0)
-
-    # resize
-    # im_bgr = cv2.resize(im_bgr, (160, 120), interpolation=cv2.INTER_CUBIC)
 
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
@@ -24,8 +24,8 @@ while(True):
     im_mask = cv2.dilate(im_mask, None, iterations=2)
 
     # find contours
-    _, contours, _ = cv2.findContours(im_mask, cv2.RETR_EXTERNAL,
-                                      cv2.CHAIN_APPROX_SIMPLE)
+    contours = cv2.findContours(im_mask, cv2.RETR_EXTERNAL,
+                                cv2.CHAIN_APPROX_SIMPLE)[-2]
 
     # get centers and radiuses
     centers = []
