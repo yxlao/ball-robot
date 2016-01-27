@@ -38,8 +38,8 @@
     </node>
 
     <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" >
-    <param name="approximate_sync" value="true" /> 
-    </node> 
+    <param name="approximate_sync" value="true" />
+    </node>
     <node pkg="hw3" type="my_tf_broadcaster" name="my_tf_broadcaster" />
 
 <!--     <node pkg="image_view" type="image_view" name="right_view" >
