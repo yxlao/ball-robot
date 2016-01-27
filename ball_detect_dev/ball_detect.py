@@ -9,6 +9,10 @@ while(True):
     # read frame
     im_bgr = camera.read()
 
+    # convert to hsv
+    im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
+    im_hsv = cv2.GaussianBlur(im_hsv, (11, 11), 0)
+
     # resize
     # im_bgr = cv2.resize(im_bgr, (160, 120), interpolation=cv2.INTER_CUBIC)
 
