@@ -16,8 +16,8 @@ def bgr_to_center_radius(im_bgr,
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
-    # resize
-    im_bgr = cv2.resize(im_bgr, (640, 480), interpolation=cv2.INTER_CUBIC)
+    # # resize
+    # im_bgr = cv2.resize(im_bgr, (640, 480), interpolation=cv2.INTER_CUBIC)
 
     # convert to hsv
     im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
