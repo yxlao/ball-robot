@@ -12,11 +12,12 @@ hsv_highs_default = (16, 255, 255)
 
 def bgr_to_center_radius(im_bgr,
                          hsv_lows=hsv_lows_default,
-                         hsv_highs=hsv_highs_default):
+                         hsv_highs=hsv_highs_default,
+                         surpress_when_large=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
-    # # resize
+    # resize
     # im_bgr = cv2.resize(im_bgr, (640, 480), interpolation=cv2.INTER_CUBIC)
 
     # convert to hsv
@@ -42,6 +43,22 @@ def bgr_to_center_radius(im_bgr,
         center, radius = cv2.minEnclosingCircle(countour)
         centers.append((int(center[0]), int(center[1])))  # a tuple
         radiuses.append(int(radius))  # an int
+
+    if surpress_when_large and len(radiuses) > 0:
+        max_radius = max(radiuses)
+        # print(im_hsv.shape[0])
+        print max_radius * 2
+        if max_radius * 2 > im_hsv.shape[0] * 0.4:
+            print "start surpress_when_large"
+            centers_new = []
+            radiuses_new = []
+            for center, radius in zip(centers, radiuses):
+                if radius * 2 > im_hsv.shape[0] * 0.05:
+                    centers_new.append(center)
+                    radiuses_new.append(radius)
+            print len(centers_new), len(centers)
+            centers = centers_new
+            radiuses = radiuses_new
 
     return (centers, radiuses)
 
