@@ -15,7 +15,6 @@ Assume your `workspace` is `~/robot`.
         catkin_make
         catkin_make
 
-
 ## Calibration
 
         # for stero camera
@@ -29,6 +28,11 @@ To add a new repository, use `git add submodule`, for example camera calibration
 
         git submodule add  https://github.com/ros-perception/image_pipeline.git
 
+## Ball tracking
+1. First launch hw3 `$ oslaunch hw3 start_hw3.launch`
+2. Then run `ball_detect node` by `$ rosrun ball_detect ball_detect.py`
+3. In the hw3 `rqt_image_view` window, refresh, can view the `/stereo/left/image_raw` topic
+
 ## Disparity Map
 1. The launch file should set up the cameras to start recording automatically. Then, to calculate the disparity map, run
 
@@ -39,7 +43,6 @@ To add a new repository, use `git add submodule`, for example camera calibration
 2. Then, to view the left and right rectified images and the disparity map run
 
         rosrun image_view stereo_view stereo:=/stereo image:=image_rect_color _approximate_sync:=True
-
 
 ## Devices used
 * Robotics arm
