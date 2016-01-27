@@ -3,8 +3,6 @@ import cv2
 
 camera = cv2.VideoCapture(0)
 
-# def get_centers_radiuses(frame):
-
 
 while(True):
     # camerature frame-by-frame
@@ -31,22 +29,29 @@ while(True):
     # find contour
     contours, hierarchy = cv2.findContours(dilated, 1, 2)
 
-    cnt = contours[0]
-    # Calculte the center of the ball
-    (center_x, center_y), radius = cv2.minEnclosingCircle(cnt)
+    centers = []
+    radiuses = []
 
-    center_x = center_x * 4
-    center_y = center_y * 4
-    radius = radius * 4
+    for cnt in contours:
+        # Calculte the center of the ball
+        (center_x, center_y), radius = cv2.minEnclosingCircle(cnt)
 
-    center = (int(center_x), int(center_y))
-    radius = int(radius)
-    # Plot the position of the ball
-    if radius > 2:
-        cv2.circle(frame0, center, radius, (0, 255, 0), 2)
-        print center_x
-        print center_y
-    #gray = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY)
+        center_x = center_x * 4
+        center_y = center_y * 4
+        radius = radius * 4
+
+        center = (int(center_x), int(center_y))
+        radius = int(radius)
+
+        centers.append(center)
+        radiuses.append(radius)
+
+    for center, radius in zip(centers, radiuses):
+        # Plot the position of the ball
+        if radius > 2:
+            cv2.circle(frame0, center, radius, (0, 255, 0), 2)
+            print center_x
+            print center_y
 
     # Display the resulting frame
     cv2.imshow('frame', frame0)
