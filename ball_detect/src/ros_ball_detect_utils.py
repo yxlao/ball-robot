@@ -8,6 +8,7 @@ import rospy
 import numpy as np
 from cv_bridge import CvBridge, CvBridgeError
 import cv2
+import tf
 from sensor_msgs.msg import Image
 
 rospy.init_node('depth_node', anonymous=True)
@@ -40,22 +41,44 @@ def calculate_depth(center1, center2, radius, radius2):
     center_x2 = center2[0]
     center_y2 = center2[1]
 
-    center = (int(center_x),int(center_y))
-    center2 = (int(center_x2),int(center_y2))
-    radius = int(radius)
-    radius2 = int(radius2)
-    # Plot the position of the ball
-    if radius>1 and radius2>1:
-        # cv2.circle(leftImg,center,radius,(0,255,0),2)
-        # cv2.circle(rightImg,center2,radius2,(0,255,0),2)
-        #calculate depth
-        f=10
-        T=8
-        k=10000
-        if center_y2 != center_y:
-            depth=f*T*k/abs(center_y2-center_y)
+    f=10
+    T=8
+    k=1000
+    if center_y2 != center_y:
+        depth=f*T*k/(abs(center_y2-center_y)*radius)
         if True:
-            print depth
+            #print depth
+            # print x and z
+            kx=50
+            ky=0.0005
+            x=(center_x-center_y)*kx/depth
+            z=(240-center_y)*ky*depth
+            # print x
+            # print z
+
+    # center = (int(center_x),int(center_y))
+    # center2 = (int(center_x2),int(center_y2))
+    # radius = int(radius)
+    # radius2 = int(radius2)
+    # # Plot the position of the ball
+    # if radius>1 and radius2>1:
+    #     # cv2.circle(leftImg,center,radius,(0,255,0),2)
+    #     # cv2.circle(rightImg,center2,radius2,(0,255,0),2)
+    #     #calculate depth
+    #     f=10
+    #     T=8
+    #     k=10000
+    #     if center_y2 != center_y:
+    #         depth=f*T*k/abs(center_y2-center_y)
+    #     if True:
+            # print depth
+    br = tf.TransformBroadcaster()
+    br.sendTransform((1.0*x/20, 1.0*depth/20, 1.0*z/20),
+                     tf.transformations.quaternion_from_euler(0, 0, 0),
+                     rospy.Time.now(),
+                     "ball",
+                     "base1")
+    return (x, depth, z)
 
 def bgr_to_center_radius(im_bgr,
                          hsv_lows=hsv_lows_default,
