@@ -67,4 +67,4 @@ To add a new repository, use `git add submodule`, for example camera calibration
 ## Assignment Submission videos:
 * Assignment 1 https://youtu.be/UvxVTmcM6as
 * Assignment 2 https://youtu.be/iocWSl63kQ8
-* Assignment 3 https://youtu.be/vF9HOneRujY
+* Assignment 3 https://youtu.be/vF9HOneRujY https://youtu.be/6ysNVln0f-Q
