@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# license removed for brevity
 """
 To run this:
     $ python ball_detect_utils.py
@@ -8,9 +6,6 @@ To run this:
 import numpy as np
 import cv2
 
-rightImg = 0
-bridge = CvBridge()
-rightReady = False
 hsv_lows_default = (0, 146, 120)
 hsv_highs_default = (16, 255, 255)
 
