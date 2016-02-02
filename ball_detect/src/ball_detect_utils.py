@@ -70,6 +70,33 @@ def plot_center_radius(im, centers, radiuses):
     return im
 
 
+def get_ball_coordinate(center0, center1, radius0, radius1):
+    """
+    x: horizontal
+    y: depth
+    z: vertical
+    """
+
+    # constants
+    f = 10.  # focal length, in cm
+    T = 13.5  # baseline, in cm
+
+    # coefficients
+    kx = 50.
+    ky = 100.
+    kz = 0.0005
+
+    # radius
+    radius = (radius0 + radius1) / 2.0  # average radius
+
+    # calculate x, y, z
+    y = f * T * ky / (abs(center0[1] - center1[1]) * radius + 1e-6)
+    x = (center0[0] - center1[0]) * kx * y
+    z = (240 - center1[1]) * kz * y
+
+    return (x, y, z)
+
+
 if __name__ == '__main__':
     # set camera
     camera = cv2.VideoCapture(0)
