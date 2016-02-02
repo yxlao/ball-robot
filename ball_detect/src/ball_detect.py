@@ -40,14 +40,25 @@ left_ball_visulize_pub = rospy.Publisher('/stereo/left/ball_visulize',
                                          Image, queue_size=10)
 right_ball_visulize_pub = rospy.Publisher('/stereo/right/ball_visulize',
                                           Image, queue_size=10)
+disparity_pub = rospy.Publisher('/stereo/my_disparity', Image, queue_size=10)
 tf_broadcaster = tf.TransformBroadcaster()
 
 # init node
 rospy.init_node('ball_detect', anonymous=True)
 
+
+def get_disparity_image(left_img, right_img):
+    # stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
+    stereo = cv2.StereoBM(cv2.STEREO_BM_BASIC_PRESET, ndisparities=16, SADWindowSize=21)
+    disparity_img = stereo.compute(cv2.cvtColor(left_img, cv2.COLOR_BGR2GRAY),
+                                   cv2.cvtColor(right_img, cv2.COLOR_BGR2GRAY))
+    disparity_img = np.abs(disparity_img)
+    disparity_img = disparity_img.astype(np.uint8)
+
+    return disparity_img
+
 while True:
     # rospy.spinOnce()
-
     if left_ready:
         left_centers, left_radiuses = bgr_to_center_radius(left_img)
         left_img = plot_center_radius(left_img, left_centers, left_radiuses)
@@ -58,7 +69,9 @@ while True:
         right_img = plot_center_radius(right_img, right_centers, right_radiuses)
         right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
 
-    #
+    disparity_img = get_disparity_image(left_img, right_img)
+    # print (disparity_img)
+    disparity_pub.publish(bridge.cv2_to_imgmsg(disparity_img, "mono8"))
 
     # only use the first detected ball
     if len(left_centers) > 0 and len(right_centers) > 0:
