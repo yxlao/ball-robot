@@ -5,11 +5,13 @@ import cv2
 import cv2.cv as cv
 import sys
 import numpy as np
+import tf
 import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import time
 from ball_detect_utils import bgr_to_center_radius, plot_center_radius
+from ball_detect_utils import get_ball_coordinate
 
 # setups
 left_img = 0
@@ -38,6 +40,7 @@ left_ball_visulize_pub = rospy.Publisher('/stereo/left/ball_visulize',
                                          Image, queue_size=10)
 right_ball_visulize_pub = rospy.Publisher('/stereo/right/ball_visulize',
                                           Image, queue_size=10)
+tf_broadcaster = tf.TransformBroadcaster()
 
 # init node
 rospy.init_node('ball_detect', anonymous=True)
@@ -54,5 +57,27 @@ while True:
         right_centers, right_radiuses = bgr_to_center_radius(right_img)
         right_img = plot_center_radius(right_img, right_centers, right_radiuses)
         right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
+
+    #
+
+    # only use the first detected ball
+    if len(left_centers) > 0 and len(right_centers) > 0:
+        lc = [x for (y,x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
+        lr = [y for (y,x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
+
+        rc = [x for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
+        rr = [y for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
+
+        # get location
+        # x, y, z = get_ball_coordinate(left_centers[0], right_centers[0],
+        #                               left_radiuses[0], right_radiuses[0])
+        x, y, z = get_ball_coordinate(lc, rc, lr, rr)
+
+        # broadcast location
+        tf_broadcaster.sendTransform((x, y, z),
+                                     tf.transformations.quaternion_from_euler(0, 0, 0),
+                                     rospy.Time.now(), "ball", "camera_frame")
+
+        print(x, y, z)
 
     time.sleep(0.1)
