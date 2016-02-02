@@ -1,0 +1,4 @@
+uint32 state_mode_id
+---
+uint32 state_mode_changed
+---
