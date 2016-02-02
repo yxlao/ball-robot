@@ -58,14 +58,23 @@ while True:
         right_img = plot_center_radius(right_img, right_centers, right_radiuses)
         right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
 
+    #
+
     # only use the first detected ball
     if len(left_centers) > 0 and len(right_centers) > 0:
+        lc = [x for (y,x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
+        lr = [y for (y,x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
+
+        rc = [x for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
+        rr = [y for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
+
         # get location
-        x, y, z = get_ball_coordinate(left_centers[0], right_centers[0],
-                                      left_radiuses[0], right_radiuses[0])
+        # x, y, z = get_ball_coordinate(left_centers[0], right_centers[0],
+        #                               left_radiuses[0], right_radiuses[0])
+        x, y, z = get_ball_coordinate(lc, rc, lr, rr)
 
         # broadcast location
-        tf_broadcaster.sendTransform((1.0 * x / 20, 1.0 * y / 20, 1.0 * z / 20),
+        tf_broadcaster.sendTransform((x, y, z),
                                      tf.transformations.quaternion_from_euler(0, 0, 0),
                                      rospy.Time.now(), "ball", "camera_frame")
 

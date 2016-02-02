@@ -17,9 +17,6 @@ def bgr_to_center_radius(im_bgr,
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
-    # resize
-    # im_bgr = cv2.resize(im_bgr, (640, 480), interpolation=cv2.INTER_CUBIC)
-
     # convert to hsv
     im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
@@ -77,23 +74,32 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
     z: vertical
     """
 
-    # constants
-    f = 10.  # focal length, in cm
-    T = 13.5  # baseline, in cm
+    # # constants
+    # f = 10.  # focal length, in cm
+    # T = 13.5  # baseline, in cm
 
-    # coefficients
-    kx = 50.
-    ky = 100.
-    kz = 0.0005
+    # # coefficients
+    # kx = 50.
+    # ky = 100.
+    # kz = 0.0005
 
-    # radius
-    radius = (radius0 + radius1) / 2.0  # average radius
+    # # radius
+    # radius = (radius0 + radius1) / 2.0  # average radius
 
-    # calculate x, y, z
-    y = f * T * ky / (abs(center0[1] - center1[1]) * radius + 1e-6)
-    x = (center0[0] - center1[0]) * kx * y
-    z = (240 - center1[1]) * kz * y
+    # # calculate x, y, z
+    # y = f * T * ky / (abs(center0[1] - center1[1]) * radius + 1e-6)
+    # x = (center0[0] - center1[0]) * kx * y
+    # z = (240 - center1[1]) * kz * y
 
+    x = (center0[0] + center1[0]) / 2.0 - 320.0
+    x = center0[0] - 320.0
+    y = 100. / ((radius0 + radius1) / 2.0)
+    z = (center0[1] + center1[1]) / 2.0 - 240.0
+    z = center0[1] - 240.0
+
+    x = x / 100.
+    y = y * 0.3
+    z = z / 100.
     return (x, y, z)
 
 
