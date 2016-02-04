@@ -2,6 +2,8 @@
 
 The system architecture wiki page can be found at https://bitbucket.org/ucsd_team_one/robot-central/wiki/System%20Architecture
 
+The driver code for assignment 4 can be found in the irobotcreate2ros directory.
+
 
 ## Running
 Assume your `workspace` is `~/robot`.
