@@ -1,3 +1,8 @@
+![structure.png](https://bitbucket.org/repo/g6j85L/images/62233650-structure.png)
+
+
+
+
 ## Running
 Assume your `workspace` is `~/robot`.
 
