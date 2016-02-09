@@ -25,20 +25,31 @@ if __name__ == '__main__':
                 raise
     print camera_indices
 
-    # # set camera
-    # camera = cv2.VideoCapture(0)
-    #
-    # # main loop
-    # while(True):
-    #     # read frame
-    #     (_, im_bgr) = camera.read()
-    #
-    #     # display the resulting frame
-    #     cv2.imshow('frame', im_bgr)
-    #     key = cv2.waitKey(10)
-    #     if key == 27:
-    #         break
-    #
-    # # when everything done, release the camera
-    # camera.release()
-    # cv2.destroyAllWindows()
+    # set camera
+    cameras = [cv2.VideoCapture(idx) for idx in camera_indices]
+
+    # init frame names
+    frame_names = ['frame_%d' % idx for idx in camera_indices]
+
+    # main loop
+    while(True):
+        # init im_bgrs
+        im_bgrs = []
+
+        # read frame
+        for camera in cameras:
+            (_, im_bgr) = camera.read()
+            im_bgrs.append(im_bgr.copy())
+
+
+        # display the resulting frame
+        for im_bgr, frame_name in zip(im_bgrs, frame_names):
+            cv2.imshow(frame_name, im_bgr)
+            key = cv2.waitKey(10)
+            if key == 27:
+                break
+
+    # when everything done, release the camera
+    for camera in cameras:
+        camera.release()
+    cv2.destroyAllWindows()
