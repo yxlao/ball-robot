@@ -39,12 +39,15 @@ if __name__ == '__main__':
         # read frame
         for camera in cameras:
             (_, im_bgr) = camera.read()
-            im_bgrs.append(im_bgr.copy())
-
+            if im_bgr is not None:
+                im_bgrs.append(im_bgr.copy())
+            else:
+                im_bgrs.append(None)
 
         # display the resulting frame
         for im_bgr, frame_name in zip(im_bgrs, frame_names):
-            cv2.imshow(frame_name, im_bgr)
+            if im_bgr is not None:
+                cv2.imshow(frame_name, im_bgr)
             key = cv2.waitKey(10)
             if key == 27:
                 break
