@@ -2,6 +2,14 @@
 
 The system architecture wiki page can be found at https://bitbucket.org/ucsd_team_one/robot-central/wiki/System%20Architecture
 
+Wiki pages:
+
+Checkpoints https://bitbucket.org/ucsd_team_one/robot-central/wiki/Checkpoints
+
+Software Architecture
+
+Hardware Architecture 
+
 The driver code for assignment 4 can be found in the irobotcreate2ros directory.
 
 
