@@ -8,7 +8,7 @@ Checkpoints https://bitbucket.org/ucsd_team_one/robot-central/wiki/Checkpoints
 
 Software Architecture https://bitbucket.org/ucsd_team_one/robot-central/wiki/Software%20Architecture
 
-Hardware Architecture 
+Hardware Architecture https://bitbucket.org/ucsd_team_one/robot-central/wiki/Hardware%20Architecture
 
 The driver code for assignment 4 can be found in the irobotcreate2ros directory.
 
