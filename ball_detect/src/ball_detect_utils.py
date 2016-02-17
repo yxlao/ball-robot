@@ -6,19 +6,22 @@ To run this:
 import numpy as np
 import cv2
 
-hsv_lows_default = (0, 146, 120)
-hsv_highs_default = (16, 255, 255)
+orange_hsv_lows = (0, 146, 120)
+orange_hsv_highs = (16, 255, 255)
+
+green_hsv_lows = (30, 130, 80)
+green_hsv_highs = (50, 255, 255)
 
 
-def bgr_to_center_radius(im_bgr,
-                         hsv_lows=hsv_lows_default,
-                         hsv_highs=hsv_highs_default,
+def hsv_to_center_radius(im_hsv,
+                         hsv_lows=orange_hsv_lows,
+                         hsv_highs=orange_hsv_highs,
                          surpress_when_large=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
     # convert to hsv
-    im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
+    # im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
@@ -74,19 +77,19 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
     z: vertical
     """
 
-    # # constants
+    # constants
     # f = 10.  # focal length, in cm
     # T = 13.5  # baseline, in cm
 
-    # # coefficients
+    # coefficients
     # kx = 50.
     # ky = 100.
     # kz = 0.0005
 
-    # # radius
+    # radius
     # radius = (radius0 + radius1) / 2.0  # average radius
 
-    # # calculate x, y, z
+    # calculate x, y, z
     # y = f * T * ky / (abs(center0[1] - center1[1]) * radius + 1e-6)
     # x = (center0[0] - center1[0]) * kx * y
     # z = (240 - center1[1]) * kz * y
@@ -112,11 +115,15 @@ if __name__ == '__main__':
         # read frame
         (_, im_bgr) = camera.read()
 
-        # get centers and radiuses
-        centers, radiuses = bgr_to_center_radius(im_bgr)
+        # convert to hsv
+        im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
+        # get centers and radiuses
+        green_centers, green_radiuses = hsv_to_center_radius(im_hsv,
+                                                             hsv_lows=green_hsv_lows,
+                                                             hsv_highs=green_hsv_highs)
         # plot center and radius
-        im_bgr = plot_center_radius(im_bgr, centers, radiuses)
+        im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses)
 
         # display the resulting frame
         cv2.imshow('frame', im_bgr)
