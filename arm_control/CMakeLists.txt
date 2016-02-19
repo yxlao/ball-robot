@@ -5,9 +5,13 @@ project(arm_control)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  genmsg
+  actionlib
   roscpp
   rospy
   std_msgs
+  actionlib_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -58,17 +62,15 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+#add_action_files(
+#  DIRECTORY action
+#  FILES ChangeVideoMode.action
+#)
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES actionlib_msgs std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -101,8 +103,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES hw2
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  LIBRARIES team6_assignment_4
+#  CATKIN_DEPENDS actionlib_msgs
 #  DEPENDS system_lib
 )
 
@@ -114,28 +116,29 @@ catkin_package(
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(hw2
-#   src/${PROJECT_NAME}/hw2.cpp
+# add_library(team6_assignment_4
+#   src/${PROJECT_NAME}/team6_assignment_4.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(hw2 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(team6_assignment_4 ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(hw2_node src/hw2_node.cpp)
+# add_executable(team6_assignment_4_node src/team6_assignment_4_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(hw2_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(team6_assignment_4_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(hw2_node
+# target_link_libraries(team6_assignment_4_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -154,7 +157,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS hw2 hw2_node
+# install(TARGETS team6_assignment_4 team6_assignment_4_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -179,10 +182,21 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_hw2.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_team6_assignment_4.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+# add_executable(motion_mode_keyboard src/motion_mode_keyboard.cpp)
+# target_link_libraries(motion_mode_keyboard ${catkin_LIBRARIES})
+# add_dependencies(motion_mode_keyboard motion_mode_keyboard_generate_messages_cpp)
+#
+# add_executable(motion_node src/motion_node.cpp)
+# target_link_libraries(motion_node ${catkin_LIBRARIES})
+# add_dependencies(motion_node motion_node_generate_messages_cpp)
+
+add_executable(arm_tf_broadcaster src/broadcast_arm_tfs.cpp)
+target_link_libraries(arm_tf_broadcaster ${catkin_LIBRARIES})
