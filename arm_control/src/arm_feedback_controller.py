@@ -15,6 +15,7 @@ angle2ready = False
 angle3ready = False
 claw_is_open = True
 state = "lowering"
+moving_joint = 0
 
 #lowering
 angle1above = -42
@@ -72,37 +73,67 @@ def run_state_machine():
     a = 1
 
 def get_lowering_cmd():
-    global claw_is_open
+    global claw_is_open, moving_joint
     if float(angle1) > angle1above:
+        moving_joint = 1
         return 'w'
     if float(angle1) < angle1below:
+        moving_joint = 1
         return 's'
+    if moving_joint == 1:
+        moving_joint = 0
+        return 'x'
     if float(angle2) > angle2above:
+        moving_joint = 2
         return 'g'
     if float(angle2) < angle1below:
+        moving_joint = 2
         return 't'
+    if moving_joint == 2:
+        moving_joint = 0
+        return 'x'
     if float(angle3) > angle3above:
+        moving_joint = 3
         return 'f'
     if float(angle1) < angle1below:
+        moving_joint = 3
         return 'r'
+    if moving_joint == 3:
+        moving_joint = 0
+        return 'x'
     if claw_is_open:
         claw_is_open = False
         return 'c'
     return "done"
 def get_raising_cmd():
-    global claw_is_open
+    global claw_is_open, moving_joint
     if float(angle1) > raising_angle1above:
+        moving_joint = 1
         return 'w'
     if float(angle1) < raising_angle1below:
+        moving_joint = 1
         return 's'
+    if moving_joint == 1:
+        moving_joint = 0
+        return 'x'
     if float(angle2) > raising_angle2above:
+        moving_joint = 2
         return 'g'
     if float(angle2) < raising_angle2below:
+        moving_joint = 2
         return 't'
+    if moving_joint == 2:
+        moving_joint = 0
+        return 'x'
     if float(angle3) > raising_angle3above:
+        moving_joint = 3
         return 'f'
     if float(angle1) < raising_angle3below:
+        moving_joint = 3
         return 'r'
+    if moving_joint == 3:
+        moving_joint = 0
+        return 'x'
     if not claw_is_open:
         claw_is_open = True
         return 'o'
