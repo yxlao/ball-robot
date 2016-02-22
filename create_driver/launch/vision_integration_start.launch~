@@ -42,6 +42,7 @@
     </node>
     <node pkg="hw3" type="my_tf_broadcaster" name="my_tf_broadcaster" />
 
+
 <!--     <node pkg="image_view" type="image_view" name="right_view" >
         <remap from="image" to="/$(arg right_cam_name)/image_raw" />
     </node>
@@ -50,9 +51,11 @@
         <remap from="image" to="/$(arg right_cam_name)/image_rect_color" />
     </node> -->
 
-    <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen">
+    <!--<node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen">
         <param name="autosize" value="true" />
-    </node>
+    </node> -->
 
     </group>
+    <node pkg="irobotcreate2" name="irobotcreate2" type="irobotcreate2" />
+    <node pkg="create_driver" name="create_state_machine" type="create_state_machine.py" />
 </launch>
