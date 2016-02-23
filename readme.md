@@ -10,7 +10,16 @@ Software Architecture https://bitbucket.org/ucsd_team_one/robot-central/wiki/Sof
 
 Hardware Architecture https://bitbucket.org/ucsd_team_one/robot-central/wiki/Hardware%20Architecture
 
-The driver code for assignment 4 can be found in the irobotcreate2ros directory.
+The driver code for assignment 4 can be found in the irobotcreate2ros directory
+
+## Backup SD card
+```
+# to backup
+$ sudo dd bs=4M if=/dev/sdb | gzip > lubuntu_feb_18.img.gz
+$ watch -n5 sudo pkill -usr1 dd
+# to restore
+sudo gunzip --stdout lubuntu_feb_18.img.gz | sudo dd bs=4M of=/dev/sdb
+```
 
 
 ## Running
