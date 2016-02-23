@@ -31,9 +31,9 @@ while True:
         msg.data = voltage_to_angle(v)
         if joint_num == 1:
             pub1.publish(msg)
-        else if joint_num == 2:
+        elif joint_num == 2:
             pub2.publish(msg)
-        else if joint_num == 3:
+        elif joint_num == 3:
             pub3.publish(msg)
         pub1.publish(msg)
         print "voltage: %s, angle: %s" % (v,  voltage_to_angle(v))
