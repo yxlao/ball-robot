@@ -51,6 +51,7 @@ right_ball_visulize_pub = rospy.Publisher('/stereo/right/ball_visulize',
 disparity_pub = rospy.Publisher('/stereo/my_disparity', Image, queue_size=10)
 ball_coord_pub = rospy.Publisher('/ball_coords', Vector3, queue_size=10)
 state_cmd_pub = rospy.Publisher('/state_cmds', String, queue_size=10)
+ball_in_sight_pub = rospy.Publisher('/is_ball_in_sight', String, queue_size=10)
 tf_broadcaster = tf.TransformBroadcaster()
 
 # init node
@@ -66,9 +67,12 @@ def get_disparity_image(left_img, right_img):
     disparity_img = disparity_img.astype(np.uint8)
 
     return disparity_img
-
-while True:
+ball_coords = Vector3()
+while not rospy.is_shutdown():
     # rospy.spinOnce()
+    if not (left_ready and right_ready):
+        time.sleep(0.1)
+        continue
     if left_ready:
         left_centers, left_radiuses = bgr_to_center_radius(left_img)
         left_img = plot_center_radius(left_img, left_centers, left_radiuses)
@@ -96,6 +100,9 @@ while True:
         # x, y, z = get_ball_coordinate(left_centers[0], right_centers[0],
         #                               left_radiuses[0], right_radiuses[0])
         x, y, z = get_ball_coordinate(lc, rc, lr, rr)
+        ball_coords.x = x
+        ball_coords.y = y
+        ball_coords.z = z
 
         # broadcast location
         tf_broadcaster.sendTransform((x, y, z),
@@ -103,12 +110,10 @@ while True:
                                      rospy.Time.now(), "ball", "camera_frame")
 
         print(x, y, z)
-        if last_command != "s":
-            state_cmd_pub.publish('s')
-            last_command = "s"
+        ball_in_sight_pub.publish("true")
+        ball_coord_pub.publish(ball_coords)
     else:
-        if last_command != "a":
-            state_cmd_pub.publish('a')
-            last_command = "a"
+        ball_in_sight_pub.publish("false")
+
 
     time.sleep(0.1)

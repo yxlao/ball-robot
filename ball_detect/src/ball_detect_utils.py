@@ -105,7 +105,7 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
 
 if __name__ == '__main__':
     # set camera
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(3)
 
     # main loop
     while(True):
