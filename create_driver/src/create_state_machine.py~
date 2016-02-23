@@ -151,8 +151,8 @@ def run_state_machine():
     elif state == "avoid":
         stop()
         rate1.sleep()
-        back_up()
-        rate1.sleep()
+        back()
+        rate_up1.sleep()
         turn_left()
         rate1.sleep()
         drive()
