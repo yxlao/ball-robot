@@ -61,6 +61,7 @@ def ir_bumper_callback(msg):
     a = 1
 
 def ball_in_sight_callback(msg):
+    global ball_in_sight, ball_in_sight_changed
     if msg.data == "false":
         if ball_in_sight == True:
             ball_in_sight = False
@@ -75,9 +76,9 @@ def ball_in_sight_callback(msg):
 
 def ball_coords_callback(msg):
     global ball_coords
-    ball_coords.x = msg.data.x
-    ball_coords.y = msg.data.y
-    ball_coords.z = msg.data.z
+    ball_coords.x = msg.x
+    ball_coords.y = msg.y
+    ball_coords.z = msg.z
 
 
 
@@ -94,6 +95,7 @@ def state_change_callback(data):
         turn_right()
         state = "right"
     elif data.data == "q":
+        last_command = "find_ball"
         state = "find_ball"
     else:
         stop()
@@ -127,6 +129,8 @@ def run_state_machine():
 
 
 rospy.Subscriber("/state_cmds", String, state_change_callback)
+rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
+rospy.Subscriber("/ball_coords", Vector3, ball_coords_callback)
 try:
     while not rospy.is_shutdown():
         run_state_machine()
