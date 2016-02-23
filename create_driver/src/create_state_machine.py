@@ -26,6 +26,8 @@ ball_coords = Vector3()
 ball_coords.x = 0
 ball_coords.y = 0
 ball_coords.z = 0
+rate1 = rospy.Rate(1.0) # 1 sec
+rate2 = rospy.rate(2.0) #0.5 sec
 
 rospy.init_node("create_state_machine", anonymous=True)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
@@ -146,6 +148,16 @@ def run_state_machine():
             back_up()
     elif state == "avoid":
         stop()
+        rate1.sleep()
+        back()
+        rate1.sleep()
+        turn_left()
+        rate1.sleep()
+        drive()
+        rate1.sleep()
+        state = find_ball
+
+
     elif state == "stop":
         if last_command != "stop":
             stop()
