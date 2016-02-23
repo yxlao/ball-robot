@@ -22,7 +22,6 @@ twist_msg.angular.y = 0.0
 twist_msg.angular.z = 0.0
 ball_in_sight = False
 ball_in_sight_changed = False
-done_avoiding_obstacle = True
 ball_coords = Vector3()
 ball_coords.x = 0
 ball_coords.y = 0
@@ -73,9 +72,9 @@ def stop():
 
 
 def ir_bumper_callback(msg):
-    if msg.state and done_avoiding_obstacle:
+    if msg.state== True:
         state = "avoid"
-        done_avoiding_obstacle = False
+        stop()
 
 
 def ball_in_sight_callback(msg):
@@ -127,7 +126,7 @@ def state_change_callback(data):
 
 
 def run_state_machine():
-    global done_avoiding_obstacle, state
+    global state
     if state == "find_ball":
         if ball_in_sight:
             if last_command != "drive":
@@ -151,16 +150,14 @@ def run_state_machine():
             back_up()
     elif state == "avoid":
         stop()
-        rospy.sleep(1)
+        rate1.sleep()
         back()
-        rospy.sleep(1.5)
-
+        rate_up1.sleep()
         turn_left()
-        rospy.sleep(3)
+        rate1.sleep()
         drive()
-        rospy.sleep(2)
+        rate1.sleep()
         state = "find_ball"
-        done_avoiding_obstacle = True
 
 
     elif state == "stop":
