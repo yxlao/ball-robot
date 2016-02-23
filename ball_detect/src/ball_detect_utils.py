@@ -9,7 +9,7 @@ import cv2
 orange_hsv_lows = (0, 146, 120)
 orange_hsv_highs = (16, 255, 255)
 
-green_hsv_lows = (30, 130, 80)
+green_hsv_lows = (30, 80, 80)
 green_hsv_highs = (50, 255, 255)
 
 
@@ -59,14 +59,19 @@ def hsv_to_center_radius(im_hsv,
     return (centers, radiuses)
 
 
-def plot_center_radius(im, centers, radiuses):
+def plot_center_radius(im, centers, radiuses, color="orange"):
     """
     Plot circles of centers and radius to im
     """
     # plot center and radius
     for center, radius in zip(centers, radiuses):
         if radius > 2:
-            cv2.circle(im, center, radius, (0, 255, 0), 2)
+            if color == "orange":
+                cv2.circle(im, center, radius, (0, 160, 255), 2)
+            elif color == "green":
+                cv2.circle(im, center, radius, (0, 255, 0), 2)
+            else:
+                cv2.circle(im, center, radius, (255, 255, 255), 2)
     return im
 
 
@@ -123,7 +128,16 @@ if __name__ == '__main__':
                                                              hsv_lows=green_hsv_lows,
                                                              hsv_highs=green_hsv_highs)
         # plot center and radius
-        im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses)
+        im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses,
+                                    color="green")
+
+        # get centers and radiuses
+        orange_centers, orange_radiuses = hsv_to_center_radius(im_hsv,
+                                                               hsv_lows=orange_hsv_lows,
+                                                               hsv_highs=orange_hsv_highs)
+        # plot center and radius
+        im_bgr = plot_center_radius(im_bgr, orange_centers, orange_radiuses,
+                                    color="orange")
 
         # display the resulting frame
         cv2.imshow('frame', im_bgr)
