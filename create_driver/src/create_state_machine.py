@@ -5,6 +5,8 @@ from geometry_msgs.msg import Twist, Vector3
 from irobotcreate2.msg import PlaySong
 from irobotcreate2.msg import Song
 from irobotcreate2.msg import Note
+from irobotcreate2.msg import RoombaIR
+from irobotcreate2.msg import Bumper
 from std_msgs.msg import String
 
 
@@ -37,6 +39,14 @@ def drive():
     last_command = "drive"
     twist_msg.linear.x = 0.0
 
+def back_up():
+    global last_command
+    back_msg = twist_msg
+    back_msg.linear.x = -0.2
+    pub.publish(back_msg)
+    last_command = "back"
+    twist_msg.linear.x = 0.0
+
 def turn_left():
     global last_command
     left_msg = twist_msg
@@ -55,10 +65,13 @@ def turn_right():
 
 def stop():
     pub.publish(twist_msg)
+    last_command = "stop"
 
 
 def ir_bumper_callback(msg):
-    a = 1
+    if msg.state:
+        state = "avoid"
+
 
 def ball_in_sight_callback(msg):
     global ball_in_sight, ball_in_sight_changed
@@ -94,9 +107,15 @@ def state_change_callback(data):
     elif data.data == "d":
         turn_right()
         state = "right"
+    elif data.data == "x":
+        back_up()
+        state = "back"
     elif data.data == "q":
         last_command = "find_ball"
         state = "find_ball"
+    elif data.data == "e":
+        state = "avoid"
+        last_command = "avoid"
     else:
         stop()
         state = "stop"
@@ -121,13 +140,17 @@ def run_state_machine():
     elif state == "turn_left":
         if last_command != "turn_left":
             turn_left()
-
+    elif state == "back":
+        if last_command != "back":
+            back_up()
+    elif state == "avoid":
+        stop()
     elif state == "stop":
         if last_command != "stop":
             stop()
 
 
-
+rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
 rospy.Subscriber("/state_cmds", String, state_change_callback)
 rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
 rospy.Subscriber("/ball_coords", Vector3, ball_coords_callback)
