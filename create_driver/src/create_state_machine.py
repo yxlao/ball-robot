@@ -69,8 +69,9 @@ def stop():
 
 
 def ir_bumper_callback(msg):
-    if msg.state:
+    if msg.state== True:
         state = "avoid"
+        stop()
 
 
 def ball_in_sight_callback(msg):
