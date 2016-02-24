@@ -73,6 +73,7 @@ def stop():
 
 
 def ir_bumper_callback(msg):
+    global done_avoiding_obstacle
     if msg.state and done_avoiding_obstacle:
         state = "avoid"
         done_avoiding_obstacle = False
