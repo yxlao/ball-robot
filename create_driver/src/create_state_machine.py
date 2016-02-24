@@ -11,6 +11,7 @@ from std_msgs.msg import String
 
 
 import sys, select, termios, tty
+import random
 
 state = "stop"
 twist_msg = Twist()
@@ -30,45 +31,75 @@ ball_coords.z = 0
 rate1 = rospy.Rate(1.0) # 1 sec
 rate2 = rospy.rate(2.0) #0.5 sec
 
+
+command_start_time = 0.0
+explore_duration = 5.0
+explore_state = "explore_turn"
+
+
 rospy.init_node("create_state_machine", anonymous=True)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 last_command = "stop"
 
 def drive():
-    global last_command
+    global last_command, command_start_time
     forward_msg = twist_msg
     forward_msg.linear.x = 0.2
     pub.publish(forward_msg)
     last_command = "drive"
+    command_start_time = rospy.get_time()
     twist_msg.linear.x = 0.0
 
 def back_up():
-    global last_command
+    global last_command, command_start_time
     back_msg = twist_msg
     back_msg.linear.x = -0.2
     pub.publish(back_msg)
     last_command = "back"
+    command_start_time = rospy.get_time()
     twist_msg.linear.x = 0.0
 
 def turn_left():
-    global last_command
+    global last_command, command_start_time
     left_msg = twist_msg
     left_msg.angular.z = 0.5
     pub.publish(left_msg)
     last_command = "turn_left"
+    command_start_time = rospy.get_time()
     twist_msg.angular.z = 0.0
 
 def turn_right():
-    global last_command
+    global last_command, command_start_time
     right_msg = twist_msg
     right_msg.angular.z = -0.5
     pub.publish(right_msg)
     last_command = "turn_right"
+    command_start_time = rospy.get_time()
     twist_msg.angular.z = 0.0
 
 def stop():
+    global last_command, command_start_time
     pub.publish(twist_msg)
     last_command = "stop"
+    command_start_time = rospy.get_time()
+
+def explore():
+    global last_command, explore_duration
+    if last_command == "explore":
+        turn_right()
+        explore_duration = random.random()*8
+        explore_state = "explore_turn"
+    elif rospy.get_time() > command_start_time + explore_duration:
+        if explore_state == "turn_right":
+            drive()
+            explore_duration = random.random()*8
+            explore_state = "explore_drive"
+        else:
+            turn_right()
+            explore_duration = random.random()*8
+            explore_state = "explore_turn"
+
+
 
 
 def ir_bumper_callback(msg):
@@ -121,6 +152,9 @@ def state_change_callback(data):
     elif data.data == "e":
         state = "avoid"
         last_command = "avoid"
+    elif data.data == "z":
+        state = "explore"
+        last_command = "explore"
     else:
         stop()
         state = "stop"
@@ -160,6 +194,8 @@ def run_state_machine():
         rospy.sleep(2)
         state = find_ball
         done_avoiding_obstacle = True
+    elif state == "explore":
+        explore()
 
 
     elif state == "stop":
