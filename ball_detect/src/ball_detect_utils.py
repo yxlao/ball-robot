@@ -67,12 +67,6 @@ def threshold_to_score(data,
     return float(np.sum(jacards))
 
 
-def hypteropt_ball_objective(args):
-    hsv_lows, hsv_highs, color, enable_circular = args
-    return -threshold_to_score(data, hsv_lows, hsv_highs,
-                               color, enable_circular)
-
-
 def hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs):
     """
     return boolean mask
