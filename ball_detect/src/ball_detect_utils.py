@@ -16,6 +16,63 @@ green_hsv_lows = (30, 80, 80)
 green_hsv_highs = (50, 255, 255)
 
 
+def jaccard(im_mask_pd, im_mask_gt):
+    """
+    - both input must be bool
+    - return between 0 to 1, 1 the best
+    """
+    assert im_mask_pd.dtype == np.bool
+    assert im_mask_gt.dtype == np.bool
+    union = float(np.sum(np.logical_or(im_mask_pd, im_mask_gt)))
+    interset = float(np.sum(np.logical_and(im_mask_pd, im_mask_gt)))
+    if union == 0:
+        if interset != 0:
+            return -1.0  # more panalty
+        else:
+            return 0.
+    return interset / union
+
+
+def hsv_to_jaccard(im_hsv, hsv_lows, hsv_highs,
+                   im_mask_gt, enable_circular):
+    if enable_circular:
+        im_mask_pd = hsv_to_circular_bool_mask(im_hsv,
+                                               hsv_lows, hsv_highs)
+    else:
+        im_mask_pd = hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs)
+    return jaccard(im_mask_pd, im_mask_gt)
+
+
+def threshold_to_score(data,
+                       hsv_lows, hsv_highs,
+                       color,
+                       enable_circular):
+    jacards = []
+
+    if color == 'orange':
+        for key, d in data.iteritems():
+            jacard = hsv_to_jaccard(d['im_hsv'],
+                                    hsv_lows, hsv_highs,
+                                    d['im_mask_orange'], enable_circular)
+            jacards.append(jacard)
+    elif color == 'green':
+        for key, d in data.iteritems():
+            jacard = hsv_to_jaccard(d['im_hsv'],
+                                    hsv_lows, hsv_highs,
+                                    d['im_mask_green'], enable_circular)
+            jacards.append(jacard)
+    else:
+        raise
+
+    return float(np.sum(jacards))
+
+
+def hypteropt_ball_objective(args):
+    hsv_lows, hsv_highs, color, enable_circular = args
+    return -threshold_to_score(data, hsv_lows, hsv_highs,
+                               color, enable_circular)
+
+
 def hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs):
     """
     return boolean mask
