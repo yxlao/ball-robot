@@ -102,9 +102,8 @@ def explore():
 
 
 
-
 def ir_bumper_callback(msg):
-    global done_avoiding_obstacle
+    global done_avoiding_obstacle, state
     if msg.state and done_avoiding_obstacle:
         state = "avoid"
         done_avoiding_obstacle = False
@@ -187,9 +186,8 @@ def run_state_machine():
     elif state == "avoid":
         stop()
         rospy.sleep(1)
-        back()
+        back_up()
         rospy.sleep(1.5)
-
         turn_left()
         rospy.sleep(3)
         drive()
@@ -198,6 +196,7 @@ def run_state_machine():
         done_avoiding_obstacle = True
     elif state == "explore":
         explore()
+
 
 
     elif state == "stop":
