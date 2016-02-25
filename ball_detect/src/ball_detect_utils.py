@@ -5,7 +5,10 @@ To run this:
 
 import numpy as np
 import cv2
+import time
 
+
+# Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
 orange_hsv_lows = (0, 146, 120)
 orange_hsv_highs = (16, 255, 255)
 
@@ -13,15 +16,10 @@ green_hsv_lows = (30, 80, 80)
 green_hsv_highs = (50, 255, 255)
 
 
-def hsv_to_center_radius(im_hsv,
-                         hsv_lows=orange_hsv_lows,
-                         hsv_highs=orange_hsv_highs,
-                         surpress_when_large=True):
+def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
-    # convert to hsv
-    # im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
@@ -70,6 +68,7 @@ def plot_center_radius(im, centers, radiuses, color="orange"):
                 cv2.circle(im, center, radius, (0, 160, 255), 2)
             elif color == "green":
                 cv2.circle(im, center, radius, (0, 255, 0), 2)
+                pass
             else:
                 cv2.circle(im, center, radius, (255, 255, 255), 2)
     return im
@@ -120,6 +119,10 @@ if __name__ == '__main__':
         # read frame
         (_, im_bgr) = camera.read()
 
+        # save_name = str(int(time.time())) + '.npy'
+        # np.save(save_name, im_bgr)
+        # print save_name
+
         # convert to hsv
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
@@ -144,6 +147,8 @@ if __name__ == '__main__':
         key = cv2.waitKey(10)
         if key == 27:
             break
+
+        # time.sleep(1)
 
     # when everything done, release the camera
     camera.release()
