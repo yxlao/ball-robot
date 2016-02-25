@@ -73,7 +73,7 @@ def stop():
 
 
 def ir_bumper_callback(msg):
-
+    global done_avoiding_obstacle, state
     if msg.state and done_avoiding_obstacle:
         state = "avoid"
         done_avoiding_obstacle = False
@@ -128,11 +128,8 @@ def state_change_callback(data):
 
 
 def run_state_machine():
-<<<<<<< HEAD
-    global state
-=======
-    global done_avoiding_obstacle
->>>>>>> 0375f946ab2aad14ffdcc43c2995316f2d3e2be5
+
+    global done_avoiding_obstacle, state
     if state == "find_ball":
         if ball_in_sight:
             if last_command != "drive":
@@ -156,26 +153,16 @@ def run_state_machine():
             back_up()
     elif state == "avoid":
         stop()
-<<<<<<< HEAD
-        rate1.sleep()
-        back_up()
-        rate1.sleep()
-=======
+
         rospy.sleep(1)
-        back()
+        back_up()
         rospy.sleep(1.5)
->>>>>>> 0375f946ab2aad14ffdcc43c2995316f2d3e2be5
         turn_left()
         rospy.sleep(3)
         drive()
-<<<<<<< HEAD
-        rate1.sleep()
-        state = "find_ball"
-=======
         rospy.sleep(2)
-        state = find_ball
+        state = "find_ball"
         done_avoiding_obstacle = True
->>>>>>> 0375f946ab2aad14ffdcc43c2995316f2d3e2be5
 
 
     elif state == "stop":
