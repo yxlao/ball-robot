@@ -16,6 +16,33 @@ green_hsv_lows = (30, 80, 80)
 green_hsv_highs = (50, 255, 255)
 
 
+def hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs):
+    """
+    return boolean mask
+    """
+    # mask by threshold
+    im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+    im_mask = cv2.medianBlur(im_mask, 5)
+    # erode
+    im_mask = cv2.erode(im_mask, None, iterations=2)
+    # dilate
+    im_mask = cv2.dilate(im_mask, None, iterations=2)
+    return im_mask.astype(np.bool)
+
+
+def hsv_to_circular_bool_mask(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True):
+    """
+    return boolean mask, which is drawn by circles
+    """
+    centers, radiuses = hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs,
+                                             surpress_when_large)
+    im_mask = np.zeros(im_hsv.shape[:2])
+    for center, radius in zip(centers, radiuses):
+        cv2.circle(im_mask, center, radius, 255, -1)
+
+    return im_mask.astype(np.bool)
+
+
 def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
