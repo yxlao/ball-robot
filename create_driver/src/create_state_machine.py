@@ -85,13 +85,13 @@ def stop():
     command_start_time = rospy.get_time()
 
 def explore():
-    global last_command, explore_duration
+    global last_command, explore_duration, explore_state, command_start_time
     if last_command == "explore":
         turn_right()
         explore_duration = random.random()*8
         explore_state = "explore_turn"
     elif rospy.get_time() > command_start_time + explore_duration:
-        if explore_state == "turn_right":
+        if explore_state == "explore_turn":
             drive()
             explore_duration = random.random()*8
             explore_state = "explore_drive"
@@ -110,7 +110,7 @@ def ir_bumper_callback(msg):
 
 
 def ball_in_sight_callback(msg):
-    global ball_in_sight, ball_in_sight_changed
+    global ball_in_sight, ball_in_sight_changed,state
     if msg.data == "false":
         if ball_in_sight == True:
             ball_in_sight = False
@@ -120,6 +120,7 @@ def ball_in_sight_callback(msg):
             a = 1
             #do nothing
         else:
+            state = "find_ball"
             ball_in_sight = True
             ball_in_sight_changed = True
 

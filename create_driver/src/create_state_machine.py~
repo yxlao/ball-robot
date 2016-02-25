@@ -69,23 +69,36 @@ def turn_right():
 def stop():
     pub.publish(twist_msg)
     last_command = "stop"
+    command_start_time = rospy.get_time()
+
+def explore():
+    global last_command, explore_duration, explore_state, command_start_time
+    if last_command == "explore":
+        turn_right()
+        explore_duration = random.random()*8
+        explore_state = "explore_turn"
+    elif rospy.get_time() > command_start_time + explore_duration:
+        if explore_state == "explore_turn":
+            drive()
+            explore_duration = random.random()*8
+            explore_state = "explore_drive"
+        else:
+            turn_right()
+            explore_duration = random.random()*8
+            explore_state = "explore_turn"
+
+
 
 
 def ir_bumper_callback(msg):
-<<<<<<< HEAD
-    if msg.state== True:
-        state = "avoid"
-        stop()
-=======
     global done_avoiding_obstacle, state
     if msg.state and done_avoiding_obstacle:
         state = "avoid"
         done_avoiding_obstacle = False
->>>>>>> rpi state machine changes
 
 
 def ball_in_sight_callback(msg):
-    global ball_in_sight, ball_in_sight_changed
+    global ball_in_sight, ball_in_sight_changed,state
     if msg.data == "false":
         if ball_in_sight == True:
             ball_in_sight = False
@@ -95,6 +108,7 @@ def ball_in_sight_callback(msg):
             a = 1
             #do nothing
         else:
+            state = "find_ball"
             ball_in_sight = True
             ball_in_sight_changed = True
 
@@ -133,12 +147,7 @@ def state_change_callback(data):
 
 
 def run_state_machine():
-<<<<<<< HEAD
-    global state
-=======
-
     global done_avoiding_obstacle, state
->>>>>>> rpi state machine changes
     if state == "find_ball":
         if ball_in_sight:
             if last_command != "drive":
@@ -162,27 +171,16 @@ def run_state_machine():
             back_up()
     elif state == "avoid":
         stop()
-<<<<<<< HEAD
-        rate1.sleep()
-        back()
-        rate_up1.sleep()
-=======
 
         rospy.sleep(1)
         back()
         rospy.sleep(1.5)
->>>>>>> rpi state machine changes
         turn_left()
         rate1.sleep()
         drive()
-<<<<<<< HEAD
-        rate1.sleep()
-        state = "find_ball"
-=======
         rospy.sleep(2)
         state = "find_ball"
         done_avoiding_obstacle = True
->>>>>>> rpi state machine changes
 
 
     elif state == "stop":
