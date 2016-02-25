@@ -6,14 +6,21 @@ To run this:
 import numpy as np
 import cv2
 import time
+import sys
 
 
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
+# manual parameters
 orange_hsv_lows = (0, 146, 120)
 orange_hsv_highs = (16, 255, 255)
-
 green_hsv_lows = (30, 80, 80)
 green_hsv_highs = (50, 255, 255)
+
+# orange_hsv_lows = (0.0033, 111.7340, 113.4713)
+# orange_hsv_highs = (13.6327, 242.5977, 254.9542)
+
+# green_hsv_lows = (39.4703, 100.4139, 59.6557)
+# green_hsv_highs = (79.5643, 254.4217, 254.6903)
 
 
 def jaccard(im_mask_pd, im_mask_gt):
@@ -190,16 +197,17 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
 
 if __name__ == '__main__':
     # set camera
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(1)
 
     # main loop
     while(True):
         # read frame
         (_, im_bgr) = camera.read()
 
-        # save_name = str(int(time.time())) + '.npy'
-        # np.save(save_name, im_bgr)
-        # print save_name
+        if len(sys.argv) > 1 and sys.argv[1] == '-s':
+            save_name = str(int(time.time())) + '.npy'
+            np.save(save_name, im_bgr)
+            print save_name
 
         # convert to hsv
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
@@ -226,7 +234,8 @@ if __name__ == '__main__':
         if key == 27:
             break
 
-        # time.sleep(1)
+        if len(sys.argv) > 1 and sys.argv[1] == '-s':
+            time.sleep(0.2)
 
     # when everything done, release the camera
     camera.release()
