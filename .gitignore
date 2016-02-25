@@ -1,2 +1,6 @@
 /CMakeLists.txt
 *.pyc
+*.swp
+*ipynb_checkpoints*
+*.npy
+*.png
