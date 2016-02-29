@@ -15,6 +15,14 @@ orange_hsv_highs = (16, 255, 255)
 green_hsv_lows = (30, 80, 80)
 green_hsv_highs = (50, 255, 255)
 
+def get_green_hsv_extremes():
+	global green_hsv_lows, green_hsv_highs
+	return green_hsv_lows, green_hsv_highs
+
+def get_orange_hsv_extremes():
+	global orange_hsv_lows, orange_hsv_highs
+	return orange_hsv_lows, orange_hsv_highs
+
 
 def hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs):
     """

@@ -56,7 +56,7 @@
     </node> -->
 
     </group>
-    <node pkg="irobotcreate2" name="irobotcreate2" type="irobotcreate2" />
+    <!--<node pkg="irobotcreate2" name="irobotcreate2" type="irobotcreate2" />-->
     <node pkg="create_driver" name="create_state_machine" type="create_state_machine.py" />
     <node pkg="ball_detect" name="ball_detect2" type="ball_detect2.py" />
 </launch>
