@@ -136,6 +136,16 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
     z = z / 100.
     return (x, y, z)
 
+def get_ball_coordinates(center, radius):
+    x = center[0] - 320.0
+    y = 100. / radius
+    z = center[1] - 240.0
+
+    x = x / 100.
+    y = y * 0.3
+    z = z / 100.
+    return (x, y, z)    
+
 
 if __name__ == '__main__':
     # set camera

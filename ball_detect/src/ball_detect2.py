@@ -83,9 +83,9 @@ while not rospy.is_shutdown():
         right_img = plot_center_radius(right_img, right_centers, right_radiuses)
         right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
 
-    disparity_img = get_disparity_image(left_img, right_img)
+    # disparity_img = get_disparity_image(left_img, right_img)
     # print (disparity_img)
-    disparity_pub.publish(bridge.cv2_to_imgmsg(disparity_img, "mono8"))
+    # disparity_pub.publish(bridge.cv2_to_imgmsg(disparity_img, "mono8"))
 
     global last_command
     # only use the first detected ball
