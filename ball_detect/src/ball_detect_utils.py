@@ -10,17 +10,42 @@ import sys
 
 
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
-# manual parameters
-orange_hsv_lows = (0, 146, 120)
-orange_hsv_highs = (16, 255, 255)
-green_hsv_lows = (30, 80, 80)
-green_hsv_highs = (50, 255, 255)
 
-# orange_hsv_lows = (0.0033, 111.7340, 113.4713)
-# orange_hsv_highs = (13.6327, 242.5977, 254.9542)
+# good old values
+# orange_hsv_lows = (0, 146, 120)
+# orange_hsv_highs = (16, 255, 255)
+# green_hsv_lows = (30, 80, 80)
+# green_hsv_highs = (50, 255, 255)
 
-# green_hsv_lows = (39.4703, 100.4139, 59.6557)
-# green_hsv_highs = (79.5643, 254.4217, 254.6903)
+# new default values
+orange_hsv_lows = (3, 111, 115)
+orange_hsv_highs = (14, 246, 255)
+green_hsv_lows = (36, 100, 115)
+green_hsv_highs = (57, 224, 255)
+
+# from fine tuning
+# orange_hsv_lows = (2.9998, 110.9023, 115.2693)
+# orange_hsv_highs = (12.5524, 245.7831, 254.9564)
+# green_hsv_lows = (35.8691, 107.8961, 115.0839)
+# green_hsv_highs = (57.0588, 224.1300, 254.9658)
+
+# tuning tools
+import termios
+import fcntl
+import sys
+import os
+fd = sys.stdin.fileno()
+
+oldterm = termios.tcgetattr(fd)
+newattr = termios.tcgetattr(fd)
+newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+termios.tcsetattr(fd, termios.TCSANOW, newattr)
+
+oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+
+tuning_state = None
+tuning_str = ""
 
 
 def jaccard(im_mask_pd, im_mask_gt):
@@ -88,7 +113,8 @@ def hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs):
     return im_mask.astype(np.bool)
 
 
-def hsv_to_circular_bool_mask(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True):
+def hsv_to_circular_bool_mask(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
+                              supress_sv=True):
     """
     return boolean mask, which is drawn by circles
     """
@@ -101,7 +127,8 @@ def hsv_to_circular_bool_mask(im_hsv, hsv_lows, hsv_highs, surpress_when_large=T
     return im_mask.astype(np.bool)
 
 
-def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True):
+def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
+                         supress_sv=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
@@ -138,6 +165,29 @@ def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True):
                     radiuses_new.append(radius)
             centers = centers_new
             radiuses = radiuses_new
+
+    if supress_sv:
+        # elimate v that are smaller than global mean
+        v_mean = np.mean(im_hsv[:, :, 2])
+        centers_new = []
+        radiuses_new = []
+        im_mean_mask = np.zeros(im_hsv.shape[:2]).astype(np.uint8)
+        for center, radius in zip(centers, radiuses):
+            # reset
+            im_mean_mask[:] = 0
+            # mask to "1" at the ball location
+            cv2.circle(im_mean_mask, center, radius, color=1, thickness=-1)
+            # area
+            area = np.sum(im_mean_mask)
+            # get mean, element wise product
+            im_mean_mask = im_mean_mask * im_hsv[:, :, 2]
+            v_mean_local = np.sum(im_mean_mask) / float(area)
+            if v_mean_local >= v_mean * 1:
+                centers_new.append(center)
+                radiuses_new.append(radius)
+        # print len(radiuses), len(radiuses_new)
+        centers = centers_new
+        radiuses = radiuses_new
 
     return (centers, radiuses)
 
@@ -195,6 +245,20 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
     return (x, y, z)
 
 
+def make_valid(thresholds):
+    """
+    input: 3 tuple
+    """
+    thresholds = list(thresholds)
+    thresholds[0] = max(0, thresholds[0])
+    thresholds[1] = max(0, thresholds[1])
+    thresholds[2] = max(0, thresholds[2])
+    thresholds[0] = min(179, thresholds[0])
+    thresholds[1] = min(255, thresholds[1])
+    thresholds[2] = min(255, thresholds[2])
+    return tuple(thresholds)
+
+
 if __name__ == '__main__':
     # set camera
     camera = cv2.VideoCapture(1)
@@ -208,6 +272,8 @@ if __name__ == '__main__':
             save_name = str(int(time.time())) + '.npy'
             np.save(save_name, im_bgr)
             print save_name
+
+        im_bgr = cv2.GaussianBlur(im_bgr,(5,5),0)
 
         # convert to hsv
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
@@ -236,6 +302,148 @@ if __name__ == '__main__':
 
         if len(sys.argv) > 1 and sys.argv[1] == '-s':
             time.sleep(0.2)
+
+        # time.sleep(0.5)
+
+        # tuning tools
+        orange_hsv_lows = list(orange_hsv_lows)
+        green_hsv_lows = list(green_hsv_lows)
+        orange_hsv_highs = list(orange_hsv_highs)
+        green_hsv_highs = list(green_hsv_highs)
+        try:
+            c = sys.stdin.read(1)
+            # quit
+            if c == 'q':
+                print "quit"
+                termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
+                fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+                break
+            # clear
+            elif c == 'c':
+                print "tuning_str cleared"
+                print "tuning_str: '%s'" % tuning_str
+            # backspace
+            elif c == '\x08' or c == '\x7f':
+                if len(tuning_str) >= 0:
+                    tuning_str = tuning_str[:-1]
+                print "tuning_str: '%s'" % tuning_str
+            # tuning
+            elif c == "-":
+                orange_hsv_lows = list(orange_hsv_lows)
+                if tuning_str == 'ohl':
+                    print "tuning orange, H, low"
+                    orange_hsv_lows[0] -= 1
+                elif tuning_str == 'ohh':
+                    print "tuning orange, H, high"
+                    orange_hsv_highs[0] -= 1
+                elif tuning_str == 'osl':
+                    print "tuning orange, S, low"
+                    orange_hsv_lows[1] -= 1
+                elif tuning_str == 'osh':
+                    print "tuning orange, S, high"
+                    orange_hsv_highs[1] -= 1
+                elif tuning_str == 'ovl':
+                    print "tuning orange, V, low"
+                    orange_hsv_lows[2] -= 1
+                elif tuning_str == 'ovh':
+                    print "tuning orange, V, high"
+                    orange_hsv_highs[2] -= 1
+                elif tuning_str == 'ghl':
+                    print "tuning green, H, low"
+                    green_hsv_lows[0] -= 1
+                elif tuning_str == 'ghh':
+                    print "tuning green, H, high"
+                    green_hsv_highs[0] -= 1
+                elif tuning_str == 'gsl':
+                    print "tuning green, S, low"
+                    green_hsv_lows[1] -= 1
+                elif tuning_str == 'gsh':
+                    print "tuning green, S, high"
+                    green_hsv_highs[1] -= 1
+                elif tuning_str == 'gvl':
+                    print "tuning green, V, low"
+                    green_hsv_lows[2] -= 1
+                elif tuning_str == 'gvh':
+                    print "tuning green, V, high"
+                    green_hsv_highs[2] -= 1
+                else:
+                    print "wrong tuning_str"
+                orange_hsv_lows = tuple(orange_hsv_lows)
+
+
+                orange_hsv_lows = make_valid(orange_hsv_lows)
+                orange_hsv_highs = make_valid(orange_hsv_highs)
+                green_hsv_lows = make_valid(green_hsv_lows)
+                green_hsv_highs = make_valid(green_hsv_highs)
+
+                print "orange_hsv_lows = (%s, %s, %s)" % orange_hsv_lows
+                print "orange_hsv_highs = (%s, %s, %s)" % orange_hsv_highs
+                print "green_hsv_lows = (%s, %s, %s)" % green_hsv_lows
+                print "green_hsv_highs = (%s, %s, %s)" % green_hsv_highs
+
+            # tuning
+            elif c == "=":
+                if tuning_str == 'ohl':
+                    print "tuning orange, H, low"
+                    orange_hsv_lows[0] += 1
+                elif tuning_str == 'ohh':
+                    print "tuning orange, H, high"
+                    orange_hsv_highs[0] += 1
+                elif tuning_str == 'osl':
+                    print "tuning orange, S, low"
+                    orange_hsv_lows[1] += 1
+                elif tuning_str == 'osh':
+                    print "tuning orange, S, high"
+                    orange_hsv_highs[1] += 1
+                elif tuning_str == 'ovl':
+                    print "tuning orange, V, low"
+                    orange_hsv_lows[2] += 1
+                elif tuning_str == 'ovh':
+                    print "tuning orange, V, high"
+                    orange_hsv_highs[2] += 1
+                elif tuning_str == 'ghl':
+                    print "tuning green, H, low"
+                    green_hsv_lows[0] += 1
+                elif tuning_str == 'ghh':
+                    print "tuning green, H, high"
+                    green_hsv_highs[0] += 1
+                elif tuning_str == 'gsl':
+                    print "tuning green, S, low"
+                    green_hsv_lows[1] += 1
+                elif tuning_str == 'gsh':
+                    print "tuning green, S, high"
+                    green_hsv_highs[1] += 1
+                elif tuning_str == 'gvl':
+                    print "tuning green, V, low"
+                    green_hsv_lows[2] += 1
+                elif tuning_str == 'gvh':
+                    print "tuning green, V, high"
+                    green_hsv_highs[2] += 1
+                else:
+                    print "wrong tuning_str"
+
+                orange_hsv_lows = make_valid(orange_hsv_lows)
+                orange_hsv_highs = make_valid(orange_hsv_highs)
+                green_hsv_lows = make_valid(green_hsv_lows)
+                green_hsv_highs = make_valid(green_hsv_highs)
+
+                print "orange_hsv_lows = (%s, %s, %s)" % orange_hsv_lows
+                print "orange_hsv_highs = (%s, %s, %s)" % orange_hsv_highs
+                print "green_hsv_lows = (%s, %s, %s)" % green_hsv_lows
+                print "green_hsv_highs = (%s, %s, %s)" % green_hsv_highs
+
+            # input string
+            elif c >= 'a' and c <= 'z':
+                tuning_str += c
+                print "tuning_str: '%s'" % tuning_str
+
+        except IOError:
+            pass
+
+        orange_hsv_lows = tuple(orange_hsv_lows)
+        green_hsv_lows = tuple(green_hsv_lows)
+        orange_hsv_highs = tuple(orange_hsv_highs)
+        green_hsv_highs = tuple(green_hsv_highs)
 
     # when everything done, release the camera
     camera.release()
