@@ -27,13 +27,13 @@ im_bgr = None
 def append_sample(event, x, y, flags, param):
     global hsv_samples, im_hsv, im_bgr
     if event == cv2.EVENT_LBUTTONUP:
-        print "x: %s, y: %s" % (x, y)
         hsv = im_hsv[y, x, :].copy()
-        hsv_samples.append(hsv)
-        print "sample hsv %s" % (hsv,)
-        print hsv_samples
-        hsv_threshold_from_sample(hsv_samples)
-        # cv2.circle(img, (x, y), 100, (255, 0, 0), -1)
+        if hsv[0] > 50 and hsv[1] > 5 and hsv[2] > 5:
+            hsv_samples.append(hsv)
+            print "[appended] x: %s, y: %s, hsv %s" % (x, y, hsv)
+            hsv_lows, hsv_highs = hsv_threshold_from_sample(hsv_samples)
+            print "[current low] %s" % (hsv_lows,)
+            print "[current high] %s" % (hsv_highs,)
 
 def hsv_threshold_from_sample(hsv_samples):
     """
@@ -49,12 +49,8 @@ def hsv_threshold_from_sample(hsv_samples):
 
 
 def get_bucket_mask(im_hsv, hsv_lows, hsv_highs):
-    print type(hsv_lows), hsv_lows, type(hsv_highs), hsv_highs
-
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
-    # im_mask = cv2.inRange(im_hsv, (1,2,3), (4,5,6))
-    # import ipdb; ipdb.set_trace()
     im_mask = cv2.medianBlur(im_mask, 5)
     # erode
     im_mask = cv2.erode(im_mask, None, iterations=2)
@@ -88,9 +84,18 @@ if __name__ == '__main__':
         # display the resulting frame
         cv2.imshow('input', im_bgr)
         cv2.imshow('bucket', im_mask)
-        key = cv2.waitKey(10)
-        if cv2.waitKey(20) & 0xFF == 27:
-            break
+
+        # if cv2.waitKey(20) & 0xFF == 27:
+        #     break
+
+        key = cv2.waitKey(30)
+        if key == 65288:
+            print "received backspace"
+            if len(hsv_samples) > 0:
+                hsv_samples.pop()
+                print "removed last sample"
+            else:
+                print "sample is empty"
 
     # when everything done, release the camera
     camera.release()
