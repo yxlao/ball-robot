@@ -30,6 +30,7 @@ lower_cam_ball_in_sight = False
 ball_in_sight_changed = False
 lower_cam_ball_in_sight_changed = False
 done_avoiding_obstacle = True
+back_obstructed = False
 ball_coords = Vector3()
 ball_coords.x = 0
 ball_coords.y = 0
@@ -42,6 +43,7 @@ lower_cam_ball_coords.z = 0
 command_start_time = 0.0
 explore_duration = 5.0
 explore_state = "explore_turn"
+avoid_state = "stop"
 
 
 rospy.init_node("create_state_machine", anonymous=True)
@@ -60,10 +62,13 @@ def drive(speed = FAST_DRIVE_SPEED):
     command_start_time = rospy.get_time()
     twist_msg.linear.x = 0.0
 
-def back_up():
-    global last_command, command_start_time
+def back_up(speed = FAST_DRIVE_SPEED):
+    global avoid_state, back_obstructed, last_command, state, command_start_time
     back_msg = twist_msg
-    back_msg.linear.x = -0.2
+    back_msg.linear.x = -1*speed
+    if back_obstructed:
+		avoid_state = "turn_left"
+		state = "avoid"
     pub.publish(back_msg)
     last_command = "back"
     command_start_time = rospy.get_time()
@@ -123,30 +128,58 @@ def fine_position():
 		turn_left(speed = SLOW_TURN_SPEED)
 	command_start_time = rospy.get_time()
 
+def avoid():
+    global avoid_state, done_avoiding_obstacle, state, last_command
+    current_time = rospy.get_time()
+    if last_command == "avoid":
+        avoid_state = "stop"
+        stop()
+    elif avoid_state == "stop":
+        if current_time - command_start_time > 1:
+            back_up()
+            avoid_state = "back_up"
+    elif avoid_state == "back_up":
+         if current_time - command_start_time > 1.5:
+            turn_left()
+            avoid_state = "turn_left"
+    elif avoid_state == "turn_left":
+        if current_time - command_start_time > 3:
+            drive()
+            avoid_state = "drive"
+    elif avoid_state == "drive":
+        if current_time - command_start_time > 2:
+            state = "explore"
+            last_command = "explore"
+            avoid_state = "stop"
+            done_avoiding_obstacle = True
+
+
 
 
 def ir_bumper_callback(msg):
-    global done_avoiding_obstacle, state
+    global done_avoiding_obstacle, state, last_command
     if msg.state and done_avoiding_obstacle:
         state = "avoid"
+        last_command = "avoid"
         done_avoiding_obstacle = False
 
 
 def ball_in_sight_callback(msg):
-    global ball_in_sight, ball_in_sight_changed,state
+    global ball_in_sight, ball_in_sight_changed, done_avoiding_obstacle, state, lower_cam_ball_in_sight
     if msg.data == "false":
         if ball_in_sight == True:
             ball_in_sight = False
             ball_in_sight_changed = True
     elif msg.data == "true":
+	if (not lower_cam_ball_in_sight) and done_avoiding_obstacle :
+            state = "find_ball"
         if ball_in_sight == True:
             a = 1
             #do nothing
         else:
-            state = "find_ball"
             ball_in_sight = True
             ball_in_sight_changed = True
-            
+
 def lower_cam_ball_in_sight_callback(msg):
     global lower_cam_ball_in_sight, lower_cam_ball_in_sight_changed,state
     if msg.data == "false":
@@ -158,6 +191,8 @@ def lower_cam_ball_in_sight_callback(msg):
             a = 1
             #do nothing
         else:
+            if state == "avoid":
+                return
             state = "fine_position"
             lower_cam_ball_in_sight = True
             lower_cam_ball_in_sight_changed = True
@@ -209,7 +244,7 @@ def state_change_callback(data):
 
 
 def run_state_machine():
-    global done_avoiding_obstacle, state
+    global done_avoiding_obstacle, state, last_command
     if state == "find_ball":
         if ball_in_sight:
             if last_command != "drive":
@@ -232,21 +267,13 @@ def run_state_machine():
         if last_command != "back":
             back_up()
     elif state == "avoid":
-        stop()
-        rospy.sleep(1)
-        back_up()
-        rospy.sleep(1.5)
-        turn_left()
-        rospy.sleep(3)
-        drive()
-        rospy.sleep(2)
-        state = "find_ball"
-        done_avoiding_obstacle = True
+        avoid()
     elif state == "explore":
         explore()
     elif state == "fine_position":
 		if not lower_cam_ball_in_sight:
-			state = "turn_left"
+			state = "explore"
+			last_command = "explore"
 		else:
 			fine_position()
 
@@ -257,7 +284,7 @@ def run_state_machine():
             stop()
 
 
-#rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
+rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
 rospy.Subscriber("/state_cmds", String, state_change_callback)
 rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
 rospy.Subscriber("/lower_cam_is_ball_in_sight", String, lower_cam_ball_in_sight_callback)
