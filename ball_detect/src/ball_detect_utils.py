@@ -8,7 +8,6 @@ import cv2
 import time
 import sys
 
-
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
 
 # good old values
@@ -28,85 +27,6 @@ green_hsv_highs = (57, 224, 255)
 # orange_hsv_highs = (12.5524, 245.7831, 254.9564)
 # green_hsv_lows = (35.8691, 107.8961, 115.0839)
 # green_hsv_highs = (57.0588, 224.1300, 254.9658)
-
-
-def jaccard(im_mask_pd, im_mask_gt):
-    """
-    - both input must be bool
-    - return between 0 to 1, 1 the best
-    """
-    assert im_mask_pd.dtype == np.bool
-    assert im_mask_gt.dtype == np.bool
-    union = float(np.sum(np.logical_or(im_mask_pd, im_mask_gt)))
-    interset = float(np.sum(np.logical_and(im_mask_pd, im_mask_gt)))
-    if union == 0:
-        if interset != 0:
-            return -1.0  # more panalty
-        else:
-            return 0.
-    return interset / union
-
-
-def hsv_to_jaccard(im_hsv, hsv_lows, hsv_highs,
-                   im_mask_gt, enable_circular):
-    if enable_circular:
-        im_mask_pd = hsv_to_circular_bool_mask(im_hsv,
-                                               hsv_lows, hsv_highs)
-    else:
-        im_mask_pd = hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs)
-    return jaccard(im_mask_pd, im_mask_gt)
-
-
-def threshold_to_score(data,
-                       hsv_lows, hsv_highs,
-                       color,
-                       enable_circular):
-    jacards = []
-
-    if color == 'orange':
-        for key, d in data.iteritems():
-            jacard = hsv_to_jaccard(d['im_hsv'],
-                                    hsv_lows, hsv_highs,
-                                    d['im_mask_orange'], enable_circular)
-            jacards.append(jacard)
-    elif color == 'green':
-        for key, d in data.iteritems():
-            jacard = hsv_to_jaccard(d['im_hsv'],
-                                    hsv_lows, hsv_highs,
-                                    d['im_mask_green'], enable_circular)
-            jacards.append(jacard)
-    else:
-        raise
-
-    return float(np.sum(jacards))
-
-
-def hsv_to_bool_mask(im_hsv, hsv_lows, hsv_highs):
-    """
-    return boolean mask
-    """
-    # mask by threshold
-    im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
-    im_mask = cv2.medianBlur(im_mask, 5)
-    # erode
-    im_mask = cv2.erode(im_mask, None, iterations=2)
-    # dilate
-    im_mask = cv2.dilate(im_mask, None, iterations=2)
-    return im_mask.astype(np.bool)
-
-
-def hsv_to_circular_bool_mask(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
-                              supress_sv=True):
-    """
-    return boolean mask, which is drawn by circles
-    """
-    centers, radiuses = hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs,
-                                             surpress_when_large)
-    im_mask = np.zeros(im_hsv.shape[:2])
-    for center, radius in zip(centers, radiuses):
-        cv2.circle(im_mask, center, radius, 255, -1)
-
-    return im_mask.astype(np.bool)
 
 
 def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
