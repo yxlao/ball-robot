@@ -28,12 +28,20 @@ def append_sample(event, x, y, flags, param):
     global hsv_samples, im_hsv, im_bgr
     if event == cv2.EVENT_LBUTTONUP:
         hsv = im_hsv[y, x, :].copy()
-        if hsv[0] > 50 and hsv[1] > 5 and hsv[2] > 5:
+        # if hsv[0] > 50 and hsv[1] > 5 and hsv[2] > 5:
+        #     hsv_samples.append(hsv)
+        #     print "[appended] x: %s, y: %s, hsv %s" % (x, y, hsv)
+        #     hsv_lows, hsv_highs = hsv_threshold_from_sample(hsv_samples)
+        #     print "[current low] %s" % (hsv_lows,)
+        #     print "[current high] %s" % (hsv_highs,)
+
+        if hsv[0] > 2 and hsv[1] > 5 and hsv[2] > 5:
             hsv_samples.append(hsv)
             print "[appended] x: %s, y: %s, hsv %s" % (x, y, hsv)
             hsv_lows, hsv_highs = hsv_threshold_from_sample(hsv_samples)
             print "[current low] %s" % (hsv_lows,)
             print "[current high] %s" % (hsv_highs,)
+
 
 def hsv_threshold_from_sample(hsv_samples):
     """
