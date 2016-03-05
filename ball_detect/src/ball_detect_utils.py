@@ -16,17 +16,17 @@ import sys
 # green_hsv_lows = (30, 80, 80)
 # green_hsv_highs = (50, 255, 255)
 
-# new default values
-orange_hsv_lows = (3, 111, 115)
-orange_hsv_highs = (14, 246, 255)
-green_hsv_lows = (36, 100, 115)
-green_hsv_highs = (57, 224, 255)
-
 # from fine tuning
 # orange_hsv_lows = (2.9998, 110.9023, 115.2693)
 # orange_hsv_highs = (12.5524, 245.7831, 254.9564)
 # green_hsv_lows = (35.8691, 107.8961, 115.0839)
 # green_hsv_highs = (57.0588, 224.1300, 254.9658)
+
+# new default values
+orange_hsv_lows = (3, 111, 115)
+orange_hsv_highs = (14, 246, 255)
+green_hsv_lows = (36, 100, 115)
+green_hsv_highs = (57, 224, 255)
 
 
 def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
@@ -110,14 +110,12 @@ def plot_center_radius(im, centers, radiuses, color="orange"):
                 cv2.circle(im, center, radius, (255, 255, 255), 2)
     return im
 
-
 def get_ball_coordinate(center0, center1, radius0, radius1):
     """
     x: horizontal
     y: depth
     z: vertical
     """
-
     # constants
     # f = 10.  # focal length, in cm
     # T = 13.5  # baseline, in cm
