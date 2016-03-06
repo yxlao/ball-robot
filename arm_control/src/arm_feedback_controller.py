@@ -18,19 +18,19 @@ state = "lowering"
 moving_joint = 0
 
 #lowering
-angle1above = -42
-angle1below = -62
-angle2above = 3
-angle2below = -17
-angle3above = -11
-angle3below = -31
+angle1above = -74
+angle1below = -83
+angle2above = 9
+angle2below = -1
+angle3above = -10
+angle3below = -20
 
 #raising
 raising_angle1above = -10
 raising_angle1below = -20
 raising_angle2above = 40
-raising_angle2below = 30
-raising_angle3above = -5
+raising_angle2below = 20
+raising_angle3above = -10
 raising_angle3below = -20
 
 def angle1callback(msg):
@@ -76,26 +76,26 @@ def get_lowering_cmd():
     global claw_is_open, moving_joint
     if float(angle1) > angle1above:
         moving_joint = 1
-        return 'w'
+        return 's'
     if float(angle1) < angle1below:
         moving_joint = 1
-        return 's'
+        return 'w'
     if moving_joint == 1:
         moving_joint = 0
         return 'x'
-    if float(angle2) > angle2above:
-        moving_joint = 2
-        return 'g'
-    if float(angle2) < angle1below:
-        moving_joint = 2
-        return 't'
-    if moving_joint == 2:
-        moving_joint = 0
-        return 'x'
+    # if float(angle2) > angle2above:
+    #     moving_joint = 2
+    #     return 'd'
+    # if float(angle2) < angle2below:
+    #     moving_joint = 2
+    #     return 'e'
+    # if moving_joint == 2:
+    #     moving_joint = 0
+    #     return 'x'
     if float(angle3) > angle3above:
         moving_joint = 3
         return 'f'
-    if float(angle1) < angle1below:
+    if float(angle3) < angle3below:
         moving_joint = 3
         return 'r'
     if moving_joint == 3:
@@ -109,26 +109,26 @@ def get_raising_cmd():
     global claw_is_open, moving_joint
     if float(angle1) > raising_angle1above:
         moving_joint = 1
-        return 'w'
+        return 's'
     if float(angle1) < raising_angle1below:
         moving_joint = 1
-        return 's'
+        return 'w'
     if moving_joint == 1:
         moving_joint = 0
         return 'x'
-    if float(angle2) > raising_angle2above:
-        moving_joint = 2
-        return 'g'
-    if float(angle2) < raising_angle2below:
-        moving_joint = 2
-        return 't'
-    if moving_joint == 2:
-        moving_joint = 0
-        return 'x'
+    # if float(angle2) > raising_angle2above:
+    #     moving_joint = 2
+    #     return 'g'
+    # if float(angle2) < raising_angle2below:
+    #     moving_joint = 2
+    #     return 't'
+    # if moving_joint == 2:
+    #     moving_joint = 0
+    #     return 'x'
     if float(angle3) > raising_angle3above:
         moving_joint = 3
         return 'f'
-    if float(angle1) < raising_angle3below:
+    if float(angle3) < raising_angle3below:
         moving_joint = 3
         return 'r'
     if moving_joint == 3:
