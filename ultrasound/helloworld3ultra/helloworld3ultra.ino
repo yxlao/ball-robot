@@ -22,7 +22,7 @@ NewPing sonar(12, 11, 300); // NewPing setup of pins and maximum distance.
 NewPing front_sonar(8, 10, 300);
 
 // Create the motor shield object with the default I2C address
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 // Or, create it with a different I2C address (say for stacking)
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
 
