@@ -18,20 +18,20 @@ state = "lowering"
 moving_joint = 0
 
 #lowering
-angle1above = -78
-angle1below = -95
-angle2above = 20
-angle2below = 5
-angle3above = 0
-angle3below = -3
+angle1above = -74
+angle1below = -83
+angle2above = 9
+angle2below = -1
+angle3above = -10
+angle3below = -20
 
 #raising
 raising_angle1above = -10
 raising_angle1below = -20
 raising_angle2above = 40
 raising_angle2below = 20
-raising_angle3above = 0
-raising_angle3below = -10
+raising_angle3above = -10
+raising_angle3below = -20
 
 def angle1callback(msg):
     global angle1, angle1ready
@@ -76,10 +76,10 @@ def get_lowering_cmd():
     global claw_is_open, moving_joint
     if float(angle1) > angle1above:
         moving_joint = 1
-        return 'w'
+        return 's'
     if float(angle1) < angle1below:
         moving_joint = 1
-        return 's'
+        return 'w'
     if moving_joint == 1:
         moving_joint = 0
         return 'x'
@@ -94,10 +94,10 @@ def get_lowering_cmd():
     #     return 'x'
     if float(angle3) > angle3above:
         moving_joint = 3
-        return 'r'
+        return 'f'
     if float(angle3) < angle3below:
         moving_joint = 3
-        return 'f'
+        return 'r'
     if moving_joint == 3:
         moving_joint = 0
         return 'x'
@@ -109,10 +109,10 @@ def get_raising_cmd():
     global claw_is_open, moving_joint
     if float(angle1) > raising_angle1above:
         moving_joint = 1
-        return 'w'
+        return 's'
     if float(angle1) < raising_angle1below:
         moving_joint = 1
-        return 's'
+        return 'w'
     if moving_joint == 1:
         moving_joint = 0
         return 'x'
@@ -127,10 +127,10 @@ def get_raising_cmd():
     #     return 'x'
     if float(angle3) > raising_angle3above:
         moving_joint = 3
-        return 'r'
+        return 'f'
     if float(angle3) < raising_angle3below:
         moving_joint = 3
-        return 'f'
+        return 'r'
     if moving_joint == 3:
         moving_joint = 0
         return 'x'
