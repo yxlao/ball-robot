@@ -116,16 +116,20 @@ def explore():
 
 
 def fine_position():
-	global last_command, command_start_time
+	global last_command, command_start_time, state, time_since_ball_in_center
 	if abs(lower_cam_ball_coords.x) < 0.5:
-		if lower_cam_ball_coords.y < 0.7:
-			stop()
+		if lower_cam_ball_coords.y < 0.55:
+                    stop()
+                    if rospy.get_time() - time_since_ball_in_center > 1:
+                        state = "pick_up"
 		else:
-			drive(speed=SLOW_DRIVE_SPEED)
+                    drive(speed=SLOW_DRIVE_SPEED)
 	elif lower_cam_ball_coords. x >= 0.5:
-		turn_right(speed=SLOW_TURN_SPEED)
+            time_since_ball_in_center = rospy.get_time()
+            turn_right(speed=SLOW_TURN_SPEED)
 	else:
-		turn_left(speed = SLOW_TURN_SPEED)
+            time_since_ball_in_center = rospy.get_time()
+            turn_left(speed = SLOW_TURN_SPEED)
 	command_start_time = rospy.get_time()
 
 def avoid():
@@ -193,6 +197,8 @@ def lower_cam_ball_in_sight_callback(msg):
         else:
             if state == "avoid":
                 return
+            if state == "pick_up":
+                return
             state = "fine_position"
             lower_cam_ball_in_sight = True
             lower_cam_ball_in_sight_changed = True
@@ -238,6 +244,8 @@ def state_change_callback(data):
     elif data.data == "c":
 		state = "fine_position"
 		last_command = "fine_position"
+    elif data.data == "p":
+        state= "pick_up"
     else:
         stop()
         state = "stop"

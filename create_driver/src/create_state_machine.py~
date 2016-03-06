@@ -65,7 +65,7 @@ def drive(speed = FAST_DRIVE_SPEED):
 def back_up(speed = FAST_DRIVE_SPEED):
     global avoid_state, back_obstructed, last_command, state, command_start_time
     back_msg = twist_msg
-    back_msg.linear.x = speed
+    back_msg.linear.x = -1*speed
     if back_obstructed:
 		avoid_state = "turn_left"
 		state = "avoid"
@@ -116,40 +116,47 @@ def explore():
 
 
 def fine_position():
-	global last_command, command_start_time
+	global last_command, command_start_time, state, time_since_ball_in_center
 	if abs(lower_cam_ball_coords.x) < 0.5:
 		if lower_cam_ball_coords.y < 0.7:
-			stop()
+                    stop()
+                    if rospy.get_time() - time_since_ball_in_center > 1:
+                        state = "pick_up"
 		else:
-			drive(speed=SLOW_DRIVE_SPEED)
+                    drive(speed=SLOW_DRIVE_SPEED)
 	elif lower_cam_ball_coords. x >= 0.5:
-		turn_right(speed=SLOW_TURN_SPEED)
+            time_since_ball_in_center = rospy.get_time()
+            turn_right(speed=SLOW_TURN_SPEED)
 	else:
-		turn_left(speed = SLOW_TURN_SPEED)
+            time_since_ball_in_center = rospy.get_time()
+            turn_left(speed = SLOW_TURN_SPEED)
 	command_start_time = rospy.get_time()
-	
+
 def avoid():
-	global avoid_state, done_avoiding_obstacle, state, last_command
-	current_time = rospy.get_time()
-	if last_command == "avoid":
-		avoid_state = "stop"
-		stop()
-	elif avoid_state == "stop":
-		if current_time - command_start_time > 1:
-			back_up()
-	elif avoid_state == "back_up":
-		if current_time - command_start_time > 1.5:
-			turn_left()
-	elif avoid_state == "turn_left":
-		if current_time - command_start_time > 3:
-			drive()
-	elif avoid_state == "drive":
-		if current_time - command_start_time > 2:
-			state = "explore"
-			last_command = "explore"
-			avoid_state = "stop"
-			done_avoiding_obstacle = True
-		
+    global avoid_state, done_avoiding_obstacle, state, last_command
+    current_time = rospy.get_time()
+    if last_command == "avoid":
+        avoid_state = "stop"
+        stop()
+    elif avoid_state == "stop":
+        if current_time - command_start_time > 1:
+            back_up()
+            avoid_state = "back_up"
+    elif avoid_state == "back_up":
+         if current_time - command_start_time > 1.5:
+            turn_left()
+            avoid_state = "turn_left"
+    elif avoid_state == "turn_left":
+        if current_time - command_start_time > 3:
+            drive()
+            avoid_state = "drive"
+    elif avoid_state == "drive":
+        if current_time - command_start_time > 2:
+            state = "explore"
+            last_command = "explore"
+            avoid_state = "stop"
+            done_avoiding_obstacle = True
+
 
 
 
@@ -176,7 +183,7 @@ def ball_in_sight_callback(msg):
         else:
             ball_in_sight = True
             ball_in_sight_changed = True
-            
+
 def lower_cam_ball_in_sight_callback(msg):
     global lower_cam_ball_in_sight, lower_cam_ball_in_sight_changed,state
     if msg.data == "false":
@@ -188,6 +195,10 @@ def lower_cam_ball_in_sight_callback(msg):
             a = 1
             #do nothing
         else:
+            if state == "avoid":
+                return
+            if state == "pick_up":
+                return
             state = "fine_position"
             lower_cam_ball_in_sight = True
             lower_cam_ball_in_sight_changed = True
@@ -233,6 +244,8 @@ def state_change_callback(data):
     elif data.data == "c":
 		state = "fine_position"
 		last_command = "fine_position"
+    elif data.data == "p":
+        state= "pick_up"
     else:
         stop()
         state = "stop"
