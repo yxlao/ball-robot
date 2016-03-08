@@ -32,17 +32,25 @@ white_color = (255, 255, 255)
 # [current low] (6, 93, 149)
 # [current high] (15, 175, 255)
 
+# green ball (1f)
+green_hsv_lows = (44, 125, 134)
+green_hsv_highs = (56, 179, 239)
+
+# orange ball (1f)
+orange_hsv_lows = (7, 131, 194)
+orange_hsv_highs = (10, 165, 255)
+
 # green bll (3f white desk)
 green_hsv_lows = (35, 144, 85)
 green_hsv_highs = (49, 193, 151)
 
-# orange bll (3f white desk)
-orange_hsv_lows = (7, 144, 112)
-orange_hsv_highs = (11, 198, 181)
-
-# bucket
-bucket_hsv_lows = (78, 7, 70)
-bucket_hsv_highs = (120, 47, 86)
+# # orange bll (3f white desk)
+# orange_hsv_lows = (7, 144, 112)
+# orange_hsv_highs = (11, 198, 181)
+#
+# # bucket
+# bucket_hsv_lows = (78, 7, 70)
+# bucket_hsv_highs = (120, 47, 86)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False):
