@@ -4,35 +4,39 @@ import rospy
 from std_msgs.msg import String
 
 import os
-import sys    
+import sys
 import termios
 import fcntl
+
+
 def getch():
-  fd = sys.stdin.fileno()
+    fd = sys.stdin.fileno()
 
-  oldterm = termios.tcgetattr(fd)
-  newattr = termios.tcgetattr(fd)
-  newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
-  termios.tcsetattr(fd, termios.TCSANOW, newattr)
+    oldterm = termios.tcgetattr(fd)
+    newattr = termios.tcgetattr(fd)
+    newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+    termios.tcsetattr(fd, termios.TCSANOW, newattr)
 
-  oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
-  fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+    oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
-  try:        
-    while 1:            
-      try:
-        c = sys.stdin.read(1)
-        break
-      except IOError: pass
-  finally:
-    termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
-    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
-  return c
+    try:
+        while 1:
+            try:
+                c = sys.stdin.read(1)
+                break
+            except IOError:
+                pass
+    finally:
+        termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
+        fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+    return c
+
 
 def talker():
     pub = rospy.Publisher('state_cmds', String, queue_size=10)
     rospy.init_node('state_talker', anonymous=True)
-    rate = rospy.Rate(1) # 10hz
+    rate = rospy.Rate(1)  # 10hz
     while not rospy.is_shutdown():
         hello_str = getch()
         print hello_str

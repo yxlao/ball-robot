@@ -10,7 +10,7 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 import time
-from ball_detect_utils import bgr_to_center_radius, plot_center_radius
+from ball_detect_utils import hsv_to_center_radius, plot_center_radius
 from ball_detect_utils import get_ball_coordinate
 
 # setups
@@ -60,12 +60,14 @@ def get_disparity_image(left_img, right_img):
 while True:
     # rospy.spinOnce()
     if left_ready:
-        left_centers, left_radiuses = bgr_to_center_radius(left_img)
+        left_img = cv2.cvtColor(left_img, cv2.COLOR_BGR2HSV)
+        left_centers, left_radiuses = hsv_to_center_radius(left_img)
         left_img = plot_center_radius(left_img, left_centers, left_radiuses)
         left_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(left_img, "bgr8"))
 
     if right_ready:
-        right_centers, right_radiuses = bgr_to_center_radius(right_img)
+        right_img = cv2.cvtColor(righ_img, cv2.COLOR_BGR2HSV)
+        right_centers, right_radiuses = hsv_to_center_radius(right_img)
         right_img = plot_center_radius(right_img, right_centers, right_radiuses)
         right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
 
