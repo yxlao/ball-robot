@@ -8,6 +8,10 @@ import cv2
 import time
 import sys
 
+orange_color = (0, 160, 255)
+green_color = (0, 255, 0)
+white_color = (255, 255, 255)
+
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
 
 # new default values
@@ -114,7 +118,7 @@ def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
     return im_mask_to_center_radius(im_mask, surpress_when_large, supress_sv)
 
 
-def plot_center_radius(im, centers, radiuses, color="orange"):
+def plot_center_radius(im, centers, radiuses, color=None):
     """
     Plot circles of centers and radius to im
     """
@@ -122,73 +126,83 @@ def plot_center_radius(im, centers, radiuses, color="orange"):
     for center, radius in zip(centers, radiuses):
         if radius > 2:
             if color == "orange":
-                cv2.circle(im, center, radius, (0, 160, 255), 2)
+                cv2.circle(im, center, radius, orange_color, 2)
             elif color == "green":
-                cv2.circle(im, center, radius, (0, 255, 0), 2)
+                cv2.circle(im, center, radius, green_color, 2)
                 pass
             else:
-                cv2.circle(im, center, radius, (255, 255, 255), 2)
+                cv2.circle(im, center, radius, white_color, 2)
     return im
 
 
-def get_ball_coordinate(center0, center1, radius0, radius1):
+def plot_targets(im, targets):
     """
-    x: horizontal
-    y: depth
-    z: vertical
+    targets['green'] = {'x': xxx, 'y': xxx, 'size': xxx}
+    targets['orange'] = {'x': xxx, 'y': xxx, 'size': xxx}
+    targets['bucket'] = {'x': xxx, 'y': xxx, 'size': xxx}
     """
-    # constants
-    # f = 10.  # focal length, in cm
-    # T = 13.5  # baseline, in cm
+    if targets['green'] is not None:
+        cv2.line(im,
+                 (targets['green']['x'] - targets['green']
+                  ['size'], targets['green']['y']),
+                 (targets['green']['x'] + targets['green']
+                  ['size'], targets['green']['y']),
+                 color=green_color, thickness=2)
+        cv2.line(im,
+                 (targets['green']['x'], targets['green']
+                  ['y'] - targets['green']['size']),
+                 (targets['green']['x'], targets['green']
+                  ['y'] + targets['green']['size']),
+                 color=green_color, thickness=2)
 
-    # coefficients
-    # kx = 50.
-    # ky = 100.
-    # kz = 0.0005
+    if targets['orange'] is not None:
+        cv2.line(im,
+                 (targets['orange']['x'] - targets['orange']
+                  ['size'], targets['orange']['y']),
+                 (targets['orange']['x'] + targets['orange']
+                  ['size'], targets['orange']['y']),
+                 color=orange_color, thickness=2)
+        cv2.line(im,
+                 (targets['orange']['x'], targets['orange']
+                  ['y'] - targets['orange']['size']),
+                 (targets['orange']['x'], targets['orange']
+                  ['y'] + targets['orange']['size']),
+                 color=orange_color, thickness=2)
 
-    # radius
-    # radius = (radius0 + radius1) / 2.0  # average radius
-
-    # calculate x, y, z
-    # y = f * T * ky / (abs(center0[1] - center1[1]) * radius + 1e-6)
-    # x = (center0[0] - center1[0]) * kx * y
-    # z = (240 - center1[1]) * kz * y
-
-    x = (center0[0] + center1[0]) / 2.0 - 320.0
-    x = center0[0] - 320.0
-    y = 100. / ((radius0 + radius1) / 2.0)
-    z = (center0[1] + center1[1]) / 2.0 - 240.0
-    z = center0[1] - 240.0
-
-    x = x / 100.
-    y = y * 0.3
-    z = z / 100.
-    return (x, y, z)
-
-
-def get_ball_coordinates(center, radius):
-    x = center[0] - 160.0
-    y = 100. / radius
-    z = center[1] - 120.0
-
-    x = x / 100.
-    y = y * 0.3
-    z = z / 100.
-    return (x, y, z)
+    return im
 
 
-def make_valid(thresholds):
+def hsv_to_targets(im_hsv):
     """
-    input: 3 tuple
+    hsv_lows, hsv_highs and everything else use default setting for now
     """
-    thresholds = list(thresholds)
-    thresholds[0] = max(0, thresholds[0])
-    thresholds[1] = max(0, thresholds[1])
-    thresholds[2] = max(0, thresholds[2])
-    thresholds[0] = min(179, thresholds[0])
-    thresholds[1] = min(255, thresholds[1])
-    thresholds[2] = min(255, thresholds[2])
-    return tuple(thresholds)
+    green_centers, green_radiuses = hsv_to_center_radius(im_hsv,
+                                                         hsv_lows=green_hsv_lows,
+                                                         hsv_highs=green_hsv_highs)
+    if len(green_radiuses) > 0:
+        green_centers = [c for (r, c) in sorted(zip(green_radiuses, green_centers),
+                                                reverse=True)]
+        green_radiuses = sorted(green_radiuses, reverse=True)
+        green_dict = {'x': green_centers[0][0],
+                      'y': green_centers[0][1],
+                      'size': green_radiuses[0]}
+    else:
+        green_dict = None
+
+    orange_centers, orange_radiuses = hsv_to_center_radius(im_hsv,
+                                                           hsv_lows=orange_hsv_lows,
+                                                           hsv_highs=orange_hsv_highs)
+    if len(orange_radiuses) > 0:
+        orange_centers = [c for (r, c) in sorted(zip(orange_radiuses, orange_centers),
+                                                 reverse=True)]
+        orange_radiuses = sorted(orange_radiuses, reverse=True)
+        orange_dict = {'x': orange_centers[0][0],
+                       'y': orange_centers[0][1],
+                       'size': orange_radiuses[0]}
+    else:
+        orange_dict = None
+
+    return {'green': green_dict, 'orange': orange_dict}
 
 
 if __name__ == '__main__':
@@ -225,6 +239,10 @@ if __name__ == '__main__':
         # plot center and radius
         im_bgr = plot_center_radius(im_bgr, orange_centers, orange_radiuses,
                                     color="orange")
+
+        # draw targests
+        targets = hsv_to_targets(im_hsv)
+        im_bgr = plot_targets(im_bgr, targets)
 
         # display the resulting frame
         cv2.imshow('frame', im_bgr)
