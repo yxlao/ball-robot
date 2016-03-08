@@ -42,20 +42,12 @@ def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
     im_mask = cv2.medianBlur(im_mask, 5)
     # erode
-    im_mask = cv2.erode(im_mask, None, iterations=2)
+    # im_mask = cv2.erode(im_mask, None, iterations=2)
     # dilate
-    im_mask = cv2.dilate(im_mask, None, iterations=2)
+    im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
 
-def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
-                         supress_sv=False):
-    """
-    Detect ball of from bgr image, returns centers and radius for circles
-    """
-
-    # mask by threshold
-    im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
-
+def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False):
     # find contours
     contours = cv2.findContours(im_mask, cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -71,40 +63,54 @@ def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
 
     if surpress_when_large and len(radiuses) > 0:
         max_radius = max(radiuses)
-        if max_radius * 2 > im_hsv.shape[0] * 0.4:
+        if max_radius * 2 > im_mask.shape[0] * 0.4:
             centers_new = []
             radiuses_new = []
             for center, radius in zip(centers, radiuses):
-                if radius * 2 > im_hsv.shape[0] * 0.05:
+                if radius * 2 > im_mask.shape[0] * 0.05:
                     centers_new.append(center)
                     radiuses_new.append(radius)
             centers = centers_new
             radiuses = radiuses_new
 
     if supress_sv:
-        # elimate v that are smaller than global mean
-        v_mean = np.mean(im_hsv[:, :, 2])
-        centers_new = []
-        radiuses_new = []
-        im_mean_mask = np.zeros(im_hsv.shape[:2]).astype(np.uint8)
-        for center, radius in zip(centers, radiuses):
-            # reset
-            im_mean_mask[:] = 0
-            # mask to "1" at the ball location
-            cv2.circle(im_mean_mask, center, radius, color=1, thickness=-1)
-            # area
-            area = np.sum(im_mean_mask)
-            # get mean, element wise product
-            im_mean_mask = im_mean_mask * im_hsv[:, :, 2]
-            v_mean_local = np.sum(im_mean_mask) / float(area)
-            if v_mean_local >= v_mean * 1:
-                centers_new.append(center)
-                radiuses_new.append(radius)
-        # print len(radiuses), len(radiuses_new)
-        centers = centers_new
-        radiuses = radiuses_new
+        pass
+        # # elimate v that are smaller than global mean
+        # v_mean = np.mean(im_hsv[:, :, 2])
+        # centers_new = []
+        # radiuses_new = []
+        # im_mean_mask = np.zeros(im_hsv.shape[:2]).astype(np.uint8)
+        # for center, radius in zip(centers, radiuses):
+        #     # reset
+        #     im_mean_mask[:] = 0
+        #     # mask to "1" at the ball location
+        #     cv2.circle(im_mean_mask, center, radius, color=1, thickness=-1)
+        #     # area
+        #     area = np.sum(im_mean_mask)
+        #     # get mean, element wise product
+        #     im_mean_mask = im_mean_mask * im_hsv[:, :, 2]
+        #     v_mean_local = np.sum(im_mean_mask) / float(area)
+        #     if v_mean_local >= v_mean * 1:
+        #         centers_new.append(center)
+        #         radiuses_new.append(radius)
+        # # print len(radiuses), len(radiuses_new)
+        # centers = centers_new
+        # radiuses = radiuses_new
 
     return (centers, radiuses)
+
+
+def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
+                         supress_sv=False):
+    """
+    Detect ball of from bgr image, returns centers and radius for circles
+    """
+
+    # mask by threshold
+    im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
+
+    # return centers radius
+    return im_mask_to_center_radius(im_mask, surpress_when_large, supress_sv)
 
 
 def plot_center_radius(im, centers, radiuses, color="orange"):
