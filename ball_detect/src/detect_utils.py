@@ -28,6 +28,18 @@ orange_hsv_highs = (14, 246, 255)
 green_hsv_lows = (36, 100, 115)
 green_hsv_highs = (57, 224, 255)
 
+# bucket
+# [current low] (97, 33, 93)
+# [current high] (121, 84, 143)
+
+# green ball
+# [current low] (46, 115, 96)
+# [current high] (52, 164, 237)
+
+# orange ball
+# current low] (6, 93, 149)
+# [current high] (15, 175, 255)
+
 
 def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
                          supress_sv=True):
@@ -152,7 +164,7 @@ def get_ball_coordinates(center, radius):
     x = x / 100.
     y = y * 0.3
     z = z / 100.
-    return (x, y, z)    
+    return (x, y, z)
 
 
 def make_valid(thresholds):
