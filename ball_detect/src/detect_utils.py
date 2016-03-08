@@ -127,6 +127,18 @@ def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
     return im_mask_to_center_radius(im_mask, surpress_when_large, supress_sv)
 
 
+def hsv_to_bucket_center_radius(im_hsv, hsv_lows, hsv_highs):
+    """
+    when the bucket fill up the whole picture:
+        return center as the center of the whole image
+    when bucket is not found:
+        return [(), ()]
+    other wise:
+        return [(center_x, center_y), radius]
+    """
+    pass
+
+
 def plot_center_radius(im, centers, radiuses, color=None):
     """
     Plot circles of centers and radius to im
