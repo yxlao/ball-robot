@@ -16,6 +16,7 @@ import numpy as np
 import cv2
 import time
 import sys
+from detect_utils import hsv_to_im_mask, hsv_to_center_radius, plot_center_radius
 
 # purple_hsv_lows = (3, 111, 115)
 # purple_hsv_highs = (14, 246, 255)
@@ -38,8 +39,8 @@ def append_sample(event, x, y, flags, param):
             hsv_samples.append(hsv)
             print "[appended] x: %s, y: %s, hsv %s" % (x, y, hsv)
             hsv_lows, hsv_highs = hsv_threshold_from_sample(hsv_samples)
-            print "[current low] %s" % (hsv_lows,)
-            print "[current high] %s" % (hsv_highs,)
+            print "hsv_lows = %s" % (hsv_lows,)
+            print "hsv_highs = %s" % (hsv_highs,)
 
 
 def hsv_threshold_from_sample(hsv_samples):
@@ -53,17 +54,6 @@ def hsv_threshold_from_sample(hsv_samples):
     else:
         return (tuple(np.min(samples, axis = 0).astype(int)),
                 tuple(np.max(samples, axis = 0).astype(int)))
-
-
-def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
-    # mask by threshold
-    im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
-    im_mask = cv2.medianBlur(im_mask, 5)
-    # erode
-    im_mask = cv2.erode(im_mask, None, iterations=2)
-    # dilate
-    im_mask = cv2.dilate(im_mask, None, iterations=2)
-    return im_mask
 
 
 if __name__ == '__main__':
@@ -87,6 +77,14 @@ if __name__ == '__main__':
 
         # get mask image
         im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
+
+        # get greencenters and radiuses
+        centers, radiuses = hsv_to_center_radius(im_hsv,
+                                                 hsv_lows=hsv_lows,
+                                                 hsv_highs=hsv_highs)
+        # plot center and radius in im_bgr
+        im_bgr = plot_center_radius(im_bgr, centers, radiuses,
+                                    color="green")
 
         # display the resulting frame
         cv2.imshow('input', im_bgr)
