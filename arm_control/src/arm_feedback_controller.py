@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import os
-import sys    
+import sys
 import termios
 import fcntl
 from std_msgs.msg import Float32
@@ -67,8 +67,8 @@ def getch():
   oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
   fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
-  try:        
-    while 1:            
+  try:
+    while 1:
       try:
         c = sys.stdin.read(1)
         break
@@ -191,7 +191,7 @@ try:
     pub1 = rospy.Publisher('/arm_cmds', String, queue_size=10)
     rospy.Subscriber("/joint1/angle", Float32, angle1callback)
     rospy.Subscriber("/joint2/angle", Float32, angle2callback)
-    rospy.Subscriber("/joint3/angle", Float32, angle3callback)    
+    rospy.Subscriber("/joint3/angle", Float32, angle3callback)
     rospy.Subscriber("/should_pick_up_ball", String, should_pick_up_ball_callback)
     rospy.init_node('arm_feedback_node', anonymous=True)
     run_node()

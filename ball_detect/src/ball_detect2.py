@@ -76,18 +76,18 @@ while not rospy.is_shutdown():
         time.sleep(0.1)
         continue
     if left_ready:
-		im_hsv = cv2.cvtColor(left_img, cv2.COLOR_BGR2HSV)
-		left_centers, left_radiuses = hsv_to_center_radius(im_hsv, orange_hsv_lows, orange_hsv_highs)
-		left_img = plot_center_radius(left_img, left_centers, left_radiuses, color="orange")
-		left_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(left_img, "bgr8"))
+        im_hsv = cv2.cvtColor(left_img, cv2.COLOR_BGR2HSV)
+        left_centers, left_radiuses = hsv_to_center_radius(im_hsv, orange_hsv_lows, orange_hsv_highs)
+        left_img = plot_center_radius(left_img, left_centers, left_radiuses, color="orange")
+        left_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(left_img, "bgr8"))
         #left_green_centers, left_green_rediuses = hsv_to_center_radius(left_img, green_hsv_lows, green_hsv_highs)
 
 
     if right_ready:
-		im_hsv_right = cv2.cvtColor(right_img, cv2.COLOR_BGR2HSV)
-		right_centers, right_radiuses = hsv_to_center_radius(im_hsv_right, orange_hsv_lows, orange_hsv_highs)
-		right_img = plot_center_radius(right_img, right_centers, right_radiuses)
-		right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
+        im_hsv_right = cv2.cvtColor(right_img, cv2.COLOR_BGR2HSV)
+        right_centers, right_radiuses = hsv_to_center_radius(im_hsv_right, orange_hsv_lows, orange_hsv_highs)
+        right_img = plot_center_radius(right_img, right_centers, right_radiuses)
+        right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
 
     # disparity_img = get_disparity_image(left_img, right_img)
     # print (disparity_img)
