@@ -10,35 +10,31 @@ import sys
 
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
 
-# good old values
-# orange_hsv_lows = (0, 146, 120)
-# orange_hsv_highs = (16, 255, 255)
-# green_hsv_lows = (30, 80, 80)
-# green_hsv_highs = (50, 255, 255)
-
-# from fine tuning
-# orange_hsv_lows = (2.9998, 110.9023, 115.2693)
-# orange_hsv_highs = (12.5524, 245.7831, 254.9564)
-# green_hsv_lows = (35.8691, 107.8961, 115.0839)
-# green_hsv_highs = (57.0588, 224.1300, 254.9658)
-
 # new default values
-orange_hsv_lows = (3, 111, 115)
-orange_hsv_highs = (14, 246, 255)
-green_hsv_lows = (36, 100, 115)
-green_hsv_highs = (57, 224, 255)
+orange_hsv_lows = (6, 93, 149)
+orange_hsv_highs = (15, 175, 255)
+green_hsv_lows = (46, 115, 96)
+green_hsv_highs = (52, 164, 237)
 
-# bucket
+# bucket (3f floor)
 # [current low] (97, 33, 93)
 # [current high] (121, 84, 143)
 
-# green ball
+# green ball (3f floor)
 # [current low] (46, 115, 96)
 # [current high] (52, 164, 237)
 
-# orange ball
-# current low] (6, 93, 149)
+# orange ball (3f floor)
+# [current low] (6, 93, 149)
 # [current high] (15, 175, 255)
+
+# green bll (3f white desk)
+hsv_lows = (6, 170, 102)
+hsv_highs = (9, 194, 162)
+
+# orange bll (3f white desk)
+hsv_lows = (46, 157, 77)
+hsv_highs = (51, 207, 137)
 
 
 def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
