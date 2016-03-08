@@ -29,13 +29,12 @@ import sys
 # [current high] (15, 175, 255)
 
 # green bll (3f white desk)
-green_hsv_lows = (44, 150, 71)
-green_hsv_highs = (52, 208, 124)
-
+green_hsv_lows = (35, 144, 85)
+green_hsv_highs = (49, 193, 151)
 
 # orange bll (3f white desk)
-orange_hsv_lows = (6, 164, 81)
-orange_hsv_highs = (10, 199, 172)
+orange_hsv_lows = (7, 144, 112)
+orange_hsv_highs = (11, 198, 181)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
