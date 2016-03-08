@@ -40,6 +40,10 @@ green_hsv_highs = (49, 193, 151)
 orange_hsv_lows = (7, 144, 112)
 orange_hsv_highs = (11, 198, 181)
 
+# bucket
+bucket_hsv_lows = (78, 7, 70)
+bucket_hsv_highs = (120, 47, 86)
+
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False):
     if is_bucket:
@@ -136,6 +140,8 @@ def hsv_to_bucket_center_radius(im_hsv, hsv_lows, hsv_highs):
     other wise:
         return [(center_x, center_y), radius]
     """
+    im_mask = hsv_to_im_mask(im_hsv, bucket_hsv_lows, bucket_hsv_highs,
+                             is_bucket=True)
     pass
 
 

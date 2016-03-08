@@ -13,6 +13,8 @@ therefore,
 """
 
 import numpy as np
+import scipy
+import scipy.misc
 import cv2
 import time
 import sys
@@ -95,6 +97,11 @@ if __name__ == '__main__':
         # get mask image
         # im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
         im_mask = hsv_to_im_mask_plot_intermediate(im_hsv, hsv_lows, hsv_highs)
+
+        # timestamp = str(int(time.time()))
+        # np.save(timestamp + '.npy', im_mask)
+        # scipy.misc.imsave(timestamp + '.png', im_mask)
+        # time.sleep(1)
 
         # get greencenters and radiuses
         centers, radiuses = im_mask_to_center_radius(im_mask)
