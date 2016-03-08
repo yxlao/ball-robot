@@ -41,14 +41,23 @@ orange_hsv_lows = (7, 144, 112)
 orange_hsv_highs = (11, 198, 181)
 
 
-def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
-    # mask by threshold
-    im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
-    im_mask = cv2.medianBlur(im_mask, 5)
-    # erode
-    # im_mask = cv2.erode(im_mask, None, iterations=2)
-    # dilate
-    im_mask = cv2.dilate(im_mask, None, iterations=3)
+def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False):
+    if is_bucket:
+        # mask by threshold
+        im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+        im_mask = cv2.medianBlur(im_mask, 10)
+        # erode
+        im_mask = cv2.erode(im_mask, None, iterations=2)
+        # dilate
+        im_mask = cv2.dilate(im_mask, None, iterations=3)
+    else:
+        # mask by threshold
+        im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+        im_mask = cv2.medianBlur(im_mask, 5)
+        # erode
+        # im_mask = cv2.erode(im_mask, None, iterations=2)
+        # dilate
+        im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
 
 
@@ -105,8 +114,8 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
     return (centers, radiuses)
 
 
-def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
-                         supress_sv=False):
+def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
+                              surpress_when_large=True, supress_sv=False):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
@@ -176,9 +185,9 @@ def hsv_to_targets(im_hsv):
     """
     hsv_lows, hsv_highs and everything else use default setting for now
     """
-    green_centers, green_radiuses = hsv_to_center_radius(im_hsv,
-                                                         hsv_lows=green_hsv_lows,
-                                                         hsv_highs=green_hsv_highs)
+    green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                              hsv_lows=green_hsv_lows,
+                                                              hsv_highs=green_hsv_highs)
     if len(green_radiuses) > 0:
         green_centers = [c for (r, c) in sorted(zip(green_radiuses, green_centers),
                                                 reverse=True)]
@@ -189,9 +198,9 @@ def hsv_to_targets(im_hsv):
     else:
         green_dict = None
 
-    orange_centers, orange_radiuses = hsv_to_center_radius(im_hsv,
-                                                           hsv_lows=orange_hsv_lows,
-                                                           hsv_highs=orange_hsv_highs)
+    orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                hsv_lows=orange_hsv_lows,
+                                                                hsv_highs=orange_hsv_highs)
     if len(orange_radiuses) > 0:
         orange_centers = [c for (r, c) in sorted(zip(orange_radiuses, orange_centers),
                                                  reverse=True)]
@@ -225,7 +234,7 @@ if __name__ == '__main__':
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
         # get centers and radiuses
-        green_centers, green_radiuses = hsv_to_center_radius(im_hsv,
+        green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
                                                              hsv_lows=green_hsv_lows,
                                                              hsv_highs=green_hsv_highs)
         # plot center and radius
@@ -233,7 +242,7 @@ if __name__ == '__main__':
                                     color="green")
 
         # get centers and radiuses
-        orange_centers, orange_radiuses = hsv_to_center_radius(im_hsv,
+        orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
                                                                hsv_lows=orange_hsv_lows,
                                                                hsv_highs=orange_hsv_highs)
         # plot center and radius
