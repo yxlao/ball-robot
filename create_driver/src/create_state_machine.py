@@ -19,7 +19,7 @@ import random
 FAST_TURN_SPEED = 0.5
 SLOW_TURN_SPEED = 0.1
 FAST_DRIVE_SPEED = 0.2
-SLOW_DRIVE_SPEED = 0.1
+SLOW_DRIVE_SPEED = 0.08
 state = "stop"
 twist_msg = Twist()
 twist_msg.linear.x = 0.0
@@ -49,12 +49,15 @@ explore_state = "explore_turn"
 avoid_state = "stop"
 
 
+
+
 rospy.init_node("create_state_machine", anonymous=True)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+pick_up_pub = rospy.Publisher('/should_pick_up_ball', String, queue_size=3)
 last_command = "stop"
 rate1 = rospy.Rate(1.0)  # 1 sec
 rate2 = rospy.Rate(2.0)  # 0.5 sec
-
+time_since_ball_in_center = rospy.get_time()
 
 def drive(speed=FAST_DRIVE_SPEED):
     global last_command, command_start_time
@@ -130,6 +133,7 @@ def fine_position():
                     stop()
                     if rospy.get_time() - time_since_ball_in_center > 1:
                         state = "pick_up"
+                        pick_up_pub.publish('true')
         else:
                     drive(speed=SLOW_DRIVE_SPEED)
     elif lower_cam_ball_coords. x >= 0.5:
@@ -326,7 +330,7 @@ def run_state_machine():
             stop()
 
 
-rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
+#rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
 rospy.Subscriber("/state_cmds", String, state_change_callback)
 rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
 rospy.Subscriber("/lower_cam_is_ball_in_sight", String, lower_cam_ball_in_sight_callback)
