@@ -51,13 +51,28 @@ green_hsv_highs = (49, 193, 151)
 # # bucket
 # bucket_hsv_lows = (78, 7, 70)
 # bucket_hsv_highs = (120, 47, 86)
+# orange bll (3f white desk)
+#orange_hsv_lows = (7, 144, 112)
+#orange_hsv_highs = (11, 198, 181)
+
+# bucket (3f)
+#bucket_hsv_lows = (78, 7, 70)
+#bucket_hsv_highs = (120, 47, 86)
+
+# green ball (1f)
+green_hsv_lows = (44, 125, 134)
+green_hsv_highs = (56, 179, 239)
+
+# orange ball (1f)
+orange_hsv_lows = (7, 131, 194)
+orange_hsv_highs = (10, 165, 255)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False):
     if is_bucket:
         # mask by threshold
         im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
-        im_mask = cv2.medianBlur(im_mask, 10)
+        im_mask = cv2.medianBlur(im_mask, 7)
         # erode
         im_mask = cv2.erode(im_mask, None, iterations=2)
         # dilate
@@ -139,7 +154,7 @@ def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
     return im_mask_to_center_radius(im_mask, surpress_when_large, supress_sv)
 
 
-def hsv_to_bucket_center_radius(im_hsv, hsv_lows, hsv_highs):
+def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
     """
     when the bucket fill up the whole picture:
         return center as the center of the whole image
@@ -150,7 +165,30 @@ def hsv_to_bucket_center_radius(im_hsv, hsv_lows, hsv_highs):
     """
     im_mask = hsv_to_im_mask(im_hsv, bucket_hsv_lows, bucket_hsv_highs,
                              is_bucket=True)
-    pass
+
+    cv2.imshow('bucket_mask', im_mask)
+
+    # find countours
+    contours, hierarchy = cv2.findContours(im_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    print (len(contours))
+
+    if len(contours) > 0:
+        # find countour with max area
+        areas = [cv2.contourArea(cnt) for cnt in contours]
+        max_idx = np.argmax(areas)
+        cnt = contours[max_idx]
+
+        # find centroid
+        M = cv2.moments(cnt)
+        centroid_x = int(M['m10']/M['m00'])
+        centroid_y = int(M['m01']/M['m00'])
+
+        # find radius
+        r = int(np.sqrt(areas[max_idx] / 3.14))
+
+        return {'x': centroid_x, 'y': centroid_y, 'size': r}
+    else:
+        return None
 
 
 def plot_center_radius(im, centers, radiuses, color=None):
@@ -204,6 +242,20 @@ def plot_targets(im, targets):
                   ['y'] + targets['orange']['size']),
                  color=orange_color, thickness=2)
 
+    if targets['bucket'] is not None:
+        cv2.line(im,
+                 (targets['bucket']['x'] - targets['bucket']
+                  ['size'], targets['bucket']['y']),
+                 (targets['bucket']['x'] + targets['bucket']
+                  ['size'], targets['bucket']['y']),
+                 color=white_color, thickness=2)
+        cv2.line(im,
+                 (targets['bucket']['x'], targets['bucket']
+                  ['y'] - targets['bucket']['size']),
+                 (targets['bucket']['x'], targets['bucket']
+                  ['y'] + targets['bucket']['size']),
+                 color=white_color, thickness=2)
+
     return im
 
 
@@ -237,7 +289,21 @@ def hsv_to_targets(im_hsv):
     else:
         orange_dict = None
 
-    return {'green': green_dict, 'orange': orange_dict}
+    bucket_dict = hsv_to_bucket_target(im_hsv, hsv_lows=bucket_hsv_lows, hsv_highs=bucket_hsv_highs)
+    # bucket_centers, bucket_radiuses = hsv_to_ball_center_radius(im_hsv,
+    #                                                             hsv_lows=bucket_hsv_lows,
+    #                                                             hsv_highs=bucket_hsv_highs)
+    # if len(bucket_radiuses) > 0:
+    #     bucket_centers = [c for (r, c) in sorted(zip(bucket_radiuses, bucket_centers),
+    #                                              reverse=True)]
+    #     bucket_radiuses = sorted(bucket_radiuses, reverse=True)
+    #     bucket_dict = {'x': bucket_centers[0][0],
+    #                    'y': bucket_centers[0][1],
+    #                    'size': bucket_radiuses[0]}
+    # else:
+    #     bucket_dict = None
+
+    return {'green': green_dict, 'orange': orange_dict, 'bucket': bucket_dict}
 
 
 if __name__ == '__main__':
