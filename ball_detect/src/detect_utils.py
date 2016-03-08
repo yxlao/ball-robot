@@ -10,11 +10,11 @@ import sys
 
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
 
-# new default values
-orange_hsv_lows = (6, 93, 149)
-orange_hsv_highs = (15, 175, 255)
-green_hsv_lows = (46, 115, 96)
-green_hsv_highs = (52, 164, 237)
+# # new default values
+# orange_hsv_lows = (6, 93, 149)
+# orange_hsv_highs = (15, 175, 255)
+# green_hsv_lows = (46, 115, 96)
+# green_hsv_highs = (52, 164, 237)
 
 # bucket (3f floor)
 # [current low] (97, 33, 93)
@@ -29,20 +29,15 @@ green_hsv_highs = (52, 164, 237)
 # [current high] (15, 175, 255)
 
 # green bll (3f white desk)
-hsv_lows = (6, 170, 102)
-hsv_highs = (9, 194, 162)
+green_hsv_lows = (44, 150, 71)
+green_hsv_highs = (52, 208, 124)
+
 
 # orange bll (3f white desk)
-hsv_lows = (46, 157, 77)
-hsv_highs = (51, 207, 137)
+orange_hsv_lows = (6, 164, 81)
+orange_hsv_highs = (10, 199, 172)
 
-
-def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
-                         supress_sv=True):
-    """
-    Detect ball of from bgr image, returns centers and radius for circles
-    """
-
+def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
     im_mask = cv2.medianBlur(im_mask, 5)
@@ -50,6 +45,16 @@ def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
     im_mask = cv2.erode(im_mask, None, iterations=2)
     # dilate
     im_mask = cv2.dilate(im_mask, None, iterations=2)
+    return im_mask
+
+def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
+                         supress_sv=False):
+    """
+    Detect ball of from bgr image, returns centers and radius for circles
+    """
+
+    # mask by threshold
+    im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
 
     # find contours
     contours = cv2.findContours(im_mask, cv2.RETR_EXTERNAL,
