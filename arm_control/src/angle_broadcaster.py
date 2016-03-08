@@ -13,6 +13,7 @@ print "running"
 angle_90 = 0.4139
 angle_0 = 0.115
 
+
 def voltage_to_angle(voltage):
     return (voltage - angle_0) / (angle_90 - angle_0) * 90. + 0.
 
@@ -21,7 +22,7 @@ pub2 = rospy.Publisher('/joint2/angle', Float32, queue_size=10)
 pub3 = rospy.Publisher('/joint3/angle', Float32, queue_size=10)
 rospy.init_node('angle_sender', anonymous=True)
 while True:
-    
+
     joint_num = 1
     port.flushInput()
     rcv = port.read(4)
@@ -40,4 +41,3 @@ while True:
     except:
         print "no signal"
     time.sleep(0.1)
-    
