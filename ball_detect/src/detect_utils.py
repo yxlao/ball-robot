@@ -144,6 +144,16 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
     z = z / 100.
     return (x, y, z)
 
+def get_ball_coordinates(center, radius):
+    x = center[0] - 160.0
+    y = 100. / radius
+    z = center[1] - 120.0
+
+    x = x / 100.
+    y = y * 0.3
+    z = z / 100.
+    return (x, y, z)    
+
 
 def make_valid(thresholds):
     """

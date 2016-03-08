@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 import os
-import sys    
+import sys
 import termios
 import fcntl
 from std_msgs.msg import Float32
@@ -13,24 +13,26 @@ angle3 = 0.0
 angle1ready = False
 angle2ready = False
 angle3ready = False
+should_pick_up_ball = False
+done_picking_up_ball = True
 claw_is_open = True
-state = "lowering"
+state = "idle"
 moving_joint = 0
 
 #lowering
-angle1above = -42
-angle1below = -62
-angle2above = 3
-angle2below = -17
-angle3above = -11
-angle3below = -31
+angle1above = -74
+angle1below = -83
+angle2above = 9
+angle2below = -1
+angle3above = -10
+angle3below = -20
 
 #raising
 raising_angle1above = -10
 raising_angle1below = -20
 raising_angle2above = 40
-raising_angle2below = 30
-raising_angle3above = -5
+raising_angle2below = 20
+raising_angle3above = -10
 raising_angle3below = -20
 
 def angle1callback(msg):
@@ -48,6 +50,12 @@ def angle3callback(msg):
     angle3 = msg.data
     angle3ready = True
 
+def should_pick_up_ball_callback(msg):
+    global should_pick_up_ball
+    if msg.data == "true":
+      should_pick_up_ball = True
+
+
 def getch():
   fd = sys.stdin.fileno()
 
@@ -59,8 +67,8 @@ def getch():
   oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
   fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
-  try:        
-    while 1:            
+  try:
+    while 1:
       try:
         c = sys.stdin.read(1)
         break
@@ -76,26 +84,26 @@ def get_lowering_cmd():
     global claw_is_open, moving_joint
     if float(angle1) > angle1above:
         moving_joint = 1
-        return 'w'
+        return 's'
     if float(angle1) < angle1below:
         moving_joint = 1
-        return 's'
+        return 'w'
     if moving_joint == 1:
         moving_joint = 0
         return 'x'
-    if float(angle2) > angle2above:
-        moving_joint = 2
-        return 'g'
-    if float(angle2) < angle1below:
-        moving_joint = 2
-        return 't'
-    if moving_joint == 2:
-        moving_joint = 0
-        return 'x'
+    # if float(angle2) > angle2above:
+    #     moving_joint = 2
+    #     return 'd'
+    # if float(angle2) < angle2below:
+    #     moving_joint = 2
+    #     return 'e'
+    # if moving_joint == 2:
+    #     moving_joint = 0
+    #     return 'x'
     if float(angle3) > angle3above:
         moving_joint = 3
         return 'f'
-    if float(angle1) < angle1below:
+    if float(angle3) < angle3below:
         moving_joint = 3
         return 'r'
     if moving_joint == 3:
@@ -109,26 +117,26 @@ def get_raising_cmd():
     global claw_is_open, moving_joint
     if float(angle1) > raising_angle1above:
         moving_joint = 1
-        return 'w'
+        return 's'
     if float(angle1) < raising_angle1below:
         moving_joint = 1
-        return 's'
+        return 'w'
     if moving_joint == 1:
         moving_joint = 0
         return 'x'
-    if float(angle2) > raising_angle2above:
-        moving_joint = 2
-        return 'g'
-    if float(angle2) < raising_angle2below:
-        moving_joint = 2
-        return 't'
-    if moving_joint == 2:
-        moving_joint = 0
-        return 'x'
+    # if float(angle2) > raising_angle2above:
+    #     moving_joint = 2
+    #     return 'g'
+    # if float(angle2) < raising_angle2below:
+    #     moving_joint = 2
+    #     return 't'
+    # if moving_joint == 2:
+    #     moving_joint = 0
+    #     return 'x'
     if float(angle3) > raising_angle3above:
         moving_joint = 3
         return 'f'
-    if float(angle1) < raising_angle3below:
+    if float(angle3) < raising_angle3below:
         moving_joint = 3
         return 'r'
     if moving_joint == 3:
@@ -140,40 +148,52 @@ def get_raising_cmd():
     return "done"
 
 def run_node():
-    global claw_is_open, state
-    pub1 = rospy.Publisher('/arm_cmds', String, queue_size=10)
-    rospy.Subscriber("/joint1/angle", Float32, angle1callback)
-    rospy.Subscriber("/joint2/angle", Float32, angle2callback)
-    rospy.Subscriber("/joint3/angle", Float32, angle3callback)
-    rospy.init_node('arm_feedback_node', anonymous=True)
-    rate = rospy.Rate(1)
+    global claw_is_open, angle1ready, angle2ready, angle3ready, should_pick_up_ball, done_picking_up_ball, state
+
+
     while not rospy.is_shutdown():
         if not (angle1ready and angle2ready and angle3ready):
             continue
-        if state == "lowering":
-            next_cmd = str(get_lowering_cmd())
-            if next_cmd == "done":
-                state = "raising"
-                continue
-            pub1.publish(next_cmd)
-            rate.sleep()
-            continue
-        if state == 'raising':
-            next_cmd = str(get_raising_cmd())
-            if next_cmd == "done":
-                state = "idle"
-                continue
-            pub1.publish(next_cmd)
-            rate.sleep()
-            continue
-        else:
-            rate.sleep()
+        if should_pick_up_ball and done_picking_up_ball:
+            state = "lowering"
+            done_picking_up_ball = False
+        run_arm_macro()
+
+def run_arm_macro():
+    global claw_is_open, state, done_picking_up_ball, pub1, should_pick_up_ball
+
+    rate = rospy.Rate(1)
+    if state == "lowering":
+        next_cmd = str(get_lowering_cmd())
+        if next_cmd == "done":
+            state = "raising"
+            return
+        pub1.publish(next_cmd)
+        rate.sleep()
+        return
+    elif state == 'raising':
+        next_cmd = str(get_raising_cmd())
+        if next_cmd == "done":
+            state = "idle"
+            done_picking_up_ball = True
+            should_pick_up_ball = False
+            return
+        pub1.publish(next_cmd)
+        rate.sleep()
+    else:
+        rate.sleep()
 
 
 
 
 
 try:
+    pub1 = rospy.Publisher('/arm_cmds', String, queue_size=10)
+    rospy.Subscriber("/joint1/angle", Float32, angle1callback)
+    rospy.Subscriber("/joint2/angle", Float32, angle2callback)
+    rospy.Subscriber("/joint3/angle", Float32, angle3callback)
+    rospy.Subscriber("/should_pick_up_ball", String, should_pick_up_ball_callback)
+    rospy.init_node('arm_feedback_node', anonymous=True)
     run_node()
 except rospy.ROSInterruptException:
     pass

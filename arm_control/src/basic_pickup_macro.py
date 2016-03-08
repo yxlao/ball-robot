@@ -33,15 +33,14 @@ cmd_queue = ['w', 'w', 'w', 'c', 's', 's', 's', 'o']
 
 def talker():
     pub = rospy.Publisher('arm_cmds', String, queue_size=10)
+    arm_macro_command_pub = rospy.Publisher('should_pick_up_ball', String, queue_size = 3)
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(1) # 10hz
     while not rospy.is_shutdown():
         hello_str = getch()
         print hello_str
         if hello_str=='1':
-          for cmd in cmd_queue:
-            pub.publish(cmd)
-            rate.sleep()
+          arm_macro_command_pub.publish("true")
         else:
         # hello_str = "forward"
           rospy.loginfo(hello_str)
