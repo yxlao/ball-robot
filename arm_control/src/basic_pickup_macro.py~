@@ -40,7 +40,7 @@ def talker():
         hello_str = getch()
         print hello_str
         if hello_str=='1':
-          arm_macro_command_pub.publish("true")
+          arm_macro_command_pub.publish('true')
         else:
         # hello_str = "forward"
           rospy.loginfo(hello_str)
