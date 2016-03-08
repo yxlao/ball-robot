@@ -10,12 +10,15 @@ from irobotcreate2.msg import Bumper
 from std_msgs.msg import String
 
 
-import sys, select, termios, tty
+import sys
+import select
+import termios
+import tty
 import random
 
 FAST_TURN_SPEED = 0.5
 SLOW_TURN_SPEED = 0.1
-FAST_DRIVE_SPEED= 0.2
+FAST_DRIVE_SPEED = 0.2
 SLOW_DRIVE_SPEED = 0.1
 state = "stop"
 twist_msg = Twist()
@@ -49,11 +52,11 @@ avoid_state = "stop"
 rospy.init_node("create_state_machine", anonymous=True)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 last_command = "stop"
-rate1 = rospy.Rate(1.0) # 1 sec
-rate2 = rospy.Rate(2.0) #0.5 sec
+rate1 = rospy.Rate(1.0)  # 1 sec
+rate2 = rospy.Rate(2.0)  # 0.5 sec
 
 
-def drive(speed = FAST_DRIVE_SPEED):
+def drive(speed=FAST_DRIVE_SPEED):
     global last_command, command_start_time
     forward_msg = twist_msg
     forward_msg.linear.x = speed
@@ -62,10 +65,11 @@ def drive(speed = FAST_DRIVE_SPEED):
     command_start_time = rospy.get_time()
     twist_msg.linear.x = 0.0
 
-def back_up(speed = FAST_DRIVE_SPEED):
+
+def back_up(speed=FAST_DRIVE_SPEED):
     global avoid_state, back_obstructed, last_command, state, command_start_time
     back_msg = twist_msg
-    back_msg.linear.x = -1*speed
+    back_msg.linear.x = -1 * speed
     if back_obstructed:
         avoid_state = "turn_left"
         state = "avoid"
@@ -73,6 +77,7 @@ def back_up(speed = FAST_DRIVE_SPEED):
     last_command = "back"
     command_start_time = rospy.get_time()
     twist_msg.linear.x = 0.0
+
 
 def turn_left(speed=FAST_TURN_SPEED):
     global last_command, command_start_time
@@ -83,14 +88,16 @@ def turn_left(speed=FAST_TURN_SPEED):
     command_start_time = rospy.get_time()
     twist_msg.angular.z = 0.0
 
+
 def turn_right(speed=FAST_TURN_SPEED):
     global last_command, command_start_time
     right_msg = twist_msg
-    right_msg.angular.z = -1*speed
+    right_msg.angular.z = -1 * speed
     pub.publish(right_msg)
     last_command = "turn_right"
     command_start_time = rospy.get_time()
     twist_msg.angular.z = 0.0
+
 
 def stop():
     global last_command, command_start_time
@@ -98,20 +105,21 @@ def stop():
     last_command = "stop"
     command_start_time = rospy.get_time()
 
+
 def explore():
     global last_command, explore_duration, explore_state, command_start_time
     if last_command == "explore":
         turn_right()
-        explore_duration = random.random()*8
+        explore_duration = random.random() * 8
         explore_state = "explore_turn"
     elif rospy.get_time() > command_start_time + explore_duration:
         if explore_state == "explore_turn":
             drive()
-            explore_duration = random.random()*8
+            explore_duration = random.random() * 8
             explore_state = "explore_drive"
         else:
             turn_right()
-            explore_duration = random.random()*8
+            explore_duration = random.random() * 8
             explore_state = "explore_turn"
 
 
@@ -129,8 +137,9 @@ def fine_position():
             turn_right(speed=SLOW_TURN_SPEED)
     else:
             time_since_ball_in_center = rospy.get_time()
-            turn_left(speed = SLOW_TURN_SPEED)
+            turn_left(speed=SLOW_TURN_SPEED)
     command_start_time = rospy.get_time()
+
 
 def avoid():
     global avoid_state, done_avoiding_obstacle, state, last_command
@@ -158,8 +167,6 @@ def avoid():
             done_avoiding_obstacle = True
 
 
-
-
 def ir_bumper_callback(msg):
     global done_avoiding_obstacle, state, last_command
     if msg.state and done_avoiding_obstacle:
@@ -175,11 +182,11 @@ def ball_in_sight_callback(msg):
             ball_in_sight = False
             ball_in_sight_changed = True
     elif msg.data == "true":
-    if (not lower_cam_ball_in_sight) and done_avoiding_obstacle :
+    if (not lower_cam_ball_in_sight) and done_avoiding_obstacle:
             state = "find_ball"
         if ball_in_sight == True:
             a = 1
-            #do nothing
+            # do nothing
         else:
             ball_in_sight = True
             ball_in_sight_changed = True
@@ -193,7 +200,7 @@ def lower_cam_ball_in_sight_callback(msg):
     elif msg.data == "true":
         if lower_cam_ball_in_sight == True:
             a = 1
-            #do nothing
+            # do nothing
         else:
             if state == "avoid":
                 return

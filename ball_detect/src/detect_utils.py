@@ -10,7 +10,7 @@ import sys
 
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
 
-# # new default values
+# new default values
 # orange_hsv_lows = (6, 93, 149)
 # orange_hsv_highs = (15, 175, 255)
 # green_hsv_lows = (46, 115, 96)
@@ -37,6 +37,7 @@ green_hsv_highs = (52, 208, 124)
 orange_hsv_lows = (6, 164, 81)
 orange_hsv_highs = (10, 199, 172)
 
+
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
@@ -46,6 +47,7 @@ def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
     # dilate
     im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
+
 
 def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False):
     # find contours
@@ -75,25 +77,25 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
 
     if supress_sv:
         pass
-        # # elimate v that are smaller than global mean
+        # elimate v that are smaller than global mean
         # v_mean = np.mean(im_hsv[:, :, 2])
         # centers_new = []
         # radiuses_new = []
         # im_mean_mask = np.zeros(im_hsv.shape[:2]).astype(np.uint8)
         # for center, radius in zip(centers, radiuses):
-        #     # reset
+        # reset
         #     im_mean_mask[:] = 0
-        #     # mask to "1" at the ball location
+        # mask to "1" at the ball location
         #     cv2.circle(im_mean_mask, center, radius, color=1, thickness=-1)
-        #     # area
+        # area
         #     area = np.sum(im_mean_mask)
-        #     # get mean, element wise product
+        # get mean, element wise product
         #     im_mean_mask = im_mean_mask * im_hsv[:, :, 2]
         #     v_mean_local = np.sum(im_mean_mask) / float(area)
         #     if v_mean_local >= v_mean * 1:
         #         centers_new.append(center)
         #         radiuses_new.append(radius)
-        # # print len(radiuses), len(radiuses_new)
+        # print len(radiuses), len(radiuses_new)
         # centers = centers_new
         # radiuses = radiuses_new
 
@@ -129,6 +131,7 @@ def plot_center_radius(im, centers, radiuses, color="orange"):
                 cv2.circle(im, center, radius, (255, 255, 255), 2)
     return im
 
+
 def get_ball_coordinate(center0, center1, radius0, radius1):
     """
     x: horizontal
@@ -162,6 +165,7 @@ def get_ball_coordinate(center0, center1, radius0, radius1):
     y = y * 0.3
     z = z / 100.
     return (x, y, z)
+
 
 def get_ball_coordinates(center, radius):
     x = center[0] - 160.0
@@ -202,7 +206,7 @@ if __name__ == '__main__':
             np.save(save_name, im_bgr)
             print save_name
 
-        im_bgr = cv2.GaussianBlur(im_bgr,(5,5),0)
+        im_bgr = cv2.GaussianBlur(im_bgr, (5, 5), 0)
 
         # convert to hsv
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)

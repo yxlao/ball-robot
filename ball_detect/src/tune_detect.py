@@ -25,6 +25,7 @@ hsv_samples = []
 im_hsv = None
 im_bgr = None
 
+
 def append_sample(event, x, y, flags, param):
     global hsv_samples, im_hsv, im_bgr
     if event == cv2.EVENT_LBUTTONUP:
@@ -50,20 +51,20 @@ def hsv_threshold_from_sample(hsv_samples):
     samples = np.array(hsv_samples)
 
     if len(samples) == 0:
-        return ((0,0,0), (0,0,0))
+        return ((0, 0, 0), (0, 0, 0))
     else:
-        return (tuple(np.min(samples, axis = 0).astype(int)),
-                tuple(np.max(samples, axis = 0).astype(int)))
+        return (tuple(np.min(samples, axis=0).astype(int)),
+                tuple(np.max(samples, axis=0).astype(int)))
 
 
 def hsv_to_im_mask_plot_intermediate(im_hsv, hsv_lows, hsv_highs):
-    im_hsv = cv2.GaussianBlur(im_hsv,(5,5),0)
+    im_hsv = cv2.GaussianBlur(im_hsv, (5, 5), 0)
     # mask by threshold
     im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
     cv2.imshow('inrange', im_mask)
     im_mask = cv2.medianBlur(im_mask, 5)
     cv2.imshow('medianBlur', im_mask)
-    # # erode
+    # erode
     # im_mask = cv2.erode(im_mask, None, iterations=1)
     # cv2.imshow('erode', im_mask)
     # dilate

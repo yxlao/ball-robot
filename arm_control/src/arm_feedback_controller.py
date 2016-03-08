@@ -19,7 +19,7 @@ claw_is_open = True
 state = "idle"
 moving_joint = 0
 
-#lowering
+# lowering
 angle1above = -74
 angle1below = -83
 angle2above = 9
@@ -27,7 +27,7 @@ angle2below = -1
 angle3above = -10
 angle3below = -20
 
-#raising
+# raising
 raising_angle1above = -10
 raising_angle1below = -20
 raising_angle2above = 40
@@ -35,50 +35,58 @@ raising_angle2below = 20
 raising_angle3above = -10
 raising_angle3below = -20
 
+
 def angle1callback(msg):
     global angle1, angle1ready
     angle1 = msg.data
     angle1ready = True
+
 
 def angle2callback(msg):
     global angle2, angle2ready
     angle2 = msg.data
     angle2ready = True
 
+
 def angle3callback(msg):
     global angle3, angle3ready
     angle3 = msg.data
     angle3ready = True
 
+
 def should_pick_up_ball_callback(msg):
     global should_pick_up_ball
     if msg.data == "true":
-      should_pick_up_ball = True
+        should_pick_up_ball = True
 
 
 def getch():
-  fd = sys.stdin.fileno()
+    fd = sys.stdin.fileno()
 
-  oldterm = termios.tcgetattr(fd)
-  newattr = termios.tcgetattr(fd)
-  newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
-  termios.tcsetattr(fd, termios.TCSANOW, newattr)
+    oldterm = termios.tcgetattr(fd)
+    newattr = termios.tcgetattr(fd)
+    newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+    termios.tcsetattr(fd, termios.TCSANOW, newattr)
 
-  oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
-  fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+    oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
-  try:
-    while 1:
-      try:
-        c = sys.stdin.read(1)
-        break
-      except IOError: pass
-  finally:
-    termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
-    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
-  return c
+    try:
+        while 1:
+            try:
+                c = sys.stdin.read(1)
+                break
+            except IOError:
+                pass
+    finally:
+        termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
+        fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+    return c
+
+
 def run_state_machine():
     a = 1
+
 
 def get_lowering_cmd():
     global claw_is_open, moving_joint
@@ -113,6 +121,8 @@ def get_lowering_cmd():
         claw_is_open = False
         return 'c'
     return "done"
+
+
 def get_raising_cmd():
     global claw_is_open, moving_joint
     if float(angle1) > raising_angle1above:
@@ -147,9 +157,9 @@ def get_raising_cmd():
         return 'o'
     return "done"
 
+
 def run_node():
     global claw_is_open, angle1ready, angle2ready, angle3ready, should_pick_up_ball, done_picking_up_ball, state
-
 
     while not rospy.is_shutdown():
         if not (angle1ready and angle2ready and angle3ready):
@@ -158,6 +168,7 @@ def run_node():
             state = "lowering"
             done_picking_up_ball = False
         run_arm_macro()
+
 
 def run_arm_macro():
     global claw_is_open, state, done_picking_up_ball, pub1, should_pick_up_ball
@@ -182,9 +193,6 @@ def run_arm_macro():
         rate.sleep()
     else:
         rate.sleep()
-
-
-
 
 
 try:

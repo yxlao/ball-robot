@@ -34,6 +34,7 @@ def left_image_callback(msg):
     left_ready = True
     left_img = bridge.imgmsg_to_cv2(msg, desired_encoding="bgr8")
 
+
 def right_image_callback(msg):
     global right_img, right_ready
     right_ready = True
@@ -52,8 +53,10 @@ disparity_pub = rospy.Publisher('/stereo/my_disparity', Image, queue_size=10)
 ball_coord_pub = rospy.Publisher('/ball_coords', Vector3, queue_size=10)
 state_cmd_pub = rospy.Publisher('/state_cmds', String, queue_size=10)
 ball_in_sight_pub = rospy.Publisher('/is_ball_in_sight', String, queue_size=10)
-lower_cam_ball_in_sight_pub = rospy.Publisher('lower_cam_is_ball_in_sight', String, queue_size=10)
-lower_cam_ball_coord_pub = rospy.Publisher('lower_cam_ball_coords', Vector3, queue_size=10)
+lower_cam_ball_in_sight_pub = rospy.Publisher(
+    'lower_cam_is_ball_in_sight', String, queue_size=10)
+lower_cam_ball_coord_pub = rospy.Publisher(
+    'lower_cam_ball_coords', Vector3, queue_size=10)
 tf_broadcaster = tf.TransformBroadcaster()
 
 # init node
@@ -77,15 +80,17 @@ while not rospy.is_shutdown():
         continue
     if left_ready:
         im_hsv = cv2.cvtColor(left_img, cv2.COLOR_BGR2HSV)
-        left_centers, left_radiuses = hsv_to_center_radius(im_hsv, orange_hsv_lows, orange_hsv_highs)
-        left_img = plot_center_radius(left_img, left_centers, left_radiuses, color="orange")
+        left_centers, left_radiuses = hsv_to_center_radius(
+            im_hsv, orange_hsv_lows, orange_hsv_highs)
+        left_img = plot_center_radius(
+            left_img, left_centers, left_radiuses, color="orange")
         left_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(left_img, "bgr8"))
         #left_green_centers, left_green_rediuses = hsv_to_center_radius(left_img, green_hsv_lows, green_hsv_highs)
 
-
     if right_ready:
         im_hsv_right = cv2.cvtColor(right_img, cv2.COLOR_BGR2HSV)
-        right_centers, right_radiuses = hsv_to_center_radius(im_hsv_right, orange_hsv_lows, orange_hsv_highs)
+        right_centers, right_radiuses = hsv_to_center_radius(
+            im_hsv_right, orange_hsv_lows, orange_hsv_highs)
         right_img = plot_center_radius(right_img, right_centers, right_radiuses)
         right_ball_visulize_pub.publish(bridge.cv2_to_imgmsg(right_img, "bgr8"))
 
@@ -96,8 +101,8 @@ while not rospy.is_shutdown():
     global last_command
     # only use the first detected ball
     if len(left_centers) > 0:
-        lc = [x for (y,x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
-        lr = [y for (y,x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
+        lc = [x for (y, x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
+        lr = [y for (y, x) in reversed(sorted(zip(left_radiuses, left_centers)))][0]
 
         #rc = [x for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
         #rr = [y for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
@@ -106,7 +111,7 @@ while not rospy.is_shutdown():
         # x, y, z = get_ball_coordinate(left_centers[0], right_centers[0],
         #                               left_radiuses[0], right_radiuses[0])
         #x, y, z = get_ball_coordinate(lc, rc, lr, rr)
-        x,y,z = get_ball_coordinates(lc, lr)
+        x, y, z = get_ball_coordinates(lc, lr)
         ball_coords.x = x
         ball_coords.y = y
         ball_coords.z = z
@@ -123,14 +128,14 @@ while not rospy.is_shutdown():
         lower_cam_ball_in_sight_pub.publish("false")
     if len(right_centers) > 0:
 
-        rc = [x for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
-        rr = [y for (y,x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
+        rc = [x for (y, x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
+        rr = [y for (y, x) in reversed(sorted(zip(right_radiuses, right_centers)))][0]
 
         # get location
         # x, y, z = get_ball_coordinate(left_centers[0], right_centers[0],
         #                               left_radiuses[0], right_radiuses[0])
         #x, y, z = get_ball_coordinate(lc, rc, lr, rr)
-        x,y,z = get_ball_coordinates(rc, rr)
+        x, y, z = get_ball_coordinates(rc, rr)
         ball_coords.x = x
         ball_coords.y = y
         ball_coords.z = z
@@ -145,6 +150,5 @@ while not rospy.is_shutdown():
         ball_coord_pub.publish(ball_coords)
     else:
         ball_in_sight_pub.publish("false")
-
 
     time.sleep(0.1)
