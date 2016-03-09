@@ -54,6 +54,7 @@ avoid_state = "stop"
 rospy.init_node("create_state_machine", anonymous=True)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
 pick_up_pub = rospy.Publisher('/should_pick_up_ball', String, queue_size=3)
+
 last_command = "stop"
 rate1 = rospy.Rate(1.0)  # 1 sec
 rate2 = rospy.Rate(2.0)  # 0.5 sec
@@ -108,6 +109,17 @@ def stop():
     last_command = "stop"
     command_start_time = rospy.get_time()
 
+def fine_right_turn():
+    turn_right(speed=SLOW_TURN_SPEED)
+    rate1.sleep()
+    stop()
+
+def fine_left_turn():
+    turn_left(speed=SLOW_TURN_SPEED)
+    rate1.sleep()
+    stop()
+    rate1.sleep()
+
 
 def explore():
     global last_command, explore_duration, explore_state, command_start_time
@@ -138,10 +150,10 @@ def fine_position():
                     drive(speed=SLOW_DRIVE_SPEED)
     elif lower_cam_ball_coords. x >= 0.5:
             time_since_ball_in_center = rospy.get_time()
-            turn_right(speed=SLOW_TURN_SPEED)
+            fine_turn_right()
     else:
             time_since_ball_in_center = rospy.get_time()
-            turn_left(speed=SLOW_TURN_SPEED)
+            fine_turn_left()
     command_start_time = rospy.get_time()
 
 def avoid():
@@ -284,6 +296,8 @@ def state_change_callback(data):
         last_command = "fine_position"
     elif data.data == "p":
         state= "pick_up"
+    elif data.data == "b":
+        state="find_bucket"
     else:
         stop()
         state = "stop"
@@ -322,6 +336,8 @@ def run_state_machine():
             last_command = "explore"
         else:
             fine_position()
+    elif state == "find_bucket":
+        stop()
 
 
 
