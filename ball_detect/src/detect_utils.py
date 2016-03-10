@@ -52,6 +52,12 @@ green_hsv_highs = (56, 179, 239)
 orange_hsv_lows = (7, 131, 194)
 orange_hsv_highs = (10, 165, 255)
 
+# arm camera
+# orange_hsv_lows = (7, 128, 185)
+# orange_hsv_highs = (10, 168, 255)
+# green_hsv_lows = (39, 121, 142)
+# green_hsv_highs = (52, 178, 246)
+
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False):
     if is_bucket:
