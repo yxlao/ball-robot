@@ -52,8 +52,10 @@ right_ball_visulize_pub = rospy.Publisher('/stereo/right/ball_visulize',
                                           Image, queue_size=10)
 disparity_pub = rospy.Publisher('/stereo/my_disparity', Image, queue_size=10)
 ball_coord_pub = rospy.Publisher('/ball_coords', Vector3, queue_size=10)
+bucket_coord_pub = rospy.Publisher('/bucket_coords', Vector3, queue_size=5)
 state_cmd_pub = rospy.Publisher('/state_cmds', String, queue_size=10)
 ball_in_sight_pub = rospy.Publisher('/is_ball_in_sight', String, queue_size=10)
+bucket_in_sight_pub = rospy.Publisher('/is_bucket_in_sight', String, queue_size=10)
 lower_cam_ball_in_sight_pub = rospy.Publisher(
     'lower_cam_is_ball_in_sight', String, queue_size=10)
 lower_cam_ball_coord_pub = rospy.Publisher(
@@ -74,6 +76,7 @@ def get_disparity_image(left_img, right_img):
 
     return disparity_img
 ball_coords = Vector3()
+bucket_coords = Vector3()
 while not rospy.is_shutdown():
     # rospy.spinOnce()
     if not (left_ready and right_ready):
@@ -175,7 +178,16 @@ while not rospy.is_shutdown():
         #print(x, y, z)
         ball_in_sight_pub.publish("true")
         ball_coord_pub.publish(ball_coords)
+
     else:
         ball_in_sight_pub.publish("false")
+    if right_targets['bucket'] != None:
+        bucket_coords.x = float(right_targets['bucket']['x'] - 160.0) /100
+        bucket_coords.z = float(right_targets['bucket']['y'] - 120.0) /100
+        bucket_coords.y = 30. / right_targets['bucket']['size']
+        bucket_coord_pub.publish(bucket_coords)
+        bucket_in_sight_pub.publish("true")
+    else:
+        bucket_in_sight_pub.publish("false")
 
     time.sleep(0.1)

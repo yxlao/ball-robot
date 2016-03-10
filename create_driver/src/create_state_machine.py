@@ -31,6 +31,7 @@ twist_msg.angular.z = 0.0
 ball_in_sight = False
 lower_cam_ball_in_sight = False
 ball_in_sight_changed = False
+bucket_in_sight = False
 lower_cam_ball_in_sight_changed = False
 done_avoiding_obstacle = True
 back_obstructed = False
@@ -42,6 +43,11 @@ lower_cam_ball_coords = Vector3()
 lower_cam_ball_coords.x = 0
 lower_cam_ball_coords.y = 0
 lower_cam_ball_coords.z = 0
+
+bucket_coords = Vector3()
+bucket_coords.x = 0
+bucket_coords.y = 0
+bucket_coords.z = 0
 
 command_start_time = 0.0
 explore_duration = 5.0
@@ -111,14 +117,15 @@ def stop():
 
 def fine_right_turn():
     turn_right(speed=SLOW_TURN_SPEED)
-    rate1.sleep()
+    rate2.sleep()
     stop()
+    rate2.sleep()
 
 def fine_left_turn():
     turn_left(speed=SLOW_TURN_SPEED)
-    rate1.sleep()
+    rate2.sleep()
     stop()
-    rate1.sleep()
+    rate2.sleep()
 
 
 def explore():
@@ -150,10 +157,10 @@ def fine_position():
                     drive(speed=SLOW_DRIVE_SPEED)
     elif lower_cam_ball_coords. x >= 0.5:
             time_since_ball_in_center = rospy.get_time()
-            fine_turn_right()
+            fine_right_turn()
     else:
             time_since_ball_in_center = rospy.get_time()
-            fine_turn_left()
+            fine_left_turn()
     command_start_time = rospy.get_time()
 
 def avoid():
@@ -253,6 +260,13 @@ def lower_cam_ball_in_sight_callback(msg):
             lower_cam_ball_in_sight = True
             lower_cam_ball_in_sight_changed = True
 
+def bucket_in_sight_callback(msg):
+    global bucket_in_sight, state
+    if msg.data == "true":
+        bucket_in_sight = True
+    else:
+        bucket_in_sight = False
+
 def ball_coords_callback(msg):
     global ball_coords
     ball_coords.x = msg.x
@@ -260,10 +274,16 @@ def ball_coords_callback(msg):
     ball_coords.z = msg.z
 
 def lower_cam_ball_coords_callback(msg):
-    global lower_cam_ball_coords_callback
+    global lower_cam_ball_coords
     lower_cam_ball_coords.x = msg.x
     lower_cam_ball_coords.y = msg.y
     lower_cam_ball_coords.z = msg.z
+
+def bucket_coords_callback(msg):
+    global bucket_coords
+    bucket_coords.x = msg.x
+    bucket_coords.y = msg.y
+    bucket_coords.z = msg.z
 
 
 
@@ -337,7 +357,12 @@ def run_state_machine():
         else:
             fine_position()
     elif state == "find_bucket":
-        stop()
+        if bucket_in_sight:
+            if last_command != "drive":
+                drive()
+        else:
+            if last_command != "turn_right":
+                turn_right()
 
 
 
