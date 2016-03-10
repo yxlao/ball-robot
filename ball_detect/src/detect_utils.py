@@ -32,13 +32,28 @@ white_color = (255, 255, 255)
 # [current low] (6, 93, 149)
 # [current high] (15, 175, 255)
 
+# green ball (1f)
+green_hsv_lows = (44, 125, 134)
+green_hsv_highs = (56, 179, 239)
+
+# orange ball (1f)
+orange_hsv_lows = (7, 131, 194)
+orange_hsv_highs = (10, 165, 255)
+
 # green bll (3f white desk)
 green_hsv_lows = (35, 144, 85)
 green_hsv_highs = (49, 193, 151)
 
+# # orange bll (3f white desk)
+# orange_hsv_lows = (7, 144, 112)
+# orange_hsv_highs = (11, 198, 181)
+#
+# # bucket
+# bucket_hsv_lows = (78, 7, 70)
+# bucket_hsv_highs = (120, 47, 86)
 # orange bll (3f white desk)
-orange_hsv_lows = (7, 144, 112)
-orange_hsv_highs = (11, 198, 181)
+#orange_hsv_lows = (7, 144, 112)
+#orange_hsv_highs = (11, 198, 181)
 
 # bucket (3f)
 bucket_hsv_lows = (78, 7, 70)
@@ -281,18 +296,18 @@ def hsv_to_targets(im_hsv):
         orange_dict = None
 
     bucket_dict = hsv_to_bucket_target(im_hsv, hsv_lows=bucket_hsv_lows, hsv_highs=bucket_hsv_highs)
-    # bucket_centers, bucket_radiuses = hsv_to_ball_center_radius(im_hsv,
-    #                                                             hsv_lows=bucket_hsv_lows,
-    #                                                             hsv_highs=bucket_hsv_highs)
-    # if len(bucket_radiuses) > 0:
-    #     bucket_centers = [c for (r, c) in sorted(zip(bucket_radiuses, bucket_centers),
-    #                                              reverse=True)]
-    #     bucket_radiuses = sorted(bucket_radiuses, reverse=True)
-    #     bucket_dict = {'x': bucket_centers[0][0],
-    #                    'y': bucket_centers[0][1],
-    #                    'size': bucket_radiuses[0]}
-    # else:
-    #     bucket_dict = None
+    bucket_centers, bucket_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                hsv_lows=bucket_hsv_lows,
+                                                                hsv_highs=bucket_hsv_highs)
+    if len(bucket_radiuses) > 0:
+        bucket_centers = [c for (r, c) in sorted(zip(bucket_radiuses, bucket_centers),
+                                                 reverse=True)]
+        bucket_radiuses = sorted(bucket_radiuses, reverse=True)
+        bucket_dict = {'x': bucket_centers[0][0],
+                       'y': bucket_centers[0][1],
+                       'size': bucket_radiuses[0]}
+    else:
+        bucket_dict = None
 
     return {'green': green_dict, 'orange': orange_dict, 'bucket': bucket_dict}
 

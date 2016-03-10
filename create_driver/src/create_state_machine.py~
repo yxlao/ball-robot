@@ -357,12 +357,7 @@ def run_state_machine():
         else:
             fine_position()
     elif state == "find_bucket":
-        if bucket_in_sight:
-            if last_command != "drive":
-                drive()
-        else:
-            if last_command != "turn_right":
-                turn_right()
+        stop()
 
 
 
