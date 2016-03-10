@@ -18,7 +18,7 @@ The driver code for assignment 4 can be found in the irobotcreate2ros directory
 $ sudo dd bs=4M if=/dev/sdb | gzip > lubuntu_feb_18.img.gz
 $ watch -n5 sudo pkill -usr1 dd
 # to restore
-sudo gunzip --stdout lubuntu_feb_18.img.gz | sudo dd bs=4M of=/dev/sdb
+gunzip --stdout lubuntu_feb_18.img.gz | sudo dd bs=4M of=/dev/sdb
 ```
 
 
