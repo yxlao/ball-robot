@@ -266,12 +266,16 @@ def plot_targets(im, targets):
         y = targets['bucket']['y']
         w = targets['bucket']['w']
         h = targets['bucket']['h']
+        d = targets['bucket']['d']
         half_w = int(w / 2)
         half_h = int(h / 2)
         cv2.rectangle(im,
                       (x - half_w, y - half_h),
                       (x + half_w, y + half_h),
                       (0, 255, 0), 2)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(im, '%.2f' % d,
+                    (x,y), font, 0.5, (255,255,255), 1)
         # cv2.line(im,
         #          (targets['bucket']['x'] - targets['bucket']
         #           ['size'], targets['bucket']['y']),
