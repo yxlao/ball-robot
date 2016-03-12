@@ -1,5 +1,5 @@
 <launch>
-    
+
     <!--<node name="arduino_cmd_sender" pkg="hw2" type="arm_cmd_send.py"/> -->
 
     <node name="arduino_rosserial" pkg="rosserial_python" type="serial_node.py" >
@@ -10,5 +10,7 @@
         <param name="~port" value="/dev/ttyACM1" />
         <param name="~baud" value="57600" />
     </node>
-    
+    <node name="arm_feedback_controller" pkg="arm_control" type="arm_feedback_controller.py"> </node>
+
+
 </launch>

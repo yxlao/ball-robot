@@ -14,26 +14,27 @@ angle1ready = False
 angle2ready = False
 angle3ready = False
 should_pick_up_ball = False
+should_stop_lowering = False
 done_picking_up_ball = True
 claw_is_open = True
 state = "idle"
 moving_joint = 0
 
 # lowering
-angle1above = -74
-angle1below = -83
+angle1above = -70
+angle1below = -79
 angle2above = 9
 angle2below = -1
-angle3above = -10
-angle3below = -20
+angle3above = -40
+angle3below = -50
 
 # raising
 raising_angle1above = -10
 raising_angle1below = -20
 raising_angle2above = 40
 raising_angle2below = 20
-raising_angle3above = -10
-raising_angle3below = -20
+raising_angle3above = -40
+raising_angle3below = -50
 
 
 def angle1callback(msg):
@@ -55,10 +56,18 @@ def angle3callback(msg):
 
 
 def should_pick_up_ball_callback(msg):
-    global should_pick_up_ball
+    global should_pick_up_ball, should_stop_lowering
     if msg.data == "true":
         should_pick_up_ball = True
+    elif msg.data == "false":
+        should_stop_lowering = True
 
+def should_drop_ball_callback(msg):
+    global pub1
+    if msg.data == "true":
+         pub1.publish('o')
+    elif msg.data == "false":
+         pub1.publish('c')
 
 def getch():
     fd = sys.stdin.fileno()
@@ -84,12 +93,11 @@ def getch():
     return c
 
 
-def run_state_machine():
-    a = 1
-
-
 def get_lowering_cmd():
-    global claw_is_open, moving_joint
+    global claw_is_open, moving_joint, should_stop_lowering
+    if should_stop_lowering:
+        should_stop_lowering = False
+        return "done"
     if float(angle1) > angle1above:
         moving_joint = 1
         return 's'
@@ -152,9 +160,7 @@ def get_raising_cmd():
     if moving_joint == 3:
         moving_joint = 0
         return 'x'
-    if not claw_is_open:
-        claw_is_open = True
-        return 'o'
+    claw_is_open = True #placeholder hack for now.
     return "done"
 
 
@@ -201,6 +207,7 @@ try:
     rospy.Subscriber("/joint2/angle", Float32, angle2callback)
     rospy.Subscriber("/joint3/angle", Float32, angle3callback)
     rospy.Subscriber("/should_pick_up_ball", String, should_pick_up_ball_callback)
+    rospy.Subscriber("/should_drop_ball", String, should_drop_ball_callback)
     rospy.init_node('arm_feedback_node', anonymous=True)
     run_node()
 except rospy.ROSInterruptException:
