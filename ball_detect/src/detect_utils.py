@@ -44,11 +44,11 @@ orange_hsv_highs = (10, 165, 255)
 green_hsv_lows = (35, 144, 85)
 green_hsv_highs = (49, 193, 151)
 
-# # orange bll (3f white desk)
+# orange bll (3f white desk)
 # orange_hsv_lows = (7, 144, 112)
 # orange_hsv_highs = (11, 198, 181)
 #
-# # bucket
+# bucket
 # bucket_hsv_lows = (78, 7, 70)
 # bucket_hsv_highs = (120, 47, 86)
 # orange bll (3f white desk)
@@ -176,7 +176,8 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
     cv2.imshow('bucket_mask', im_mask)
 
     # find countours
-    contours, hierarchy = cv2.findContours(im_mask,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(
+        im_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     print (len(contours))
 
     if len(contours) > 0:
@@ -269,7 +270,7 @@ def plot_targets(im, targets):
         cv2.rectangle(im,
                       (x - half_w, y - half_h),
                       (x + half_w, y + half_h),
-                      (0,255,0),2)
+                      (0, 255, 0), 2)
         # cv2.line(im,
         #          (targets['bucket']['x'] - targets['bucket']
         #           ['size'], targets['bucket']['y']),
@@ -345,16 +346,16 @@ if __name__ == '__main__':
 
         # get centers and radiuses
         green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
-                                                             hsv_lows=green_hsv_lows,
-                                                             hsv_highs=green_hsv_highs)
+                                                                  hsv_lows=green_hsv_lows,
+                                                                  hsv_highs=green_hsv_highs)
         # plot center and radius
         im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses,
                                     color="green")
 
         # get centers and radiuses
         orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
-                                                               hsv_lows=orange_hsv_lows,
-                                                               hsv_highs=orange_hsv_highs)
+                                                                    hsv_lows=orange_hsv_lows,
+                                                                    hsv_highs=orange_hsv_highs)
         # plot center and radius
         im_bgr = plot_center_radius(im_bgr, orange_centers, orange_radiuses,
                                     color="orange")
