@@ -199,12 +199,13 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
         # r = int(np.sqrt(areas[max_idx] / 3.14))
 
         x, y, w, h = cv2.boundingRect(cnt)
+        d = 10909.0 / h
         x = int(x + w / 2)
         y = int(y + h / 2)
         w = int(w)
-        h = int(h)
+        # print d
 
-        return {'x': x, 'y': y, 'w': w, 'h': h}
+        return {'x': x, 'y': y, 'w': w, 'h': h, 'd': d}
     else:
         return None
 
