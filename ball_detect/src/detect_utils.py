@@ -56,8 +56,8 @@ green_hsv_highs = (49, 193, 151)
 #orange_hsv_highs = (11, 198, 181)
 
 # bucket (3f)
-bucket_hsv_lows = (78, 7, 70)
-bucket_hsv_highs = (120, 47, 86)
+hsv_lows = (149, 47, 94)
+hsv_highs = (171, 90, 156)
 
 # green ball (1f)
 green_hsv_lows = (44, 125, 134)
