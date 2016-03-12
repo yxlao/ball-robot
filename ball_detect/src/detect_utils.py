@@ -273,9 +273,8 @@ def plot_targets(im, targets):
                       (x - half_w, y - half_h),
                       (x + half_w, y + half_h),
                       (0, 255, 0), 2)
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(im, '%.2f' % d,
-                    (x,y), font, 0.5, (255,255,255), 1)
+        cv2.putText(im, '%.2f' % d, (x,y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
         # cv2.line(im,
         #          (targets['bucket']['x'] - targets['bucket']
         #           ['size'], targets['bucket']['y']),
