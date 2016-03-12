@@ -19,10 +19,10 @@
 //#define MAX_DISTANCE 200 // Maximum distance we want to ping for (in centimeters). Maximum sensor distance is rated at 400-500cm.
 
 NewPing sonar(12, 11, 300); // NewPing setup of pins and maximum distance.
-NewPing front_sonar(8, 10, 300);
+NewPing front_sonar(10, 8, 300);
 
 // Create the motor shield object with the default I2C address
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
 // Or, create it with a different I2C address (say for stacking)
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
 
@@ -44,10 +44,10 @@ ros::Publisher front_ultrasonic_pub("front_ultrasonic", &ultrasonic_msg);
 
 
 //char hello[13] = "hello world!";
-char forward[8] = "forward";
-char back[5] = "back";
+char forward[4] = "fwd";
+char back[3] = "bk";
 unsigned int ultrasonic_dist;
-int MOTOR_SPEED= 70;
+int MOTOR_SPEED= 90;
 
 void callback(const std_msgs::String& msg){
   uint8_t i;
@@ -85,7 +85,7 @@ void callback(const std_msgs::String& msg){
     arm_cmd.data = forward;
     ////run the second motor
     myMotor->run(FORWARD);
-    myMotor->setSpeed(MOTOR_SPEED);
+    myMotor->setSpeed(150);
 //    delay(500);
 //    while (angle > a){
 ////      chatter.publish("%4.2f", angle); 
