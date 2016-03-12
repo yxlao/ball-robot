@@ -44,6 +44,8 @@ def talker():
         print hello_str
         if hello_str == '1':
             arm_macro_command_pub.publish("true")
+        elif hello_str == '2':
+            arm_macro_command_pub.publish("false")
         else:
             # hello_str = "forward"
             rospy.loginfo(hello_str)
