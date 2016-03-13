@@ -178,7 +178,7 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
     # find countours
     contours, hierarchy = cv2.findContours(
         im_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    print (len(contours))
+    # print (len(contours))
 
     if len(contours) > 0:
         # find countour with max area
@@ -236,31 +236,37 @@ def plot_targets(im, targets):
     """
     if targets['green'] is not None:
         cv2.line(im,
-                 (targets['green']['x'] - targets['green']
-                  ['size'], targets['green']['y']),
-                 (targets['green']['x'] + targets['green']
-                  ['size'], targets['green']['y']),
+                 (targets['green']['x'] - targets['green']['size'],
+                  targets['green']['y']),
+                 (targets['green']['x'] + targets['green']['size'],
+                  targets['green']['y']),
                  color=green_color, thickness=2)
         cv2.line(im,
-                 (targets['green']['x'], targets['green']
-                  ['y'] - targets['green']['size']),
-                 (targets['green']['x'], targets['green']
-                  ['y'] + targets['green']['size']),
+                 (targets['green']['x'],
+                  targets['green']['y'] - targets['green']['size']),
+                 (targets['green']['x'],
+                  targets['green']['y'] + targets['green']['size']),
                  color=green_color, thickness=2)
+        cv2.putText(im, '%.2f' % targets['green']['d'],
+                    (targets['green']['x'], targets['green']['y']),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
     if targets['orange'] is not None:
         cv2.line(im,
-                 (targets['orange']['x'] - targets['orange']
-                  ['size'], targets['orange']['y']),
-                 (targets['orange']['x'] + targets['orange']
-                  ['size'], targets['orange']['y']),
+                 (targets['orange']['x'] - targets['orange']['size'],
+                  targets['orange']['y']),
+                 (targets['orange']['x'] + targets['orange']['size'],
+                  targets['orange']['y']),
                  color=orange_color, thickness=2)
         cv2.line(im,
-                 (targets['orange']['x'], targets['orange']
-                  ['y'] - targets['orange']['size']),
-                 (targets['orange']['x'], targets['orange']
-                  ['y'] + targets['orange']['size']),
+                 (targets['orange']['x'],
+                  targets['orange']['y'] - targets['orange']['size']),
+                 (targets['orange']['x'],
+                  targets['orange']['y'] + targets['orange']['size']),
                  color=orange_color, thickness=2)
+        cv2.putText(im, '%.2f' % targets['orange']['d'],
+                    (targets['orange']['x'], targets['orange']['y']),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
 
     if targets['bucket'] is not None:
         x = targets['bucket']['x']
@@ -291,6 +297,13 @@ def plot_targets(im, targets):
 
     return im
 
+def ball_radius_to_dist(radius, im_height):
+    """
+    returns distance in centimeters
+    """
+    # print radius, im_height
+    return 2.5 / (radius / float(im_height))
+
 
 def hsv_to_targets(im_hsv):
     """
@@ -306,7 +319,8 @@ def hsv_to_targets(im_hsv):
         green_radiuses = sorted(green_radiuses, reverse=True)
         green_dict = {'x': green_centers[0][0],
                       'y': green_centers[0][1],
-                      'size': green_radiuses[0]}
+                      'size': green_radiuses[0],
+                      'd': ball_radius_to_dist(green_radiuses[0], im_hsv.shape[0])}
     else:
         green_dict = None
 
@@ -320,7 +334,8 @@ def hsv_to_targets(im_hsv):
         orange_radiuses = sorted(orange_radiuses, reverse=True)
         orange_dict = {'x': orange_centers[0][0],
                        'y': orange_centers[0][1],
-                       'size': orange_radiuses[0]}
+                       'size': orange_radiuses[0],
+                       'd': ball_radius_to_dist(orange_radiuses[0], im_hsv.shape[0])}
     else:
         orange_dict = None
 
