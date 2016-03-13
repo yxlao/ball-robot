@@ -7,7 +7,7 @@ from irobotcreate2.msg import Song
 from irobotcreate2.msg import Note
 from irobotcreate2.msg import RoombaIR
 from irobotcreate2.msg import Bumper
-from std_msgs.msg import String
+from std_msgs.msg import String, UInt8
 
 
 import sys
@@ -59,6 +59,7 @@ avoid_state = "stop"
 
 rospy.init_node("create_state_machine", anonymous=True)
 pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+should_drop_ball_pub = rospy.Publisher('/should_drop_ball', String, queue_size=3)
 pick_up_pub = rospy.Publisher('/should_pick_up_ball', String, queue_size=3)
 
 last_command = "stop"
@@ -260,6 +261,20 @@ def lower_cam_ball_in_sight_callback(msg):
             lower_cam_ball_in_sight = True
             lower_cam_ball_in_sight_changed = True
 
+def front_ultrasonic_callback(msg):
+    global state, should_drop_ball_pub
+    if msg.data != 0:
+        if msg.data < 40 and state == "find_bucket":
+            should_drop_ball_pub.publish("true")
+            state = "stop"
+
+def back_ultrasonic_callback(msg):
+    global state, back_obstructed
+    if msg.data < 20 and msg.data > 0:
+        back_obstructed = True
+    else:
+        back_obstructed = False
+
 def bucket_in_sight_callback(msg):
     global bucket_in_sight, state
     if msg.data == "true":
@@ -357,12 +372,13 @@ def run_state_machine():
         else:
             fine_position()
     elif state == "find_bucket":
-        if bucket_in_sight:
-            if last_command != "drive":
-                drive()
-        else:
-            if last_command != "turn_right":
-                turn_right()
+        stop()
+        #if bucket_in_sight:
+         #   if last_command != "drive":
+          #      drive()
+        #else:
+         #   if last_command != "turn_right":
+          #      turn_right()
 
 
 
@@ -377,6 +393,8 @@ rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
 rospy.Subscriber("/lower_cam_is_ball_in_sight", String, lower_cam_ball_in_sight_callback)
 rospy.Subscriber("/ball_coords", Vector3, ball_coords_callback)
 rospy.Subscriber("/lower_cam_ball_coords", Vector3, lower_cam_ball_coords_callback)
+rospy.Subscriber("/front_ultrasonic", UInt8, front_ultrasonic_callback)
+rospy.Subscriber("/back_ultrasonic", UInt8, back_ultrasonic_callback)
 try:
     while not rospy.is_shutdown():
         run_state_machine()
