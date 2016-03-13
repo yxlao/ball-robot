@@ -198,8 +198,9 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
         # y = int(M['m01']/M['m00'])
         # r = int(np.sqrt(areas[max_idx] / 3.14))
 
+        im_height = float(im_mask.shape[0])
         x, y, w, h = cv2.boundingRect(cnt)
-        d = 10909.0 / h
+        d = 22.72 / (h / im_height)
         x = int(x + w / 2)
         y = int(y + h / 2)
         w = int(w)
