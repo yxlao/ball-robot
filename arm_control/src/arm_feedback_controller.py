@@ -21,16 +21,16 @@ state = "idle"
 moving_joint = 0
 
 # lowering
-angle1above = -70
-angle1below = -79
+angle1above = -65
+angle1below = -74
 angle2above = 9
 angle2below = -1
 angle3above = -40
 angle3below = -50
 
 # raising
-raising_angle1above = -10
-raising_angle1below = -20
+raising_angle1above = 0
+raising_angle1below = -25
 raising_angle2above = 40
 raising_angle2below = 20
 raising_angle3above = -40
