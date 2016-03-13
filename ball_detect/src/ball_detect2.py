@@ -145,11 +145,11 @@ while not rospy.is_shutdown():
         if targets['orange'] != None:
             ball_coords.x = float(targets['orange']['x'] - 160.0) /100
             ball_coords.z = float(targets['orange']['y']- 120.0) /100
-            ball_coords.y = 30. / targets['orange']['size'] 
+            ball_coords.y = targets['orange']['d'] 
         elif targets['green'] != None:
             ball_coords.x = float(targets['green']['x'] - 160.0) / 100
             ball_coords.z = float(targets['green']['y'] - 120.0) /100
-            ball_coords.y = 30. / targets['green']['size']
+            ball_coords.y = targets['green']['d']
 
         # broadcast location
         tf_broadcaster.sendTransform((ball_coords.x, ball_coords.y, ball_coords.z),
@@ -163,11 +163,11 @@ while not rospy.is_shutdown():
         if right_targets['orange'] != None:
             ball_coords.x = float(right_targets['orange']['x'] - 160.0) / 100
             ball_coords.z = float(right_targets['orange']['y'] - 120.0) / 100
-            ball_coords.y = 30. / right_targets['orange']['size']
+            ball_coords.y = right_targets['orange']['d']
         elif right_targets['green'] != None:
             ball_coords.x = float(right_targets['green']['x'] - 160.0) /100
             ball_coords.z = float(right_targets['green']['y'] - 120.0) /100
-            ball_coords.y = 30. / right_targets['green']['size']
+            ball_coords.y = right_targets['green']['d']
 
 
         # broadcast location
@@ -184,7 +184,7 @@ while not rospy.is_shutdown():
     if right_targets['bucket'] != None:
         bucket_coords.x = float(right_targets['bucket']['x'] - 160.0) /100
         bucket_coords.z = float(right_targets['bucket']['y'] - 120.0) /100
-        bucket_coords.y = 30. / right_targets['bucket']['size']
+        bucket_coords.y = right_targets['bucket']['d']
         bucket_coord_pub.publish(bucket_coords)
         bucket_in_sight_pub.publish("true")
     else:
