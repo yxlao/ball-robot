@@ -10,5 +10,5 @@
      <param name="autosize" value="true" />
     </node>
 
-    <node pkg="ball_detect" name="arm_ball_detect" type="arm_ball_detect.py" />
+    <node pkg="ball_detect" name="arm_ball_detect" type="arm_ball_detect.py" output="screen"/>
 </launch>
