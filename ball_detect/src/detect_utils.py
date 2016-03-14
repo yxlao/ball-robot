@@ -37,12 +37,16 @@ green_hsv_lows = (39, 126, 78)
 green_hsv_highs = (46, 189, 248)
 
 # orange ball (1f)
-orange_hsv_lows = (3, 189, 139)
-orange_hsv_highs = (9, 237, 255)
+# orange_hsv_lows = (3, 189, 139)
+# orange_hsv_highs = (9, 237, 255)
+orange_hsv_lows = (0, 189, 139)
+orange_hsv_highs = (0, 237, 255)
 
 # green bll (3f white desk)
-green_hsv_lows = (35, 177, 89)
-green_hsv_highs = (38, 210, 131)
+# green_hsv_lows = (35, 177, 89)
+# green_hsv_highs = (38, 210, 131)
+green_hsv_lows = (43, 141, 117)
+green_hsv_highs = (52, 179, 173)
 
 # orange bll (3f white desk)
 # orange_hsv_lows = (7, 144, 112)
@@ -56,8 +60,10 @@ green_hsv_highs = (38, 210, 131)
 #orange_hsv_highs = (11, 198, 181)
 
 # bucket (3f)
-bucket_hsv_lows = (149, 47, 94)
-bucket_hsv_highs = (171, 90, 156)
+# bucket_hsv_lows = (149, 47, 94)
+# bucket_hsv_highs = (171, 90, 156)
+bucket_hsv_lows = (133, 33, 93)
+bucket_hsv_highs = (166, 63, 127)
 
 # green ball (1f)
 #green_hsv_lows = (44, 125, 134)
@@ -305,7 +311,13 @@ def ball_radius_to_dist(radius, im_height):
     return 2.5 / (radius / float(im_height))
 
 
-def hsv_to_targets(im_hsv):
+def hsv_to_targets(im_hsv,
+                   green_hsv_lows=green_hsv_lows,
+                   green_hsv_highs=green_hsv_highs,
+                   orange_hsv_lows=orange_hsv_lows,
+                   orange_hsv_highs=orange_hsv_highs,
+                   bucket_hsv_lows=bucket_hsv_lows,
+                   bucket_hsv_highs=bucket_hsv_highs):
     """
     hsv_lows, hsv_highs and everything else use default setting for now
     """
