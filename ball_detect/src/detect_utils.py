@@ -311,7 +311,13 @@ def ball_radius_to_dist(radius, im_height):
     return 2.5 / (radius / float(im_height))
 
 
-def hsv_to_targets(im_hsv):
+def hsv_to_targets(im_hsv,
+                   green_hsv_lows=green_hsv_lows,
+                   green_hsv_highs=green_hsv_highs,
+                   orange_hsv_lows=orange_hsv_lows,
+                   orange_hsv_highs=orange_hsv_highs,
+                   bucket_hsv_lows=bucket_hsv_lows,
+                   bucket_hsv_highs=bucket_hsv_highs):
     """
     hsv_lows, hsv_highs and everything else use default setting for now
     """
