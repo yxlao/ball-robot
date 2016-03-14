@@ -11,7 +11,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge, CvBridgeError
 import time
-from detect_utils import orange_hsv_lows, orange_hsv_highs, green_hsv_lows, green_hsv_highs
+#from detect_utils import orange_hsv_lows, orange_hsv_highs, green_hsv_lows, green_hsv_highs
 from detect_utils import hsv_to_ball_center_radius, plot_center_radius, plot_targets
 from detect_utils import hsv_to_targets
 from geometry_msgs.msg import Vector3
@@ -38,17 +38,23 @@ arm_has_ball_pub = rospy.Publisher('/arm_cam/has_ball', Bool, queue_size=10)
 # init node
 rospy.init_node('arm_ball_detect', anonymous=True)
 
-green_hsv_lows = (46, 104, 175)
-green_hsv_highs = (52, 157, 255)
+#green_hsv_lows = (46, 104, 175)
+#green_hsv_highs = (52, 157, 255)
+green_hsv_lows = (33, 108, 85)
+green_hsv_highs = (54, 171, 188)
 
-orange_hsv_lows = (7, 96, 161)
-orange_hsv_highs = (16, 183, 255)
 
-min_dist = 7.5
-max_dist = 15.
 
-min_center = 0.45
-max_center = 0.55
+#orange_hsv_lows = (7, 96, 161)
+#orange_hsv_highs = (16, 183, 255)
+orange_hsv_lows = (6, 147, 117)
+orange_hsv_highs = (10, 182, 239)
+
+min_dist = 10.
+max_dist = 24.
+
+min_center = 0.35
+max_center = 0.65
 
 while not rospy.is_shutdown():
     # rospy.spinOnce()

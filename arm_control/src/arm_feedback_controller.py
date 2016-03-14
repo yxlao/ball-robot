@@ -165,24 +165,26 @@ def get_raising_cmd():
 
 
 def run_node():
-    global claw_is_open, angle1ready, angle2ready, angle3ready, should_pick_up_ball, done_picking_up_ball, state
+    global claw_is_open, angle1ready, angle2ready, angle3ready, should_pick_up_ball, done_picking_up_ball, state, pickup_status_pub
 
     while not rospy.is_shutdown():
         if not (angle1ready and angle2ready and angle3ready):
             continue
         if should_pick_up_ball and done_picking_up_ball:
+            pickup_status_pub.publish("starting")
             state = "lowering"
             done_picking_up_ball = False
         run_arm_macro()
 
 
 def run_arm_macro():
-    global claw_is_open, state, done_picking_up_ball, pub1, should_pick_up_ball
+    global claw_is_open, state, done_picking_up_ball, pub1, should_pick_up_ball, pickup_status_pub
 
     rate = rospy.Rate(1)
     if state == "lowering":
         next_cmd = str(get_lowering_cmd())
         if next_cmd == "done":
+            pickup_status_pub.publish("raising")
             state = "raising"
             return
         pub1.publish(next_cmd)
@@ -194,6 +196,7 @@ def run_arm_macro():
             state = "idle"
             done_picking_up_ball = True
             should_pick_up_ball = False
+            pickup_status_pub.publish("done")
             return
         pub1.publish(next_cmd)
         rate.sleep()
@@ -203,6 +206,7 @@ def run_arm_macro():
 
 try:
     pub1 = rospy.Publisher('/arm_cmds', String, queue_size=10)
+    pickup_status_pub = rospy.Publisher("/pickup_status", String, queue_size=3)
     rospy.Subscriber("/joint1/angle", Float32, angle1callback)
     rospy.Subscriber("/joint2/angle", Float32, angle2callback)
     rospy.Subscriber("/joint3/angle", Float32, angle3callback)
