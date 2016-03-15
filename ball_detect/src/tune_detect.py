@@ -118,7 +118,8 @@ if __name__ == '__main__':
         #     break
 
         key = cv2.waitKey(30)
-        print "key", key
+        if key != -1:
+            print "key", key
         if key == 65288:
             print "received backspace"
             if len(hsv_samples) > 0:
