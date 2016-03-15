@@ -7,7 +7,7 @@ from irobotcreate2.msg import Song
 from irobotcreate2.msg import Note
 from irobotcreate2.msg import RoombaIR
 from irobotcreate2.msg import Bumper
-from std_msgs.msg import String, UInt8
+from std_msgs.msg import String, UInt8, Bool
 
 
 import sys
@@ -54,7 +54,9 @@ command_start_time = 0.0
 explore_duration = 5.0
 explore_state = "explore_turn"
 avoid_state = "stop"
+stop_all_movement = False
 
+ball_in_claw = False
 
 
 
@@ -66,9 +68,11 @@ state_pub = rospy.Publisher('/state', String, queue_size=3)
 
 last_command = "stop"
 rate1 = rospy.Rate(1.0)  # 1 sec
-rate2 = rospy.Rate(3.0)  # 0.5 sec
+rate2 = rospy.Rate(2.0)  # 0.5 sec
+rate3 = rospy.Rate(10.0)
 time_since_ball_in_center = rospy.get_time()
 time_since_bucket_in_center = rospy.get_time()
+time_ball_last_in_claw = rospy.get_time()
 
 def drive(speed=FAST_DRIVE_SPEED):
     global last_command, command_start_time
@@ -121,15 +125,23 @@ def stop():
 
 def fine_right_turn():
     turn_right(speed=SLOW_TURN_SPEED)
-    rate2.sleep()
+    for i in xrange(5):
+        rate3.sleep() 
     stop()
-    rate2.sleep()
+    for i in xrange(10):
+        rate3.sleep()
 
 def fine_left_turn():
     turn_left(speed=SLOW_TURN_SPEED)
-    rate2.sleep()
+    for i in xrange(5):
+        rate3.sleep() 
     stop()
-    rate2.sleep()
+    for i in xrange(10):
+        rate3.sleep()
+#    turn_left(speed=SLOW_TURN_SPEED)
+#    rate2.sleep()
+#    stop()
+#    rate1.sleep()
 
 
 def explore():
@@ -150,44 +162,45 @@ def explore():
 
 
 def fine_position():
-    global last_command, command_start_time, state, time_since_ball_in_center
-    if abs(lower_cam_ball_coords.x) < 0.3:
-        if lower_cam_ball_coords.y < 13:
+    global last_command, command_start_time, state, stop_all_movement, time_since_ball_in_center
+    if -0.1 < lower_cam_ball_coords.x and lower_cam_ball_coords.x < 0.4:
+        if lower_cam_ball_coords.y < 11:
             if lower_cam_ball_coords.y < 5:
                 back_up(speed=SLOW_DRIVE_SPEED)
                 time_since_ball_in_center = rospy.get_time()
             else:
                 stop()
+                state_pub.publish(str(rospy.get_time() - time_since_ball_in_center))
                 if rospy.get_time() - time_since_ball_in_center > 3:
                     state = "pick_up"
                     pick_up_pub.publish('true')
-                    rospy.sleep(15)
-                    state = "find_bucket"
+                    stop_all_movement=True
         else:
-                    drive(speed=SLOW_DRIVE_SPEED)
-    elif lower_cam_ball_coords. x >= 0.5:
-            time_since_ball_in_center = rospy.get_time()
-            fine_right_turn()
-    else:
-            time_since_ball_in_center = rospy.get_time()
-            fine_left_turn()
+            drive(speed=SLOW_DRIVE_SPEED)
+    elif lower_cam_ball_coords.x >= 0.4:
+        time_since_ball_in_center = rospy.get_time()
+        fine_right_turn()
+    elif lower_cam_ball_coords.x <= -0.1:
+        time_since_ball_in_center = rospy.get_time()
+        fine_left_turn()
     command_start_time = rospy.get_time()
+    rate3.sleep()
 
 def fine_bucket_position():
     global last_command, command_start_time, state, time_since_bucket_in_center, bucket_coords
     if abs(bucket_coords.x) < 0.5:
         if bucket_coords.y < 15:
-                    stop()
-                    if rospy.get_time() - time_since_bucket_in_center > 1:
-                        state = "stop"
+            stop()
+            if rospy.get_time() - time_since_bucket_in_center > 1:
+                 state = "stop"
                         #pick_up_pub.publish('true')
         else:
-                    drive(speed=SLOW_DRIVE_SPEED)
+             drive(speed=SLOW_DRIVE_SPEED)
     elif bucket_coords.x >= 0.5:
             time_since_bucket_in_center = rospy.get_time()
             fine_right_turn()
     else:
-            time_since_ball_in_center = rospy.get_time()
+            time_since_bucket_in_center = rospy.get_time()
             fine_left_turn()
     command_start_time = rospy.get_time()
 
@@ -269,13 +282,13 @@ def ball_in_sight_callback(msg):
             ball_in_sight_changed = True
 
 def lower_cam_ball_in_sight_callback(msg):
-    global lower_cam_ball_in_sight, lower_cam_ball_in_sight_changed,state
+    global lower_cam_ball_in_sight, lower_cam_ball_in_sight_changed,state, time_since_ball_in_center
     if msg.data == "false":
         if lower_cam_ball_in_sight == True:
             lower_cam_ball_in_sight = False
             lower_cam_ball_in_sight_changed = True
     elif msg.data == "true":
-        if lower_cam_ball_in_sight == True:
+        if False:
             a = 1
             # do nothing
         else:
@@ -285,6 +298,8 @@ def lower_cam_ball_in_sight_callback(msg):
                 return
             if state == "find_bucket":
                 return
+            if state != "fine_position":
+                time_since_ball_in_center = rospy.get_time()
 
             state = "fine_position"
             lower_cam_ball_in_sight = True
@@ -329,10 +344,27 @@ def bucket_coords_callback(msg):
     bucket_coords.y = msg.y
     bucket_coords.z = msg.z
 
+def pickup_status_callback(msg):
+    global state, stop_all_movement
+    if msg.data == "done":
+        stop_all_movement = False
+        state = "find_bucket"
+
+def ball_in_claw_callback(msg):
+    global ball_in_claw, time_ball_last_in_claw
+    if msg.data == True:
+        time_ball_last_in_claw = rospy.get_time()
+        ball_in_claw = True
+    else:
+        if state != "find_bucket":
+            return
+        if rospy.get_time() - time_ball_last_in_claw > 2: 
+             ball_in_claw = False
+        
 
 
 def state_change_callback(data):
-    global state
+    global state, time_since_ball_in_center, stop_all_movement
 
     if data.data == "w":
         drive()
@@ -357,19 +389,27 @@ def state_change_callback(data):
         last_command = "explore"
     elif data.data == "c":
         state = "fine_position"
+        time_since_ball_in_center = rospy.get_time()
         last_command = "fine_position"
     elif data.data == "p":
         state= "pick_up"
     elif data.data == "b":
         state="find_bucket"
+    elif data.data == "u":
+        stop_all_movement = True
+    elif data.data == "i":
+        stop_all_movement = False
     else:
         stop()
         state = "stop"
 
 
 def run_state_machine():
-    global done_avoiding_obstacle, state, state_pub, last_command, bucket_in_sight, rate2
+    global done_avoiding_obstacle, state, state_pub, last_command, bucket_in_sight, rate2, stop_all_movement,bucket_in_sight
     state_pub.publish(state)
+    if stop_all_movement:
+        stop()
+        return
     if state == "find_ball":
         if ball_in_sight:
             #if last_command != "drive":
@@ -404,6 +444,9 @@ def run_state_machine():
         else:
             fine_position()
     elif state == "find_bucket":
+        if not ball_in_claw:
+            state = "find_ball"
+            return
         if bucket_in_sight:
             fine_bucket_position()
         else:
@@ -427,6 +470,8 @@ rospy.Subscriber("/front_ultrasonic", UInt8, front_ultrasonic_callback)
 rospy.Subscriber("/back_ultrasonic", UInt8, back_ultrasonic_callback)
 rospy.Subscriber("/is_bucket_in_sight", String, bucket_in_sight_callback)
 rospy.Subscriber("/bucket_coords", Vector3, bucket_coords_callback)
+rospy.Subscriber("/arm_cam/has_ball", Bool, ball_in_claw_callback)
+rospy.Subscriber("/pickup_status", String, pickup_status_callback)
 try:
     while not rospy.is_shutdown():
         run_state_machine()
