@@ -121,18 +121,6 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
         max_idx = np.argmax(areas)
         cnt = contours[max_idx]
 
-        # find center, radius
-        # (x,y),r = cv2.minEnclosingCircle(cnt)
-        # x = int(x)
-        # y = int(y)
-        # r = int(r)
-
-        # old method for centorid
-        # M = cv2.moments(cnt)
-        # x = int(M['m10']/M['m00'])
-        # y = int(M['m01']/M['m00'])
-        # r = int(np.sqrt(areas[max_idx] / 3.14))
-
         im_height = float(im_mask.shape[0])
         x, y, w, h = cv2.boundingRect(cnt)
         d = 22.72 / (h / im_height)
