@@ -13,88 +13,30 @@ green_color = (0, 255, 0)
 white_color = (255, 255, 255)
 
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
+green_hsv_lows = (40, 63, 77)
+green_hsv_highs = (55, 209, 157)
 
-# new default values
-# orange_hsv_lows = (6, 93, 149)
-# orange_hsv_highs = (15, 175, 255)
-# green_hsv_lows = (46, 115, 96)
-# green_hsv_highs = (52, 164, 237)
+orange_hsv_lows = (6, 164, 133)
+orange_hsv_highs = (10, 235, 247)
 
-# bucket (3f floor)
-# [current low] (97, 33, 93)
-# [current high] (121, 84, 143)
+bucket_hsv_lows = (143, 42, 60)
+bucket_hsv_highs = (178, 86, 137)
 
-# green ball (3f floor)
-# [current low] (46, 115, 96)
-# [current high] (52, 164, 237)
-
-# orange ball (3f floor)
-# [current low] (6, 93, 149)
-# [current high] (15, 175, 255)
-
-# green ball (1f)
-green_hsv_lows = (39, 126, 78)
-green_hsv_highs = (46, 189, 248)
-
-# orange ball (1f)
-# orange_hsv_lows = (3, 189, 139)
-# orange_hsv_highs = (9, 237, 255)
-orange_hsv_lows = (7, 158, 64)
-orange_hsv_highs = (15, 235, 161)
-
-# green bll (3f white desk)
-# green_hsv_lows = (35, 177, 89)
-# green_hsv_highs = (38, 210, 131)
-# green_hsv_lows = (43, 141, 117)
-# green_hsv_highs = (52, 179, 173)
-green_hsv_lows = (47, 130, 69)
-green_hsv_highs = (55, 218, 184)
-
-# orange bll (3f white desk)
-# orange_hsv_lows = (7, 144, 112)
-# orange_hsv_highs = (11, 198, 181)
-#
-# bucket
-# bucket_hsv_lows = (78, 7, 70)
-# bucket_hsv_highs = (120, 47, 86)
-# orange bll (3f white desk)
-#orange_hsv_lows = (7, 144, 112)
-#orange_hsv_highs = (11, 198, 181)
-
-# bucket (3f)
-# bucket_hsv_lows = (149, 47, 94)
-# bucket_hsv_highs = (171, 90, 156)
-# bucket_hsv_lows = (133, 33, 93)
-# bucket_hsv_highs = (166, 63, 127)
-bucket_hsv_lows = (132, 33, 39)
-bucket_hsv_highs = (166, 89, 127)
-
-# green ball (1f)
-#green_hsv_lows = (44, 125, 134)
-#green_hsv_highs = (56, 179, 239)
-
-# orange ball (1f)
-#orange_hsv_lows = (7, 131, 194)
-#orange_hsv_highs = (10, 165, 255)
-
-# arm camera
-# orange_hsv_lows = (7, 128, 185)
-# orange_hsv_highs = (10, 168, 255)
-# green_hsv_lows = (39, 121, 142)
-# green_hsv_highs = (52, 178, 246)
-orange_hsv_lows = (5, 110, 123)
-orange_hsv_highs = (11, 201, 255)
-green_hsv_lows = (30, 135, 60)
-green_hsv_highs = (50, 195, 190)
-
-
-def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False):
+def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
     if is_bucket:
         # mask by threshold
         im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
         im_mask = cv2.medianBlur(im_mask, 7)
         # erode
         im_mask = cv2.erode(im_mask, None, iterations=2)
+        # dilate
+        im_mask = cv2.dilate(im_mask, None, iterations=3)
+    elif is_arm:
+        # mask by threshold
+        im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+        im_mask = cv2.medianBlur(im_mask, 9)
+        # erode
+        # im_mask = cv2.erode(im_mask, None, iterations=2)
         # dilate
         im_mask = cv2.dilate(im_mask, None, iterations=3)
     else:
@@ -136,27 +78,6 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
 
     if supress_sv:
         pass
-        # elimate v that are smaller than global mean
-        # v_mean = np.mean(im_hsv[:, :, 2])
-        # centers_new = []
-        # radiuses_new = []
-        # im_mean_mask = np.zeros(im_hsv.shape[:2]).astype(np.uint8)
-        # for center, radius in zip(centers, radiuses):
-        # reset
-        #     im_mean_mask[:] = 0
-        # mask to "1" at the ball location
-        #     cv2.circle(im_mean_mask, center, radius, color=1, thickness=-1)
-        # area
-        #     area = np.sum(im_mean_mask)
-        # get mean, element wise product
-        #     im_mean_mask = im_mean_mask * im_hsv[:, :, 2]
-        #     v_mean_local = np.sum(im_mean_mask) / float(area)
-        #     if v_mean_local >= v_mean * 1:
-        #         centers_new.append(center)
-        #         radiuses_new.append(radius)
-        # print len(radiuses), len(radiuses_new)
-        # centers = centers_new
-        # radiuses = radiuses_new
 
     return (centers, radiuses)
 
@@ -199,18 +120,6 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
         areas = [cv2.contourArea(cnt) for cnt in contours]
         max_idx = np.argmax(areas)
         cnt = contours[max_idx]
-
-        # find center, radius
-        # (x,y),r = cv2.minEnclosingCircle(cnt)
-        # x = int(x)
-        # y = int(y)
-        # r = int(r)
-
-        # old method for centorid
-        # M = cv2.moments(cnt)
-        # x = int(M['m10']/M['m00'])
-        # y = int(M['m01']/M['m00'])
-        # r = int(np.sqrt(areas[max_idx] / 3.14))
 
         im_height = float(im_mask.shape[0])
         x, y, w, h = cv2.boundingRect(cnt)
@@ -263,7 +172,7 @@ def plot_targets(im, targets):
                  color=green_color, thickness=2)
         cv2.putText(im, '%.2f' % targets['green']['d'],
                     (targets['green']['x'], targets['green']['y']),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
     if targets['orange'] is not None:
         cv2.line(im,
@@ -280,7 +189,7 @@ def plot_targets(im, targets):
                  color=orange_color, thickness=2)
         cv2.putText(im, '%.2f' % targets['orange']['d'],
                     (targets['orange']['x'], targets['orange']['y']),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
     if targets['bucket'] is not None:
         x = targets['bucket']['x']
@@ -294,8 +203,8 @@ def plot_targets(im, targets):
                       (x - half_w, y - half_h),
                       (x + half_w, y + half_h),
                       (0, 255, 0), 2)
-        cv2.putText(im, '%.2f' % d, (x,y),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,255,255), 1)
+        cv2.putText(im, '%.2f' % d, (x, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
         # cv2.line(im,
         #          (targets['bucket']['x'] - targets['bucket']
         #           ['size'], targets['bucket']['y']),
@@ -311,12 +220,56 @@ def plot_targets(im, targets):
 
     return im
 
+
 def ball_radius_to_dist(radius, im_height):
     """
     returns distance in centimeters
     """
     # print radius, im_height
     return 2.5 / (radius / float(im_height))
+
+
+def arm_hsv_to_targets(im_hsv,
+                       green_hsv_lows=green_hsv_lows,
+                       green_hsv_highs=green_hsv_highs,
+                       orange_hsv_lows=orange_hsv_lows,
+                       orange_hsv_highs=orange_hsv_highs,
+                       bucket_hsv_lows=bucket_hsv_lows,
+                       bucket_hsv_highs=bucket_hsv_highs):
+    """
+    hsv_lows, hsv_highs and everything else use default setting for now
+    """
+    # green ball
+    green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                              hsv_lows=green_hsv_lows,
+                                                              hsv_highs=green_hsv_highs)
+    if len(green_radiuses) > 0:
+        green_centers = [c for (r, c) in sorted(zip(green_radiuses, green_centers),
+                                                reverse=True)]
+        green_radiuses = sorted(green_radiuses, reverse=True)
+        green_dict = {'x': green_centers[0][0],
+                      'y': green_centers[0][1],
+                      'size': green_radiuses[0],
+                      'd': ball_radius_to_dist(green_radiuses[0], im_hsv.shape[0])}
+    else:
+        green_dict = None
+
+    # orange ball
+    orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                hsv_lows=orange_hsv_lows,
+                                                                hsv_highs=orange_hsv_highs)
+    if len(orange_radiuses) > 0:
+        orange_centers = [c for (r, c) in sorted(zip(orange_radiuses, orange_centers),
+                                                 reverse=True)]
+        orange_radiuses = sorted(orange_radiuses, reverse=True)
+        orange_dict = {'x': orange_centers[0][0],
+                       'y': orange_centers[0][1],
+                       'size': orange_radiuses[0],
+                       'd': ball_radius_to_dist(orange_radiuses[0], im_hsv.shape[0])}
+    else:
+        orange_dict = None
+
+    return {'green': green_dict, 'orange': orange_dict}
 
 
 def hsv_to_targets(im_hsv,

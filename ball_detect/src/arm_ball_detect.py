@@ -13,7 +13,7 @@ from cv_bridge import CvBridge, CvBridgeError
 import time
 #from detect_utils import orange_hsv_lows, orange_hsv_highs, green_hsv_lows, green_hsv_highs
 from detect_utils import hsv_to_ball_center_radius, plot_center_radius, plot_targets
-from detect_utils import hsv_to_targets
+from detect_utils import arm_hsv_to_targets
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import String
 
@@ -42,13 +42,20 @@ rospy.init_node('arm_ball_detect', anonymous=True)
 #green_hsv_highs = (52, 157, 255)
 green_hsv_lows = (33, 108, 85)
 green_hsv_highs = (54, 171, 188)
-
+green_hsv_lows = (48, 126, 46)
+green_hsv_highs = (59, 188, 204)
 
 
 #orange_hsv_lows = (7, 96, 161)
 #orange_hsv_highs = (16, 183, 255)
+
 orange_hsv_lows = (6, 147, 117)
 orange_hsv_highs = (10, 182, 239)
+
+# mar 15 value
+hsv_lows = (3, 78, 110)
+hsv_highs = (18, 188, 255)
+
 
 min_dist = 10.
 max_dist = 24.
@@ -66,13 +73,13 @@ while not rospy.is_shutdown():
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
         im_height = float(im_hsv.shape[0])
         im_width = float(im_hsv.shape[1])
-        targets = hsv_to_targets(im_hsv,
-                                 green_hsv_lows=green_hsv_lows,
-                                 green_hsv_highs=green_hsv_highs,
-                                 orange_hsv_lows=orange_hsv_lows,
-                                 orange_hsv_highs=orange_hsv_highs,
-                                 bucket_hsv_lows=(0, 0, 0),
-                                 bucket_hsv_highs=(0, 0, 0))
+        targets = arm_hsv_to_targets(im_hsv,
+                                    green_hsv_lows=green_hsv_lows,
+                                    green_hsv_highs=green_hsv_highs,
+                                    orange_hsv_lows=orange_hsv_lows,
+                                    orange_hsv_highs=orange_hsv_highs,
+                                    bucket_hsv_lows=(0, 0, 0),
+                                    bucket_hsv_highs=(0, 0, 0))
 
         # tell if a ball inside
         has_ball = False
