@@ -79,27 +79,6 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
 
     if supress_sv:
         pass
-        # elimate v that are smaller than global mean
-        # v_mean = np.mean(im_hsv[:, :, 2])
-        # centers_new = []
-        # radiuses_new = []
-        # im_mean_mask = np.zeros(im_hsv.shape[:2]).astype(np.uint8)
-        # for center, radius in zip(centers, radiuses):
-        # reset
-        #     im_mean_mask[:] = 0
-        # mask to "1" at the ball location
-        #     cv2.circle(im_mean_mask, center, radius, color=1, thickness=-1)
-        # area
-        #     area = np.sum(im_mean_mask)
-        # get mean, element wise product
-        #     im_mean_mask = im_mean_mask * im_hsv[:, :, 2]
-        #     v_mean_local = np.sum(im_mean_mask) / float(area)
-        #     if v_mean_local >= v_mean * 1:
-        #         centers_new.append(center)
-        #         radiuses_new.append(radius)
-        # print len(radiuses), len(radiuses_new)
-        # centers = centers_new
-        # radiuses = radiuses_new
 
     return (centers, radiuses)
 
