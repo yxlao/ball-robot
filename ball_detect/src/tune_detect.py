@@ -120,7 +120,7 @@ if __name__ == '__main__':
         key = cv2.waitKey(30)
         if key != -1:
             print "key", key
-        if key == 1048668:
+        if key == 1113864:
             print "received backspace"
             if len(hsv_samples) > 0:
                 hsv_samples.pop()

@@ -13,15 +13,14 @@ green_color = (0, 255, 0)
 white_color = (255, 255, 255)
 
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
-green_hsv_lows = (47, 130, 69)
-green_hsv_highs = (55, 218, 184)
+green_hsv_lows = (40, 63, 77)
+green_hsv_highs = (55, 209, 157)
 
-bucket_hsv_lows = (132, 33, 39)
-bucket_hsv_highs = (166, 89, 127)
+orange_hsv_lows = (6, 164, 133)
+orange_hsv_highs = (10, 235, 247)
 
-orange_hsv_lows = (30, 135, 60)
-orange_hsv_highs = (50, 195, 190)
-
+bucket_hsv_lows = (143, 42, 60)
+bucket_hsv_highs = (178, 86, 137)
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
     if is_bucket:
