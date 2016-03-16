@@ -187,7 +187,7 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
                              is_bucket=True)
 
     im_mask = cv2.medianBlur(im_mask, 23)
-    cv2.imshow('bucket_mask', im_mask)
+    # cv2.imshow('bucket_mask', im_mask)
 
     # find countours
     contours, hierarchy = cv2.findContours(
