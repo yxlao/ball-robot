@@ -40,15 +40,15 @@ rospy.init_node('arm_ball_detect', anonymous=True)
 
 #green_hsv_lows = (46, 104, 175)
 #green_hsv_highs = (52, 157, 255)
-green_hsv_lows = (33, 108, 85)
-green_hsv_highs = (54, 171, 188)
+green_hsv_lows = (40, 107, 99)
+green_hsv_highs = (54, 201, 255)
 
 
 
 #orange_hsv_lows = (7, 96, 161)
 #orange_hsv_highs = (16, 183, 255)
-orange_hsv_lows = (6, 147, 117)
-orange_hsv_highs = (10, 182, 239)
+orange_hsv_lows = (3, 98, 212)
+orange_hsv_highs = (15, 157, 255)
 
 min_dist = 10.
 max_dist = 24.

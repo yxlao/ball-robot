@@ -15,77 +15,15 @@ white_color = (255, 255, 255)
 # Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
 
 # new default values
-# orange_hsv_lows = (6, 93, 149)
-# orange_hsv_highs = (15, 175, 255)
-# green_hsv_lows = (46, 115, 96)
-# green_hsv_highs = (52, 164, 237)
-
-# bucket (3f floor)
-# [current low] (97, 33, 93)
-# [current high] (121, 84, 143)
-
-# green ball (3f floor)
-# [current low] (46, 115, 96)
-# [current high] (52, 164, 237)
-
-# orange ball (3f floor)
-# [current low] (6, 93, 149)
-# [current high] (15, 175, 255)
-
-# green ball (1f)
-green_hsv_lows = (39, 126, 78)
-green_hsv_highs = (46, 189, 248)
+green_hsv_lows = (43, 144, 58)
+green_hsv_highs = (55, 244, 179)
 
 # orange ball (1f)
-# orange_hsv_lows = (3, 189, 139)
-# orange_hsv_highs = (9, 237, 255)
-orange_hsv_lows = (7, 158, 64)
-orange_hsv_highs = (15, 235, 161)
+orange_hsv_lows = (3, 98, 212)
+orange_hsv_highs = (15, 157, 255)
 
-# green bll (3f white desk)
-# green_hsv_lows = (35, 177, 89)
-# green_hsv_highs = (38, 210, 131)
-# green_hsv_lows = (43, 141, 117)
-# green_hsv_highs = (52, 179, 173)
-green_hsv_lows = (47, 130, 69)
-green_hsv_highs = (55, 218, 184)
-
-# orange bll (3f white desk)
-# orange_hsv_lows = (7, 144, 112)
-# orange_hsv_highs = (11, 198, 181)
-#
-# bucket
-# bucket_hsv_lows = (78, 7, 70)
-# bucket_hsv_highs = (120, 47, 86)
-# orange bll (3f white desk)
-#orange_hsv_lows = (7, 144, 112)
-#orange_hsv_highs = (11, 198, 181)
-
-# bucket (3f)
-# bucket_hsv_lows = (149, 47, 94)
-# bucket_hsv_highs = (171, 90, 156)
-# bucket_hsv_lows = (133, 33, 93)
-# bucket_hsv_highs = (166, 63, 127)
 bucket_hsv_lows = (132, 33, 39)
 bucket_hsv_highs = (166, 89, 127)
-
-# green ball (1f)
-#green_hsv_lows = (44, 125, 134)
-#green_hsv_highs = (56, 179, 239)
-
-# orange ball (1f)
-#orange_hsv_lows = (7, 131, 194)
-#orange_hsv_highs = (10, 165, 255)
-
-# arm camera
-# orange_hsv_lows = (7, 128, 185)
-# orange_hsv_highs = (10, 168, 255)
-# green_hsv_lows = (39, 121, 142)
-# green_hsv_highs = (52, 178, 246)
-orange_hsv_lows = (5, 110, 123)
-orange_hsv_highs = (11, 201, 255)
-green_hsv_lows = (30, 135, 60)
-green_hsv_highs = (50, 195, 190)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False):
