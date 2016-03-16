@@ -19,8 +19,8 @@ green_hsv_highs = (55, 218, 184)
 bucket_hsv_lows = (132, 33, 39)
 bucket_hsv_highs = (166, 89, 127)
 
-green_hsv_lows = (30, 135, 60)
-green_hsv_highs = (50, 195, 190)
+orange_hsv_lows = (30, 135, 60)
+orange_hsv_highs = (50, 195, 190)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
