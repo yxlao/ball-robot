@@ -96,7 +96,7 @@ def is_ball(contour):
     feature = get_contour_feature(contour)
     return True if clf.predict(feature)[0] == 1 else False
 
-def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False):
+def im_mask_to_center_radius(im_mask, surpress_when_large=True):
     # find contours
     contours = cv2.findContours(im_mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -152,14 +152,11 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
                 centers = centers_new
                 radiuses = radiuses_new
 
-        if supress_sv:
-            pass
-
     return (centers, radiuses)
 
 
 def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
-                              surpress_when_large=True, supress_sv=False):
+                              surpress_when_large=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
@@ -168,7 +165,7 @@ def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
     im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
 
     # return centers radius
-    return im_mask_to_center_radius(im_mask, surpress_when_large, supress_sv)
+    return im_mask_to_center_radius(im_mask, surpress_when_large)
 
 
 def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
