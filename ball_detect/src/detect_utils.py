@@ -29,12 +29,17 @@ orange_hsv_highs = (15, 157, 255)
 bucket_hsv_lows = (132, 33, 39)
 bucket_hsv_highs = (166, 89, 127)
 
-
 orange_hsv_lows = (6, 164, 133)
 orange_hsv_highs = (10, 235, 247)
 
 bucket_hsv_lows = (143, 42, 60)
 bucket_hsv_highs = (178, 86, 137)
+
+
+# just for debugging classifier
+orange_hsv_lows = (5, 111, 137)
+orange_hsv_highs = (13, 182, 211)
+
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
     if is_bucket:

@@ -8,6 +8,7 @@ def get_accuracy(labels_predict, labels):
 ball_factors = np.loadtxt('ball_factors.txt')
 paper_factors = np.loadtxt('paper_factors.txt')
 
+# try:
 all_factors = np.concatenate((ball_factors, paper_factors), axis=0)
 all_labels = [1] * len(ball_factors) + [-1] * len(paper_factors)
 
