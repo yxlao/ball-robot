@@ -36,9 +36,9 @@ bucket_hsv_lows = (143, 42, 60)
 bucket_hsv_highs = (178, 86, 137)
 
 
-# just for debugging classifier
-orange_hsv_lows = (5, 111, 137)
-orange_hsv_highs = (13, 182, 211)
+# # just for debugging classifier
+# orange_hsv_lows = (5, 111, 137)
+# orange_hsv_highs = (13, 182, 211)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
@@ -68,6 +68,19 @@ def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
         im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
 
+def is_ball(contour):
+    # gen feature
+    circle_area = radius * radius * math.pi
+    x,y,w,h = cv2.boundingRect(contour)
+    rect_area = w * h
+    contour_area = cv2.contourArea(contour)
+    circle_factor = contour_area / float(circle_area)
+    rect_factor = contour_area / float(rect_area)
+    flat_factor = w / float(h)
+    feature = [circle_factor, rect_factor, flat_factor]
+
+    return True if clf.predict(feature)[0] == 1 else False
+
 def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False):
     # find contours
     contours = cv2.findContours(im_mask.copy(), cv2.RETR_EXTERNAL,
@@ -92,11 +105,6 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         centers = [centers[ind] for ind in sorted_inds]
         radiuses = [radiuses[ind] for ind in sorted_inds]
 
-        # pick the largest one for now
-        contour = contours[0]
-        center = centers[0]
-        radius = radiuses[0]
-
         # # white area ~= countour area
         # im_sum_mask = np.zeros_like(im_mask).astype(np.uint8)
         # cv2.circle(im_sum_mask, center, radius, color=1., thickness=-1)
@@ -110,15 +118,11 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         # cv2.imshow('im_mask', im_mask)
         # cv2.imshow('im_sum_mask', im_sum_mask * 255)
 
-        circle_area = radius * radius * math.pi
-        x,y,w,h = cv2.boundingRect(contour)
-        rect_area = w * h
-        contour_area = cv2.contourArea(contour)
-        circle_factor = contour_area / float(circle_area)
-        rect_factor = contour_area / float(rect_area)
-        flat_factor = w / float(h)
-        # print circle_factor, rect_factor, flat_factor
-        print "ball" if clf.predict([circle_factor, rect_factor, flat_factor])[0] == 1 else "paper"
+        # pick the largest one for now
+        # if supress_paper
+        # contour = contours[0]
+        # center = centers[0]
+        # radius = radiuses[0]
 
         # supress when large
         if surpress_when_large and len(radiuses) > 0:
@@ -397,13 +401,13 @@ if __name__ == '__main__':
         # convert to hsv
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
-        # # get centers and radiuses
-        # green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
-        #                                                           hsv_lows=green_hsv_lows,
-        #                                                           hsv_highs=green_hsv_highs)
-        # # plot center and radius
-        # im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses,
-        #                             color="green")
+        # get centers and radiuses
+        green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                  hsv_lows=green_hsv_lows,
+                                                                  hsv_highs=green_hsv_highs)
+        # plot center and radius
+        im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses,
+                                    color="green")
 
         # get centers and radiuses
         orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
@@ -414,8 +418,8 @@ if __name__ == '__main__':
                                     color="orange")
 
         # draw targests
-        # targets = hsv_to_targets(im_hsv)
-        # im_bgr = plot_targets(im_bgr, targets)
+        targets = hsv_to_targets(im_hsv)
+        im_bgr = plot_targets(im_bgr, targets)
 
         # display the resulting frame
         cv2.imshow('frame', im_bgr)
