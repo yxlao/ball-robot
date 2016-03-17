@@ -106,6 +106,11 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         # cv2.imshow('im_mask', im_mask)
         # cv2.imshow('im_sum_mask', im_sum_mask * 255)
 
+        circle_area = radius * radius * math.pi
+        contour_area = cv2.contourArea(contour)
+        print circle_area, contour_area
+        print contour_area / float(circle_area)
+
         # supress when large
         if surpress_when_large and len(radiuses) > 0:
             max_radius = max(radiuses)
