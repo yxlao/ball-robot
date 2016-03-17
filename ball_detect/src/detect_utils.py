@@ -70,27 +70,13 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
 
         # sort all by largest radius
         sorted_inds = np.argsort(radiuses).tolist()[::-1]
-        try:
-            contours = [contours[ind] for ind in sorted_inds]
-        except:
-            import ipdb; ipdb.set_trace()
+        contours = [contours[ind] for ind in sorted_inds]
         centers = [centers[ind] for ind in sorted_inds]
         radiuses = [radiuses[ind] for ind in sorted_inds]
 
-        # try:
-        #     # contours.sort(key=dict(zip(contours, radiuses)).get)
-        #     contours = [contour for (radius, contour) in sorted(zip(radiuses, contours), reverse=True)]
-        #     centers = [center for (radius, center) in sorted(zip(radiuses, centers), reverse=True)]
-        #     radiuses = sorted(radiuses, reverse=True)
-        # except:
-        #     import ipdb; ipdb.set_trace()
-
         # pick the largest one for now
         contour = contours[0]
-        try:
-            center = centers[0]
-        except:
-            import ipdb; ipdb.set_trace()
+        center = centers[0]
         radius = radiuses[0]
 
         # # white area ~= countour area
@@ -110,7 +96,6 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         contour_area = cv2.contourArea(contour)
         print circle_area, contour_area
         print contour_area / float(circle_area)
-
 
         # supress when large
         if surpress_when_large and len(radiuses) > 0:
