@@ -68,17 +68,32 @@ def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
         im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
 
-def is_ball(contour):
-    # gen feature
+def get_contour_feature(contour):
+    # fit center
+    center, radius = cv2.minEnclosingCircle(contour)
     circle_area = radius * radius * math.pi
+
+    # fit rectangle
     x,y,w,h = cv2.boundingRect(contour)
     rect_area = w * h
+
+    # contour area
     contour_area = cv2.contourArea(contour)
+
+    # factors
     circle_factor = contour_area / float(circle_area)
     rect_factor = contour_area / float(rect_area)
     flat_factor = w / float(h)
-    feature = [circle_factor, rect_factor, flat_factor]
 
+    # final feature
+    feature = [circle_factor, rect_factor, flat_factor]
+    return feature
+
+def is_ball(contour):
+    """
+    return true if the contour is ball
+    """
+    feature = get_contour_feature(contour)
     return True if clf.predict(feature)[0] == 1 else False
 
 def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False):
