@@ -1,12 +1,15 @@
 import numpy as np
 from sklearn import linear_model
+from os.path import expanduser
+
 clf = linear_model.LogisticRegression()
 
 def get_accuracy(labels_predict, labels):
     return np.sum(labels_predict == labels) / float(len(labels))
 
-ball_factors = np.loadtxt('ball_factors.txt')
-paper_factors = np.loadtxt('paper_factors.txt')
+home = expanduser("~")
+ball_factors = np.loadtxt(home + '/robot/src/ball_detect/src/ball_factors.txt')
+paper_factors = np.loadtxt(home + '/robot/src/ball_detect/src/paper_factors.txt')
 
 # try:
 all_factors = np.concatenate((ball_factors, paper_factors), axis=0)
