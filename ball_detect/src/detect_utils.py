@@ -36,9 +36,9 @@ bucket_hsv_lows = (143, 42, 60)
 bucket_hsv_highs = (178, 86, 137)
 
 
-# # just for debugging classifier
-# orange_hsv_lows = (5, 111, 137)
-# orange_hsv_highs = (13, 182, 211)
+# just for debugging classifier
+orange_hsv_lows = (5, 111, 137)
+orange_hsv_highs = (13, 182, 211)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
@@ -96,7 +96,7 @@ def is_ball(contour):
     feature = get_contour_feature(contour)
     return True if clf.predict(feature)[0] == 1 else False
 
-def im_mask_to_center_radius(im_mask, surpress_when_large=True):
+def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_paper=True):
     # find contours
     contours = cv2.findContours(im_mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -140,7 +140,6 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True):
         # radius = radiuses[0]
 
         # supress papaer
-        supress_paper = True
         if supress_paper:
             for contour, center, radius in zip(contours, centers, radiuses):
                 if is_ball(contour):
@@ -165,7 +164,7 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True):
 
 
 def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
-                              surpress_when_large=True):
+                              surpress_when_large=True, supress_paper=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
@@ -174,7 +173,9 @@ def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
     im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
 
     # return centers radius
-    return im_mask_to_center_radius(im_mask, surpress_when_large)
+    return im_mask_to_center_radius(im_mask,
+                                    surpress_when_large=surpress_when_large,
+                                    supress_paper=supress_paper)
 
 
 def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
@@ -317,14 +318,16 @@ def arm_hsv_to_targets(im_hsv,
                        orange_hsv_lows=orange_hsv_lows,
                        orange_hsv_highs=orange_hsv_highs,
                        bucket_hsv_lows=bucket_hsv_lows,
-                       bucket_hsv_highs=bucket_hsv_highs):
+                       bucket_hsv_highs=bucket_hsv_highs,
+                       surpress_paper=True):
     """
     hsv_lows, hsv_highs and everything else use default setting for now
     """
     # green ball
     green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
                                                               hsv_lows=green_hsv_lows,
-                                                              hsv_highs=green_hsv_highs)
+                                                              hsv_highs=green_hsv_highs,
+                                                              surpress_paper=surpress_paper)
     if len(green_radiuses) > 0:
         green_centers = [c for (r, c) in sorted(zip(green_radiuses, green_centers),
                                                 reverse=True)]
@@ -339,7 +342,8 @@ def arm_hsv_to_targets(im_hsv,
     # orange ball
     orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
                                                                 hsv_lows=orange_hsv_lows,
-                                                                hsv_highs=orange_hsv_highs)
+                                                                hsv_highs=orange_hsv_highs,
+                                                                surpress_paper=surpress_paper)
     if len(orange_radiuses) > 0:
         orange_centers = [c for (r, c) in sorted(zip(orange_radiuses, orange_centers),
                                                  reverse=True)]
