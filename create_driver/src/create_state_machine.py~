@@ -16,7 +16,7 @@ import termios
 import tty
 import random
 
-FAST_TURN_SPEED = 0.5
+FAST_TURN_SPEED = 0.35
 SLOW_TURN_SPEED = 0.1
 FAST_DRIVE_SPEED = 0.15
 SLOW_DRIVE_SPEED = 0.08
@@ -125,24 +125,28 @@ def stop():
 
 def fine_right_turn():
     turn_right(speed=SLOW_TURN_SPEED)
-    for i in xrange(5):
-        rate3.sleep() 
+    for i in xrange(3):
+        rate3.sleep()
     stop()
     for i in xrange(10):
         rate3.sleep()
 
 def fine_left_turn():
     turn_left(speed=SLOW_TURN_SPEED)
-    for i in xrange(5):
-        rate3.sleep() 
+    for i in xrange(3):
+        rate3.sleep()
     stop()
     for i in xrange(10):
         rate3.sleep()
-#    turn_left(speed=SLOW_TURN_SPEED)
-#    rate2.sleep()
-#    stop()
-#    rate1.sleep()
 
+
+def fine_approach():
+    drive(speed=SLOW_DRIVE_SPEED)
+    for i in xrange(3):
+        rate3.sleep()
+    stop()
+    for i in xrange(10):
+        rate3.sleep()    
 
 def explore():
     global last_command, explore_duration, explore_state, command_start_time
@@ -163,9 +167,9 @@ def explore():
 
 def fine_position():
     global last_command, command_start_time, state, stop_all_movement, time_since_ball_in_center
-    if -0.1 < lower_cam_ball_coords.x and lower_cam_ball_coords.x < 0.4:
-        if lower_cam_ball_coords.y < 13:
-            if lower_cam_ball_coords.y < 5:
+    if -0.2 < lower_cam_ball_coords.x and lower_cam_ball_coords.x < 0.45:
+        if lower_cam_ball_coords.y < 11:
+            if lower_cam_ball_coords.y < 7:
                 back_up(speed=SLOW_DRIVE_SPEED)
                 time_since_ball_in_center = rospy.get_time()
             else:
@@ -177,10 +181,10 @@ def fine_position():
                     stop_all_movement=True
         else:
             drive(speed=SLOW_DRIVE_SPEED)
-    elif lower_cam_ball_coords.x >= 0.4:
+    elif lower_cam_ball_coords.x >= 0.45:
         time_since_ball_in_center = rospy.get_time()
         fine_right_turn()
-    elif lower_cam_ball_coords.x <= -0.1:
+    elif lower_cam_ball_coords.x <= -0.2:
         time_since_ball_in_center = rospy.get_time()
         fine_left_turn()
     command_start_time = rospy.get_time()
@@ -358,9 +362,9 @@ def ball_in_claw_callback(msg):
     else:
         if state != "find_bucket":
             return
-        if rospy.get_time() - time_ball_last_in_claw > 2: 
+        if rospy.get_time() - time_ball_last_in_claw > 2:
              ball_in_claw = False
-        
+
 
 
 def state_change_callback(data):
@@ -405,7 +409,7 @@ def state_change_callback(data):
 
 
 def run_state_machine():
-    global done_avoiding_obstacle, state, state_pub, last_command, bucket_in_sight, rate2, stop_all_movement,bucket_in_sight
+    global done_avoiding_obstacle, state, state_pub, last_command, bucket_in_sight, rate2, stop_all_movement,bucket_in_sight, should_drop_ball_pub
     state_pub.publish(state)
     if stop_all_movement:
         stop()
@@ -446,6 +450,7 @@ def run_state_machine():
     elif state == "find_bucket":
         if not ball_in_claw:
             state = "find_ball"
+            should_drop_ball_pub.publish("true")
             return
         if bucket_in_sight:
             fine_bucket_position()
@@ -460,7 +465,7 @@ def run_state_machine():
             stop()
 
 
-#rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
+rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
 rospy.Subscriber("/state_cmds", String, state_change_callback)
 rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
 rospy.Subscriber("/lower_cam_is_ball_in_sight", String, lower_cam_ball_in_sight_callback)

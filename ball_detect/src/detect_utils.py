@@ -17,6 +17,18 @@ white_color = (255, 255, 255)
 green_hsv_lows = (40, 63, 77)
 green_hsv_highs = (55, 209, 157)
 
+# new default values
+green_hsv_lows = (43, 144, 58)
+green_hsv_highs = (55, 244, 179)
+
+# orange ball (1f)
+orange_hsv_lows = (3, 98, 212)
+orange_hsv_highs = (15, 157, 255)
+
+bucket_hsv_lows = (132, 33, 39)
+bucket_hsv_highs = (166, 89, 127)
+
+
 orange_hsv_lows = (6, 164, 133)
 orange_hsv_highs = (10, 235, 247)
 
