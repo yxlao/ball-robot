@@ -59,27 +59,49 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
     centers = []
     radiuses = []
 
+    # find all centers and radius
     for countour in contours:
         center, radius = cv2.minEnclosingCircle(countour)
         centers.append((int(center[0]), int(center[1])))  # a tuple
         radiuses.append(int(radius))  # an int
 
-    if surpress_when_large and len(radiuses) > 0:
-        max_radius = max(radiuses)
-        if max_radius * 2 > im_mask.shape[0] * 0.4:
-            centers_new = []
-            radiuses_new = []
-            for center, radius in zip(centers, radiuses):
-                if radius * 2 > im_mask.shape[0] * 0.05:
-                    centers_new.append(center)
-                    radiuses_new.append(radius)
-            centers = centers_new
-            radiuses = radiuses_new
+    if len(radiuses) > 0:
+        # sort contours, centers, radius accodring to desceidng radius size
+        centers = [center for (radius, center, contour) in sorted(zip(radiuses, centers, contours), reverse=True)]
+        contours = [contour for (radius, center, contour) in sorted(zip(radiuses, centers, contours), reverse=True)]
+        radiuses = sorted(radiuses, reverse=True)
 
-    if supress_sv:
-        pass
+        # only pick the largest
+        center = centers[0]
+        countour = contours[0]
+        radius = radiuses[0]
 
-    return (centers, radiuses)
+        # test if the white area convers sufficient large
+        im_sum_mask = np.zeros_like(im_mask).astype(np.uint8)
+        cv2.circle(im_sum_mask, center, 10, color=1, thickness=-1)
+        im_product = im_mask * im_sum_mask
+        white_area = np.sum(im_product) / 255.
+        countour_ara = cv2.contourArea(countour)
+        print white_area, countour_ara
+
+        if surpress_when_large and len(radiuses) > 0:
+            max_radius = max(radiuses)
+            if max_radius * 2 > im_mask.shape[0] * 0.4:
+                centers_new = []
+                radiuses_new = []
+                for center, radius in zip(centers, radiuses):
+                    if radius * 2 > im_mask.shape[0] * 0.05:
+                        centers_new.append(center)
+                        radiuses_new.append(radius)
+                centers = centers_new
+                radiuses = radiuses_new
+
+        if supress_sv:
+            pass
+
+        return ([center], [radius])
+    else:
+        return (centers, radiuses)
 
 
 def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
