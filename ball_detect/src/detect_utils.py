@@ -269,7 +269,7 @@ def arm_hsv_to_targets(im_hsv,
     else:
         orange_dict = None
 
-    return {'green': green_dict, 'orange': orange_dict}
+    return {'green': green_dict, 'orange': orange_dict, 'bucket': None}
 
 
 def hsv_to_targets(im_hsv,

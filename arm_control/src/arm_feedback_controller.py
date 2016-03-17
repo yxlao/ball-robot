@@ -17,6 +17,7 @@ should_pick_up_ball = False
 should_stop_lowering = False
 done_picking_up_ball = True
 claw_is_open = True
+should_reset = False
 state = "idle"
 moving_joint = 0
 
@@ -29,13 +30,19 @@ angle3above = -40
 angle3below = -50
 
 # raising
-raising_angle1above = 0
-raising_angle1below = -15
+raising_angle1above = 40
+raising_angle1below = 27
 raising_angle2above = 40
 raising_angle2below = 20
 raising_angle3above = -40
 raising_angle3below = -50
 
+drop_angle1above = 0
+drop_angle1below = -25
+drop_angle2above = 40
+drop_angle2below = 20
+drop_angle3above = -40
+drop_angle3below = -50
 
 def angle1callback(msg):
     global angle1, angle1ready
@@ -61,13 +68,19 @@ def should_pick_up_ball_callback(msg):
         should_pick_up_ball = True
     elif msg.data == "false":
         should_stop_lowering = True
+    elif msg.data == "reset":
+        should_reset = True
 
 def should_drop_ball_callback(msg):
-    global pub1
+    global pub1, state, claw_is_open
     if msg.data == "true":
-         pub1.publish('o')
+        state = "dropping"
     elif msg.data == "false":
-         pub1.publish('c')
+        pub1.publish('c')
+    elif msg.data == "truefast":
+        claw_is_open = True
+        pub1.publish('o')
+
 
 def getch():
     fd = sys.stdin.fileno()
@@ -130,6 +143,44 @@ def get_lowering_cmd():
         return 'c'
     return "done"
 
+def get_dropping_cmd():
+    global claw_is_open, moving_joint, should_stop_lowering, should_reset
+    if should_reset:
+        should_reset = False
+        state = "raising"
+        return "o"
+    if float(angle1) > drop_angle1above:
+        moving_joint = 1
+        return 's'
+    if float(angle1) < drop_angle1below:
+        moving_joint = 1
+        return 'w'
+    if moving_joint == 1:
+        moving_joint = 0
+        return 'x'
+    # if float(angle2) > angle2above:
+    #     moving_joint = 2
+    #     return 'd'
+    # if float(angle2) < angle2below:
+    #     moving_joint = 2
+    #     return 'e'
+    # if moving_joint == 2:
+    #     moving_joint = 0
+    #     return 'x'
+    if float(angle3) > drop_angle3above:
+        moving_joint = 3
+        return 'f'
+    if float(angle3) < drop_angle3below:
+        moving_joint = 3
+        return 'r'
+    if moving_joint == 3:
+        moving_joint = 0
+        return 'x'
+    if not claw_is_open:
+        claw_is_open = True
+        return 'o'
+    return "done"
+
 
 def get_raising_cmd():
     global claw_is_open, moving_joint
@@ -160,7 +211,6 @@ def get_raising_cmd():
     if moving_joint == 3:
         moving_joint = 0
         return 'x'
-    claw_is_open = True #placeholder hack for now.
     return "done"
 
 
@@ -180,23 +230,41 @@ def run_node():
 def run_arm_macro():
     global claw_is_open, state, done_picking_up_ball, pub1, should_pick_up_ball, pickup_status_pub
 
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(2)
     if state == "lowering":
         next_cmd = str(get_lowering_cmd())
         if next_cmd == "done":
             pickup_status_pub.publish("raising")
-            state = "raising"
+            state = "ball_raising"
             return
         pub1.publish(next_cmd)
         rate.sleep()
         return
+    elif state == "dropping":
+        next_cmd = str(get_dropping_cmd())
+        if next_cmd == "done":
+            pickup_status_pub.publish("done")
+            state = "raising"
+            return
+        pub1.publish(next_cmd)
+        rate.sleep()
+    elif state == 'ball_raising':
+        next_cmd = str(get_raising_cmd())
+        if next_cmd == "done":
+            state = "idle"
+            done_picking_up_ball = True
+            should_pick_up_ball = False
+            pickup_status_pub.publish("drop ready")
+            return
+        pub1.publish(next_cmd)
+        rate.sleep()
     elif state == 'raising':
         next_cmd = str(get_raising_cmd())
         if next_cmd == "done":
             state = "idle"
             done_picking_up_ball = True
             should_pick_up_ball = False
-            pickup_status_pub.publish("done")
+            pickup_status_pub.publish("raised")
             return
         pub1.publish(next_cmd)
         rate.sleep()
