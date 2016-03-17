@@ -85,7 +85,7 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         # except:
         #     import ipdb; ipdb.set_trace()
 
-        # picke the largest one for now
+        # pick the largest one for now
         contour = contours[0]
         try:
             center = centers[0]
@@ -110,6 +110,7 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         contour_area = cv2.contourArea(contour)
         print circle_area, contour_area
         print contour_area / float(circle_area)
+
 
         # supress when large
         if surpress_when_large and len(radiuses) > 0:
