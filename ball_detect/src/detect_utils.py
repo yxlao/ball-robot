@@ -120,7 +120,7 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
                              is_bucket=True)
 
     im_mask = cv2.medianBlur(im_mask, 23)
-    cv2.imshow('bucket_mask', im_mask)
+    # cv2.imshow('bucket_mask', im_mask)
 
     # find countours
     contours, hierarchy = cv2.findContours(
@@ -281,7 +281,7 @@ def arm_hsv_to_targets(im_hsv,
     else:
         orange_dict = None
 
-    return {'green': green_dict, 'orange': orange_dict}
+    return {'green': green_dict, 'orange': orange_dict, 'bucket': None}
 
 
 def hsv_to_targets(im_hsv,
