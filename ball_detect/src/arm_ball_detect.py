@@ -39,40 +39,47 @@ arm_has_ball_pub = rospy.Publisher('/arm_cam/has_ball', Bool, queue_size=10)
 rospy.init_node('arm_ball_detect', anonymous=True)
 
 #green_hsv_lows = (46, 104, 175)
-#green_hsv_highs = (52, 157, 255)
-green_hsv_lows = (40, 107, 99)
-green_hsv_highs = (54, 201, 255)
+# #green_hsv_highs = (52, 157, 255)
+# green_hsv_lows = (40, 107, 99)
+# green_hsv_highs = (54, 201, 255)
 
-green_hsv_lows = (33, 108, 85)
-green_hsv_highs = (54, 171, 188)
-green_hsv_lows = (48, 126, 46)
-green_hsv_highs = (59, 188, 204)
-#green_hsv_lows = (33, 108, 85)
-#green_hsv_highs = (54, 171, 188)
-#green_hsv_lows = (48, 126, 46)
-#green_hsv_highs = (59, 188, 204)
-#3f
-green_hsv_lows = (32, 6, 179)
-green_hsv_highs = (43, 163, 255)
+# green_hsv_lows = (33, 108, 85)
+# green_hsv_highs = (54, 171, 188)
+# green_hsv_lows = (48, 126, 46)
+# green_hsv_highs = (59, 188, 204)
+# #green_hsv_lows = (33, 108, 85)
+# #green_hsv_highs = (54, 171, 188)
+# #green_hsv_lows = (48, 126, 46)
+# #green_hsv_highs = (59, 188, 204)
+# #3f
+# green_hsv_lows = (32, 6, 179)
+# green_hsv_highs = (43, 163, 255)
 
 
 
-#orange_hsv_lows = (7, 96, 161)
-#orange_hsv_highs = (16, 183, 255)
-orange_hsv_lows = (3, 98, 212)
-orange_hsv_highs = (15, 157, 255)
+# #orange_hsv_lows = (7, 96, 161)
+# #orange_hsv_highs = (16, 183, 255)
+# orange_hsv_lows = (3, 98, 212)
+# orange_hsv_highs = (15, 157, 255)
 
-orange_hsv_lows = (6, 147, 117)
-orange_hsv_highs = (10, 182, 239)
-#orange_hsv_lows = (6, 147, 117)
-#orange_hsv_highs = (10, 182, 239)
-#3rd floor
-orange_hsv_lows = (8, 10, 171)
-orange_hsv_highs = (37, 181, 255)
+# orange_hsv_lows = (6, 147, 117)
+# orange_hsv_highs = (10, 182, 239)
+# #orange_hsv_lows = (6, 147, 117)
+# #orange_hsv_highs = (10, 182, 239)
+# #3rd floor
+# orange_hsv_lows = (8, 10, 171)
+# orange_hsv_highs = (37, 181, 255)
 
-# mar 15 value
-hsv_lows = (3, 78, 110)
-hsv_highs = (18, 188, 255)
+# # mar 15 value
+# hsv_lows = (3, 78, 110)
+# hsv_highs = (18, 188, 255)
+
+# march 17 value
+orange_hsv_lows = (6, 64, 104)
+orange_hsv_highs = (25, 184, 255)
+
+green_hsv_lows = (39, 129, 70)
+green_hsv_highs = (57, 235, 212)
 
 
 min_dist = 5.
