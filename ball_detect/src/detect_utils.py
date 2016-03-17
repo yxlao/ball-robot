@@ -105,9 +105,13 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         # cv2.imshow('im_sum_mask', im_sum_mask * 255)
 
         circle_area = radius * radius * math.pi
+        x,y,w,h = cv2.boundingRect(contour)
+        rect_area = w * h
         contour_area = cv2.contourArea(contour)
-        print circle_area, contour_area
-        print contour_area / float(circle_area)
+        circle_factor = contour_area / float(circle_area)
+        rect_factor = contour_area / float(rect_area)
+        flat_factor = w / float(h)
+        print circle_factor, rect_factor, flat_factor
 
         # supress when large
         if surpress_when_large and len(radiuses) > 0:
@@ -373,6 +377,9 @@ if __name__ == '__main__':
         # read frame
         (_, im_bgr) = camera.read()
 
+        im_bgr = cv2.resize(im_bgr,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
+        # print im_bgr.shape
+
         if len(sys.argv) > 1 and sys.argv[1] == '-s':
             save_name = str(int(time.time())) + '.npy'
             np.save(save_name, im_bgr)
@@ -412,7 +419,7 @@ if __name__ == '__main__':
         if len(sys.argv) > 1 and sys.argv[1] == '-s':
             time.sleep(0.2)
 
-        # time.sleep(0.5)
+        # time.sleep(0.1)
 
     # when everything done, release the camera
     camera.release()
