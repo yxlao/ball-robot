@@ -332,10 +332,12 @@ def arm_hsv_to_targets(im_hsv,
                        orange_hsv_highs=orange_hsv_highs,
                        bucket_hsv_lows=bucket_hsv_lows,
                        bucket_hsv_highs=bucket_hsv_highs,
-                       surpress_paper=True):
+                       surpress_paper=False):
     """
     hsv_lows, hsv_highs and everything else use default setting for now
     """
+    surpress_paper = False
+
     # green ball
     green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
                                                               hsv_lows=green_hsv_lows,
