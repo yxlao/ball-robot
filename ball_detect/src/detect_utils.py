@@ -8,6 +8,7 @@ import cv2
 import time
 import sys
 import math
+from ball_paper_classify import clf
 
 orange_color = (0, 160, 255)
 green_color = (0, 255, 0)
@@ -111,7 +112,8 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False
         circle_factor = contour_area / float(circle_area)
         rect_factor = contour_area / float(rect_area)
         flat_factor = w / float(h)
-        print circle_factor, rect_factor, flat_factor
+        # print circle_factor, rect_factor, flat_factor
+        print "ball" if clf.predict([circle_factor, rect_factor, flat_factor])[0] == 1 else "paper"
 
         # supress when large
         if surpress_when_large and len(radiuses) > 0:
@@ -370,7 +372,7 @@ def hsv_to_targets(im_hsv,
 
 if __name__ == '__main__':
     # set camera
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(1)
 
     # main loop
     while(True):
