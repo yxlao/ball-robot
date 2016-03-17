@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 import time
 import sys
+import math
 
 orange_color = (0, 160, 255)
 green_color = (0, 255, 0)
@@ -49,35 +50,77 @@ def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
         im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
 
-
 def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False):
     # find contours
-    contours = cv2.findContours(im_mask, cv2.RETR_EXTERNAL,
+    contours = cv2.findContours(im_mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
+    # contours = tuple(contours)
 
     # get centers and radiuses
     centers = []
     radiuses = []
 
-    for countour in contours:
-        center, radius = cv2.minEnclosingCircle(countour)
-        centers.append((int(center[0]), int(center[1])))  # a tuple
-        radiuses.append(int(radius))  # an int
+    if len(contours) > 0:
+        # fit circles
+        for contour in contours:
+            center, radius = cv2.minEnclosingCircle(contour)
+            centers.append((int(center[0]), int(center[1])))  # a tuple
+            radiuses.append(int(radius))  # an int
+        # print len(contours), len(centers), len(radiuses)
 
-    if surpress_when_large and len(radiuses) > 0:
-        max_radius = max(radiuses)
-        if max_radius * 2 > im_mask.shape[0] * 0.4:
-            centers_new = []
-            radiuses_new = []
-            for center, radius in zip(centers, radiuses):
-                if radius * 2 > im_mask.shape[0] * 0.05:
-                    centers_new.append(center)
-                    radiuses_new.append(radius)
-            centers = centers_new
-            radiuses = radiuses_new
+        # sort all by largest radius
+        sorted_inds = np.argsort(radiuses).tolist()[::-1]
+        try:
+            contours = [contours[ind] for ind in sorted_inds]
+        except:
+            import ipdb; ipdb.set_trace()
+        centers = [centers[ind] for ind in sorted_inds]
+        radiuses = [radiuses[ind] for ind in sorted_inds]
 
-    if supress_sv:
-        pass
+        # try:
+        #     # contours.sort(key=dict(zip(contours, radiuses)).get)
+        #     contours = [contour for (radius, contour) in sorted(zip(radiuses, contours), reverse=True)]
+        #     centers = [center for (radius, center) in sorted(zip(radiuses, centers), reverse=True)]
+        #     radiuses = sorted(radiuses, reverse=True)
+        # except:
+        #     import ipdb; ipdb.set_trace()
+
+        # picke the largest one for now
+        contour = contours[0]
+        try:
+            center = centers[0]
+        except:
+            import ipdb; ipdb.set_trace()
+        radius = radiuses[0]
+
+        # # white area ~= countour area
+        # im_sum_mask = np.zeros_like(im_mask).astype(np.uint8)
+        # cv2.circle(im_sum_mask, center, radius, color=1., thickness=-1)
+        # im_product = im_mask * im_sum_mask
+        # white_area = np.sum(im_product) / 255
+        # # print "np.max(im_sum_mask)", np.max(im_sum_mask) # 1
+        # # print "np.max(im_mask)", np.max(im_mask) # 255
+        # # print "np.unique(im_mask)", np.unique(im_mask) # [0, 255]
+        # contour_area = cv2.contourArea(contour)
+        # print white_area, contour_area, center, radius
+        # cv2.imshow('im_mask', im_mask)
+        # cv2.imshow('im_sum_mask', im_sum_mask * 255)
+
+        # supress when large
+        if surpress_when_large and len(radiuses) > 0:
+            max_radius = max(radiuses)
+            if max_radius * 2 > im_mask.shape[0] * 0.4:
+                centers_new = []
+                radiuses_new = []
+                for center, radius in zip(centers, radiuses):
+                    if radius * 2 > im_mask.shape[0] * 0.05:
+                        centers_new.append(center)
+                        radiuses_new.append(radius)
+                centers = centers_new
+                radiuses = radiuses_new
+
+        if supress_sv:
+            pass
 
     return (centers, radiuses)
 
@@ -110,13 +153,13 @@ def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
     im_mask = cv2.medianBlur(im_mask, 23)
     # cv2.imshow('bucket_mask', im_mask)
 
-    # find countours
+    # find contours
     contours, hierarchy = cv2.findContours(
         im_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # print (len(contours))
 
     if len(contours) > 0:
-        # find countour with max area
+        # find contour with max area
         areas = [cv2.contourArea(cnt) for cnt in contours]
         max_idx = np.argmax(areas)
         cnt = contours[max_idx]
@@ -320,7 +363,7 @@ def hsv_to_targets(im_hsv,
 
 if __name__ == '__main__':
     # set camera
-    camera = cv2.VideoCapture(1)
+    camera = cv2.VideoCapture(0)
 
     # main loop
     while(True):
@@ -337,13 +380,13 @@ if __name__ == '__main__':
         # convert to hsv
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
-        # get centers and radiuses
-        green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
-                                                                  hsv_lows=green_hsv_lows,
-                                                                  hsv_highs=green_hsv_highs)
-        # plot center and radius
-        im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses,
-                                    color="green")
+        # # get centers and radiuses
+        # green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
+        #                                                           hsv_lows=green_hsv_lows,
+        #                                                           hsv_highs=green_hsv_highs)
+        # # plot center and radius
+        # im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses,
+        #                             color="green")
 
         # get centers and radiuses
         orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
@@ -354,8 +397,8 @@ if __name__ == '__main__':
                                     color="orange")
 
         # draw targests
-        targets = hsv_to_targets(im_hsv)
-        im_bgr = plot_targets(im_bgr, targets)
+        # targets = hsv_to_targets(im_hsv)
+        # im_bgr = plot_targets(im_bgr, targets)
 
         # display the resulting frame
         cv2.imshow('frame', im_bgr)
