@@ -120,7 +120,7 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True):
         centers = [centers[ind] for ind in sorted_inds]
         radiuses = [radiuses[ind] for ind in sorted_inds]
 
-        # # white area ~= countour area
+        # # white area ~= contour area
         # im_sum_mask = np.zeros_like(im_mask).astype(np.uint8)
         # cv2.circle(im_sum_mask, center, radius, color=1., thickness=-1)
         # im_product = im_mask * im_sum_mask
@@ -139,18 +139,27 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True):
         # center = centers[0]
         # radius = radiuses[0]
 
+        # supress papaer
+        supress_paper = True
+        if supress_paper:
+            for contour, center, radius in zip(contours, centers, radiuses):
+                if is_ball(contour):
+                    return ([center], [radius])
+            return ([], [])
+
         # supress when large
         if surpress_when_large and len(radiuses) > 0:
-            max_radius = max(radiuses)
-            if max_radius * 2 > im_mask.shape[0] * 0.4:
-                centers_new = []
-                radiuses_new = []
-                for center, radius in zip(centers, radiuses):
-                    if radius * 2 > im_mask.shape[0] * 0.05:
-                        centers_new.append(center)
-                        radiuses_new.append(radius)
-                centers = centers_new
-                radiuses = radiuses_new
+            pass
+            # max_radius = max(radiuses)
+            # if max_radius * 2 > im_mask.shape[0] * 0.4:
+            #     centers_new = []
+            #     radiuses_new = []
+            #     for center, radius in zip(centers, radiuses):
+            #         if radius * 2 > im_mask.shape[0] * 0.05:
+            #             centers_new.append(center)
+            #             radiuses_new.append(radius)
+            #     centers = centers_new
+            #     radiuses = radiuses_new
 
     return (centers, radiuses)
 
