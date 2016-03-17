@@ -125,7 +125,7 @@ def stop():
 
 def fine_right_turn():
     turn_right(speed=SLOW_TURN_SPEED)
-    for i in xrange(5):
+    for i in xrange(3):
         rate3.sleep()
     stop()
     for i in xrange(10):
@@ -133,16 +133,20 @@ def fine_right_turn():
 
 def fine_left_turn():
     turn_left(speed=SLOW_TURN_SPEED)
-    for i in xrange(5):
+    for i in xrange(3):
         rate3.sleep()
     stop()
     for i in xrange(10):
         rate3.sleep()
-#    turn_left(speed=SLOW_TURN_SPEED)
-#    rate2.sleep()
-#    stop()
-#    rate1.sleep()
 
+
+def fine_approach():
+    drive(speed=SLOW_DRIVE_SPEED)
+    for i in xrange(3):
+        rate3.sleep()
+    stop()
+    for i in xrange(10):
+        rate3.sleep()    
 
 def explore():
     global last_command, explore_duration, explore_state, command_start_time
@@ -461,7 +465,7 @@ def run_state_machine():
             stop()
 
 
-#rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
+rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
 rospy.Subscriber("/state_cmds", String, state_change_callback)
 rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
 rospy.Subscriber("/lower_cam_is_ball_in_sight", String, lower_cam_ball_in_sight_callback)

@@ -142,11 +142,11 @@ while not rospy.is_shutdown():
 
     global last_command
     if targets['green'] != None or targets['orange'] != None:
-        if targets['orange'] != None:
+        if targets['orange'] != None and targets['orange']['d'] < 80:
             ball_coords.x = float(targets['orange']['x'] - 160.0) /100
             ball_coords.z = float(targets['orange']['y']- 120.0) /100
-            ball_coords.y = targets['orange']['d'] 
-        elif targets['green'] != None:
+            ball_coords.y = targets['orange']['d']
+        elif targets['green'] != None and targets['green']['d'] < 80:
             ball_coords.x = float(targets['green']['x'] - 160.0) / 100
             ball_coords.z = float(targets['green']['y'] - 120.0) /100
             ball_coords.y = targets['green']['d']
@@ -160,11 +160,11 @@ while not rospy.is_shutdown():
     else:
         lower_cam_ball_in_sight_pub.publish("false")
     if right_targets['green'] != None or right_targets['orange'] != None:
-        if right_targets['orange'] != None:
+        if right_targets['orange'] != None and right_targets['orange']['d'] < 100:
             ball_coords.x = float(right_targets['orange']['x'] - 160.0) / 100
             ball_coords.z = float(right_targets['orange']['y'] - 120.0) / 100
             ball_coords.y = right_targets['orange']['d']
-        elif right_targets['green'] != None:
+        elif right_targets['green'] != None and right_targets['green']['d'] < 100:
             ball_coords.x = float(right_targets['green']['x'] - 160.0) /100
             ball_coords.z = float(right_targets['green']['y'] - 120.0) /100
             ball_coords.y = right_targets['green']['d']
