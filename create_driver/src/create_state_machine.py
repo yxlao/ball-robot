@@ -454,7 +454,7 @@ def run_state_machine():
             stop()
 
 
-rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
+#rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
 rospy.Subscriber("/state_cmds", String, state_change_callback)
 rospy.Subscriber("/is_ball_in_sight", String, ball_in_sight_callback)
 rospy.Subscriber("/lower_cam_is_ball_in_sight", String, lower_cam_ball_in_sight_callback)
