@@ -168,8 +168,8 @@ def explore():
 def fine_position():
     global last_command, command_start_time, state, stop_all_movement, time_since_ball_in_center, rate3
     if -0.2 < lower_cam_ball_coords.x and lower_cam_ball_coords.x < 0.45:
-        if lower_cam_ball_coords.y < 11:
-            if lower_cam_ball_coords.y < 7:
+        if lower_cam_ball_coords.y < 10:
+            if lower_cam_ball_coords.y < 6:
                 back_up(speed=SLOW_DRIVE_SPEED)
                 time_since_ball_in_center = rospy.get_time()
             else:
@@ -225,7 +225,7 @@ def avoid():
             back_up()
             avoid_state = "back_up"
     elif avoid_state == "back_up":
-         if current_time - command_start_time > 1.5:
+         if current_time - command_start_time > 1:
             turn_right()
             avoid_state = "turn_left"
     elif avoid_state == "turn_left":
