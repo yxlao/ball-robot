@@ -294,13 +294,13 @@ def lower_cam_ball_in_sight_callback(msg):
 def front_ultrasonic_callback(msg):
     global avoid_state, bucket_in_sight, rate1, state, should_drop_ball_pub, stop_all_movement
     if msg.data != 0:
-        if msg.data < 20 and state == "find_bucket" and abs(bucket_coords.x) < 0.5 and bucket_in_sight: # and abs(bucket_coords.x) < 0.5:
+        if msg.data < 15 and state == "find_bucket" and abs(bucket_coords.x) < 0.5 and bucket_in_sight: # and abs(bucket_coords.x) < 0.5:
             should_drop_ball_pub.publish("true")
             state = "stop"
             stop_all_movement = True
             rate1.sleep()
             state = "explore"
-        elif msg.data < 30 and state != "pick_up" and not (state == "find_bucket" and bucket_in_sight):
+        elif msg.data < 25 and state != "pick_up" and not (state == "find_bucket" and bucket_in_sight):
             state = "avoid"
             avoid_state = "stop"
 
