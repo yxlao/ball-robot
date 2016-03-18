@@ -109,7 +109,7 @@ def is_ball(contour):
     feature = get_contour_feature(contour)
     return True if clf.predict(feature)[0] == 1 else False
 
-def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_paper=True):
+def im_mask_to_center_radius(im_mask, surpress_when_large=True, surpress_paper=True):
     # find contours
     contours = cv2.findContours(im_mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -147,19 +147,19 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_paper=Tr
         # cv2.imshow('im_sum_mask', im_sum_mask * 255)
 
         # pick the largest one for now
-        # if supress_paper
+        # if surpress_paper
         # contour = contours[0]
         # center = centers[0]
         # radius = radiuses[0]
 
-        # supress papaer
-        if supress_paper:
+        # surpress papaer
+        if surpress_paper:
             for contour, center, radius in zip(contours, centers, radiuses):
                 if is_ball(contour):
                     return ([center], [radius])
             return ([], [])
 
-        # supress when large
+        # surpress when large
         if surpress_when_large and len(radiuses) > 0:
             pass
             # max_radius = max(radiuses)
@@ -177,7 +177,7 @@ def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_paper=Tr
 
 
 def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
-                              surpress_when_large=True, supress_paper=True):
+                              surpress_when_large=True, surpress_paper=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
@@ -188,7 +188,7 @@ def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
     # return centers radius
     return im_mask_to_center_radius(im_mask,
                                     surpress_when_large=surpress_when_large,
-                                    supress_paper=supress_paper)
+                                    surpress_paper=surpress_paper)
 
 
 def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
