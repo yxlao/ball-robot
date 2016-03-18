@@ -64,6 +64,11 @@ def get_contour_feature(contour):
     x,y,w,h = cv2.boundingRect(contour)
     rect_area = w * h
 
+    # find centroid
+    M = cv2.moments(contour)
+    cx = int(M['m10'] / M['m00'])
+    cy = int(M['m01'] / M['m00'])
+
     # contour area
     contour_area = cv2.contourArea(contour)
 
@@ -73,7 +78,7 @@ def get_contour_feature(contour):
     flat_factor = w / float(h)
 
     # final feature
-    feature = [circle_factor, rect_factor, flat_factor]
+    feature = [circle_factor, rect_factor, flat_factor, cx, cy, contour_area]
     return feature
 
 def is_ball(contour):
