@@ -14,44 +14,18 @@ orange_color = (0, 160, 255)
 green_color = (0, 255, 0)
 white_color = (255, 255, 255)
 
-# Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
-# green_hsv_lows = (40, 63, 77)
-# green_hsv_highs = (55, 209, 157)
-
-# # new default values
-# green_hsv_lows = (43, 144, 58)
-# green_hsv_highs = (55, 244, 179)
-
-# # orange ball (1f)
-# orange_hsv_lows = (3, 98, 212)
-# orange_hsv_highs = (15, 157, 255)
-
-# bucket_hsv_lows = (132, 33, 39)
-# bucket_hsv_highs = (166, 89, 127)
-
-# orange_hsv_lows = (6, 164, 133)
-# orange_hsv_highs = (10, 235, 247)
-
-# bucket_hsv_lows = (143, 42, 60)
-# bucket_hsv_highs = (178, 86, 137)
-
-
-# just for debugging classifier
-# orange_hsv_lows = (5, 111, 137)
-# orange_hsv_highs = (13, 182, 211)
-
 # march 17 threshold
-orange_hsv_lows = (5, 141, 159)
-orange_hsv_highs = (11, 182, 255)
+orange_hsv_lows = (4, 135, 75)
+orange_hsv_highs = (10, 197, 255)
 
-green_hsv_lows = (40, 127, 56)
-green_hsv_highs = (53, 188, 204)
-
+green_hsv_lows = (35, 123, 60)
+green_hsv_highs = (52, 221, 252)
 
 bucket_hsv_lows = (126, 30, 80)
 bucket_hsv_highs = (161, 72, 130)
 
-
+bucket_hsv_lows = (144, 44, 71)
+bucket_hsv_highs = (174, 118, 169)
 
 
 def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
