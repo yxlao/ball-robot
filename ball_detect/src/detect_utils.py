@@ -16,10 +16,10 @@ white_color = (255, 255, 255)
 
 # march 17 threshold
 orange_hsv_lows = (4, 135, 75)
-orange_hsv_highs = (10, 197, 255)
+orange_hsv_highs = (11, 231, 255)
 
-green_hsv_lows = (35, 123, 60)
-green_hsv_highs = (52, 221, 252)
+green_hsv_lows = (30, 123, 43)
+green_hsv_highs = (52, 231, 252)
 
 bucket_hsv_lows = (126, 30, 80)
 bucket_hsv_highs = (161, 72, 130)
