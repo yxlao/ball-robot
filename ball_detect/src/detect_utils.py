@@ -55,13 +55,14 @@ def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
         im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
 
+
 def get_contour_feature(contour):
     # fit center
     center, radius = cv2.minEnclosingCircle(contour)
     circle_area = radius * radius * math.pi
 
     # fit rectangle
-    x,y,w,h = cv2.boundingRect(contour)
+    x, y, w, h = cv2.boundingRect(contour)
     rect_area = w * h
 
     # find centroid
@@ -81,12 +82,14 @@ def get_contour_feature(contour):
     feature = [circle_factor, rect_factor, flat_factor, cx, cy, contour_area]
     return feature
 
+
 def is_ball(contour):
     """
     return true if the contour is ball
     """
     feature = get_contour_feature(contour)
     return True if clf.predict(feature)[0] == 1 else False
+
 
 def im_mask_to_center_radius(im_mask, surpress_when_large=True, surpress_paper=True):
     # find contours
@@ -393,7 +396,8 @@ def hsv_to_targets(im_hsv,
         orange_dict = None
 
     # bucket
-    bucket_dict = hsv_to_bucket_target(im_hsv, bucket_hsv_lows, bucket_hsv_highs)
+    bucket_dict = hsv_to_bucket_target(
+        im_hsv, bucket_hsv_lows, bucket_hsv_highs)
 
     return {'green': green_dict, 'orange': orange_dict, 'bucket': bucket_dict}
 
@@ -407,7 +411,8 @@ if __name__ == '__main__':
         # read frame
         (_, im_bgr) = camera.read()
 
-        im_bgr = cv2.resize(im_bgr,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
+        im_bgr = cv2.resize(im_bgr, None, fx=0.5, fy=0.5,
+                            interpolation=cv2.INTER_CUBIC)
         # print im_bgr.shape
 
         if len(sys.argv) > 1 and sys.argv[1] == '-s':

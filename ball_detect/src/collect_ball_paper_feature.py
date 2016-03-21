@@ -24,7 +24,8 @@ if __name__ == '__main__':
     while(True):
         # read frame
         (_, im_bgr) = camera.read()
-        im_bgr = cv2.resize(im_bgr, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_CUBIC)
+        im_bgr = cv2.resize(im_bgr, None, fx=0.5, fy=0.5,
+                            interpolation=cv2.INTER_CUBIC)
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
         # [green ball] ######################

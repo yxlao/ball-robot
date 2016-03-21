@@ -22,6 +22,7 @@ im_bgr = 0
 im_ready = False
 bridge = CvBridge()
 
+
 def image_callback(msg):
     global im_bgr, im_ready
     im_ready = True
@@ -63,26 +64,26 @@ while not rospy.is_shutdown():
         im_height = float(im_hsv.shape[0])
         im_width = float(im_hsv.shape[1])
         targets = arm_hsv_to_targets(im_hsv,
-                                    green_hsv_lows=green_hsv_lows,
-                                    green_hsv_highs=green_hsv_highs,
-                                    orange_hsv_lows=orange_hsv_lows,
-                                    orange_hsv_highs=orange_hsv_highs,
-                                    bucket_hsv_lows=(0, 0, 0),
-                                    bucket_hsv_highs=(0, 0, 0))
+                                     green_hsv_lows=green_hsv_lows,
+                                     green_hsv_highs=green_hsv_highs,
+                                     orange_hsv_lows=orange_hsv_lows,
+                                     orange_hsv_highs=orange_hsv_highs,
+                                     bucket_hsv_lows=(0, 0, 0),
+                                     bucket_hsv_highs=(0, 0, 0))
 
         # tell if a ball inside
         has_ball = False
         if targets['orange'] and targets['orange']['d']:
             if (targets['orange']['d'] > min_dist and
-                targets['orange']['d'] < max_dist and
-                targets['orange']['x'] / im_width > min_center and
-                targets['orange']['x'] / im_width < max_center):
+                    targets['orange']['d'] < max_dist and
+                    targets['orange']['x'] / im_width > min_center and
+                    targets['orange']['x'] / im_width < max_center):
                 has_ball = True
         if targets['green'] and targets['green']['d']:
             if (targets['green']['d'] > min_dist and
-                targets['green']['d'] < max_dist and
-                targets['green']['x'] / im_width > min_center and
-                targets['green']['x'] / im_width < max_center):
+                    targets['green']['d'] < max_dist and
+                    targets['green']['x'] / im_width > min_center and
+                    targets['green']['x'] / im_width < max_center):
                 has_ball = True
 
         im_bgr = plot_targets(im_bgr, targets)

@@ -44,6 +44,7 @@ drop_angle2below = 20
 drop_angle3above = -40
 drop_angle3below = -50
 
+
 def angle1callback(msg):
     global angle1, angle1ready
     angle1 = msg.data
@@ -70,6 +71,7 @@ def should_pick_up_ball_callback(msg):
         should_stop_lowering = True
     elif msg.data == "reset":
         should_reset = True
+
 
 def should_drop_ball_callback(msg):
     global pub1, state, claw_is_open
@@ -142,6 +144,7 @@ def get_lowering_cmd():
         claw_is_open = False
         return 'c'
     return "done"
+
 
 def get_dropping_cmd():
     global claw_is_open, moving_joint, should_stop_lowering, should_reset
@@ -278,7 +281,8 @@ try:
     rospy.Subscriber("/joint1/angle", Float32, angle1callback)
     rospy.Subscriber("/joint2/angle", Float32, angle2callback)
     rospy.Subscriber("/joint3/angle", Float32, angle3callback)
-    rospy.Subscriber("/should_pick_up_ball", String, should_pick_up_ball_callback)
+    rospy.Subscriber("/should_pick_up_ball", String,
+                     should_pick_up_ball_callback)
     rospy.Subscriber("/should_drop_ball", String, should_drop_ball_callback)
     rospy.init_node('arm_feedback_node', anonymous=True)
     run_node()

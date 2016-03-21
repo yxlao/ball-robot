@@ -13,13 +13,14 @@ print "running"
 angle_90 = 0.4139
 angle_0 = 0.115
 
+
 def voltage_to_angle(voltage):
     return (voltage - angle_0) / (angle_90 - angle_0) * 90. + 0.
 
 pub = rospy.Publisher('arm_angle', Float32, queue_size=10)
 rospy.init_node('angle_sender', anonymous=True)
 while True:
-    
+
     port.flushInput()
     rcv = port.read(4)
     msg = Float32()
@@ -31,4 +32,3 @@ while True:
     except:
         print "no signal"
     time.sleep(0.2)
-    

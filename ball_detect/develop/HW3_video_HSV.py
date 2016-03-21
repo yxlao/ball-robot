@@ -7,46 +7,46 @@ while(True):
     # Capture frame-by-frame
     ret, frame0 = cap.read()
     # Resize the resolution of image
-    frame=cv2.resize(frame0,(320,240),interpolation=cv2.INTER_CUBIC)
+    frame = cv2.resize(frame0, (320, 240), interpolation=cv2.INTER_CUBIC)
     # Convert BGR to HSV
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    h,s,v=cv2.split(hsv)
+    h, s, v = cv2.split(hsv)
 
     # find orange
-    for y in range(1,320):
-        for x in range(1,240):
-            if h[x,y]>3 and h[x,y]<8 and s[x,y]>156 and s[x,y]<188 and v[x,y]>144 and v[x,y]<214:
-                h[x,y]=h[x,y]
+    for y in range(1, 320):
+        for x in range(1, 240):
+            if h[x, y] > 3 and h[x, y] < 8 and s[x, y] > 156 and s[x, y] < 188 and v[x, y] > 144 and v[x, y] < 214:
+                h[x, y] = h[x, y]
             else:
-                h[x,y]=255
-    ret,thresh = cv2.threshold(h,60,255,0)
-    #erode
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(20, 20))
-    eroded = cv2.erode(thresh,kernel)
-    #dilate
-    dilated = cv2.dilate(eroded,kernel)
-    #find contour
-    image,contours,hierarchy = cv2.findContours(dilated, 1, 2)
+                h[x, y] = 255
+    ret, thresh = cv2.threshold(h, 60, 255, 0)
+    # erode
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (20, 20))
+    eroded = cv2.erode(thresh, kernel)
+    # dilate
+    dilated = cv2.dilate(eroded, kernel)
+    # find contour
+    image, contours, hierarchy = cv2.findContours(dilated, 1, 2)
 
     cnt = contours[0]
     # Calculte the center of the ball
-    (center_x,center_y),radius = cv2.minEnclosingCircle(cnt)
+    (center_x, center_y), radius = cv2.minEnclosingCircle(cnt)
 
-    center_x=center_x*2
-    center_y=center_y*2
-    radius=radius*2
-    
-    center = (int(center_x),int(center_y))
+    center_x = center_x * 2
+    center_y = center_y * 2
+    radius = radius * 2
+
+    center = (int(center_x), int(center_y))
     radius = int(radius)
     # Plot the position of the ball
-    if radius>2:
-        cv2.circle(frame0,center,radius,(0,255,0),2)
+    if radius > 2:
+        cv2.circle(frame0, center, radius, (0, 255, 0), 2)
         print center_x
         print center_y
     #gray = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY)
 
     # Display the resulting frame
-    cv2.imshow('frame',frame0)
+    cv2.imshow('frame', frame0)
     key = cv2.waitKey(10)
     if key == 27:
         break

@@ -32,7 +32,7 @@ def ir_bumper_callback(data):
             turn_right_msg = twist_msg
             turn_right_msg.linear.x = 0
             turn_right_msg.angular.z = -0.5
-            pub.publish(turn_right_msg) 
+            pub.publish(turn_right_msg)
     elif data.header.frame_id == "base_irbumper_center_left":
         if data.state == True:
             turn_right_msg = twist_msg
@@ -44,19 +44,20 @@ def ir_bumper_callback(data):
             turn_left_msg = twist_msg
             turn_left_msg.linear.x = 0
             turn_left_msg.angular.z = 0.5
-            pub.publish(turn_left_msg) 
+            pub.publish(turn_left_msg)
     elif data.header.frame_id == "base_irbumper_center_right":
         if data.state == True:
             turn_left_msg = twist_msg
             turn_left_msg.linear.x = 0
             turn_left_msg.angular.z = 0.5
-            pub.publish(turn_left_msg) 
+            pub.publish(turn_left_msg)
     elif data.header.frame_id == "base_irbumper_front_right":
         if data.state == True:
             turn_left_msg = twist_msg
             turn_left_msg.linear.x = 0
             turn_left_msg.angular.z = 0.5
             pub.publish(turn_left_msg)
+
 
 def bumper_callback(data):
     if data.left.state == True or data.right.state == True:
@@ -70,5 +71,5 @@ def bumper_callback(data):
 
 
 rospy.Subscriber("/ir_bumper", RoombaIR, ir_bumper_callback)
-rospy.Subscriber("/bumper", Bumper, bumper_callback)            
+rospy.Subscriber("/bumper", Bumper, bumper_callback)
 rospy.spin()

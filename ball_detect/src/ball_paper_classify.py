@@ -6,12 +6,14 @@ from sklearn import ensemble
 # clf = linear_model.LogisticRegression()
 clf = ensemble.GradientBoostingClassifier()
 
+
 def get_accuracy(labels_predict, labels):
     return np.sum(labels_predict == labels) / float(len(labels))
 
 home = expanduser("~")
 ball_factors = np.loadtxt(home + '/robot/src/ball_detect/src/ball_factors.txt')
-paper_factors = np.loadtxt(home + '/robot/src/ball_detect/src/paper_factors.txt')
+paper_factors = np.loadtxt(
+    home + '/robot/src/ball_detect/src/paper_factors.txt')
 
 # try:
 all_factors = np.concatenate((ball_factors, paper_factors), axis=0)
