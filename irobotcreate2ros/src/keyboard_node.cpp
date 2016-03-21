@@ -34,7 +34,7 @@
 *
 * Author: Alessandro Settimi 2015
 * Author: Mirko Ferrati 2015
-* 
+*
 *********************************************************************/
 
 #include "keyboard_node.h"
@@ -45,100 +45,94 @@
 int kfd = 0;
 struct termios cooked, raw;
 
-keyboard_handler::keyboard_handler()
-{
+keyboard_handler::keyboard_handler() {
     twist_pub = nodeh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
-    selection_sub = nodeh.subscribe("/agent_selection",10,&keyboard_handler::agent_selection_callback,this);
+    selection_sub = nodeh.subscribe("/agent_selection", 10,
+                                    &keyboard_handler::agent_selection_callback, this);
 
-    twist.linear.x=0;
-    twist.linear.y=0;
-    twist.linear.z=0;
-    twist.angular.x=0;
-    twist.angular.y=0;
-    twist.angular.z=0;
+    twist.linear.x = 0;
+    twist.linear.y = 0;
+    twist.linear.z = 0;
+    twist.angular.x = 0;
+    twist.angular.y = 0;
+    twist.angular.z = 0;
 }
 
-void keyboard_handler::agent_selection_callback(const std_msgs::String& msg)
-{
-    if(msg.data == "All") twist_pub = nodeh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
-    else twist_pub = nodeh.advertise<geometry_msgs::Twist>("/"+msg.data+"/cmd_vel", 1);
+void keyboard_handler::agent_selection_callback(const std_msgs::String& msg) {
+    if (msg.data == "All") twist_pub =
+            nodeh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+    else twist_pub = nodeh.advertise<geometry_msgs::Twist>("/" + msg.data +
+                         "/cmd_vel", 1);
 }
 
-void keyboard_handler::keyboard_reading()
-{
+void keyboard_handler::keyboard_reading() {
     char c;
 
-    // get the console in raw mode                                                              
+    // get the console in raw mode
     tcgetattr(kfd, &cooked);
     memcpy(&raw, &cooked, sizeof(struct termios));
-    raw.c_lflag &=~ (ICANON | ECHO);
-    // Setting a new line, then end of file                         
+    raw.c_lflag &= ~ (ICANON | ECHO);
+    // Setting a new line, then end of file
     raw.c_cc[VEOL] = 1;
     raw.c_cc[VEOF] = 2;
     tcsetattr(kfd, TCSANOW, &raw);
 
     ROS_INFO("Use arrow keys to move the robot.");
 
-    while(1)
-    {
-	if(read(kfd, &c, 1) < 0)
-	{
-	    ROS_ERROR("Something wrong!");
-	    exit(-1);
-	}
+    while (1) {
+        if (read(kfd, &c, 1) < 0) {
+            ROS_ERROR("Something wrong!");
+            exit(-1);
+        }
 
-	twist.linear.x = 0;
-	twist.angular.z = 0;
+        twist.linear.x = 0;
+        twist.angular.z = 0;
 
-	switch(c)
-	{
-	    case LEFT:
-		twist.angular.z = MAX_ANG_VEL;
-		break;
-	    case RIGHT:
-		twist.angular.z = -MAX_ANG_VEL;
-		break;
-	    case FORWARD:
-		twist.linear.x = MAX_LIN_VEL;
-		break;
-	    case BACKWARD:
-		twist.linear.x = -MAX_LIN_VEL;
-		break;
-	    case STOP:
-		twist.linear.x = 0;
-		twist.angular.z = 0;
-	    break;
-	}
+        switch (c) {
+        case LEFT:
+            twist.angular.z = MAX_ANG_VEL;
+            break;
+        case RIGHT:
+            twist.angular.z = -MAX_ANG_VEL;
+            break;
+        case FORWARD:
+            twist.linear.x = MAX_LIN_VEL;
+            break;
+        case BACKWARD:
+            twist.linear.x = -MAX_LIN_VEL;
+            break;
+        case STOP:
+            twist.linear.x = 0;
+            twist.angular.z = 0;
+            break;
+        }
 
-	twist_pub.publish(twist);    
- 
-	ros::spinOnce();
+        twist_pub.publish(twist);
 
-	usleep(100);
-    }    
+        ros::spinOnce();
+
+        usleep(100);
+    }
 }
 
-keyboard_handler::~keyboard_handler()
-{
+keyboard_handler::~keyboard_handler() {
 
 }
 
-void quit(int sig)
-{
+void quit(int sig) {
     tcsetattr(kfd, TCSANOW, &cooked);
     ros::shutdown();
     exit(0);
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     ros::init(argc, argv, "keyboard_node");
 
     keyboard_handler keyboard_h;
 
     ROS_INFO("Keyboard Handler Started");
 
-    signal(SIGINT,quit);
+    signal(SIGINT, quit);
 
     keyboard_h.keyboard_reading();
 
