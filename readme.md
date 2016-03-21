@@ -21,7 +21,7 @@
 - Arduino Motor Shield * 1
 - Mbed * 1
 - Potentiometer * 4
-- TP-LINK rounter * 1
+- TP-LINK router * 1
 - Robotic arm * 1 (with 4 motors)
 - Laptop * 1 (for launching and monitoring)
 - iRobot cleaner * 1
@@ -29,7 +29,7 @@
 - USB camera * 3
 - Plastic platform * 1
 
-### 1.2 Hardware architecture
+### 1.2 Hardware hierarchy
 
 Here, we describe the responsibility of each hardware components
 
@@ -50,7 +50,7 @@ Here, we describe the responsibility of each hardware components
     - Runs
         - ROS Master node
         - Motor control node
-        - Ball dtection node
+        - Ball detection node
         - Voltage receiver node
         - Ultrasonic distance sensor node
 
