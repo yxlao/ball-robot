@@ -7,103 +7,156 @@ import numpy as np
 import cv2
 import time
 import sys
+import math
+from ball_paper_classify import clf
 
-# Hue range is [0,179], Saturation range is [0,255] and Value range is [0,255]
+orange_color = (0, 160, 255)
+green_color = (0, 255, 0)
+white_color = (255, 255, 255)
 
-# new default values
-# orange_hsv_lows = (6, 93, 149)
-# orange_hsv_highs = (15, 175, 255)
-# green_hsv_lows = (46, 115, 96)
-# green_hsv_highs = (52, 164, 237)
+# march 17 threshold
+orange_hsv_lows = (4, 135, 75)
+orange_hsv_highs = (11, 231, 255)
 
-# bucket (3f floor)
-# [current low] (97, 33, 93)
-# [current high] (121, 84, 143)
+green_hsv_lows = (30, 123, 43)
+green_hsv_highs = (52, 231, 252)
 
-# green ball (3f floor)
-# [current low] (46, 115, 96)
-# [current high] (52, 164, 237)
+bucket_hsv_lows = (126, 30, 80)
+bucket_hsv_highs = (161, 72, 130)
 
-# orange ball (3f floor)
-# [current low] (6, 93, 149)
-# [current high] (15, 175, 255)
-
-# green bll (3f white desk)
-green_hsv_lows = (44, 150, 71)
-green_hsv_highs = (52, 208, 124)
+bucket_hsv_lows = (144, 44, 71)
+bucket_hsv_highs = (174, 118, 169)
 
 
-# orange bll (3f white desk)
-orange_hsv_lows = (6, 164, 81)
-orange_hsv_highs = (10, 199, 172)
-
-
-def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs):
-    # mask by threshold
-    im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
-    im_mask = cv2.medianBlur(im_mask, 5)
-    # erode
-    # im_mask = cv2.erode(im_mask, None, iterations=2)
-    # dilate
-    im_mask = cv2.dilate(im_mask, None, iterations=3)
+def hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs, is_bucket=False, is_arm=False):
+    if is_bucket:
+        # mask by threshold
+        im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+        im_mask = cv2.medianBlur(im_mask, 7)
+        # erode
+        im_mask = cv2.erode(im_mask, None, iterations=2)
+        # dilate
+        im_mask = cv2.dilate(im_mask, None, iterations=3)
+    elif is_arm:
+        # mask by threshold
+        im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+        im_mask = cv2.medianBlur(im_mask, 9)
+        # erode
+        # im_mask = cv2.erode(im_mask, None, iterations=2)
+        # dilate
+        im_mask = cv2.dilate(im_mask, None, iterations=3)
+    else:
+        # mask by threshold
+        im_mask = cv2.inRange(im_hsv, hsv_lows, hsv_highs)
+        im_mask = cv2.medianBlur(im_mask, 5)
+        # erode
+        # im_mask = cv2.erode(im_mask, None, iterations=2)
+        # dilate
+        im_mask = cv2.dilate(im_mask, None, iterations=3)
     return im_mask
 
+def get_contour_feature(contour):
+    # fit center
+    center, radius = cv2.minEnclosingCircle(contour)
+    circle_area = radius * radius * math.pi
 
-def im_mask_to_center_radius(im_mask, surpress_when_large=True, supress_sv=False):
+    # fit rectangle
+    x,y,w,h = cv2.boundingRect(contour)
+    rect_area = w * h
+
+    # find centroid
+    M = cv2.moments(contour)
+    cx = int(M['m10'] / M['m00'])
+    cy = int(M['m01'] / M['m00'])
+
+    # contour area
+    contour_area = cv2.contourArea(contour)
+
+    # factors
+    circle_factor = contour_area / float(circle_area)
+    rect_factor = contour_area / float(rect_area)
+    flat_factor = w / float(h)
+
+    # final feature
+    feature = [circle_factor, rect_factor, flat_factor, cx, cy, contour_area]
+    return feature
+
+def is_ball(contour):
+    """
+    return true if the contour is ball
+    """
+    feature = get_contour_feature(contour)
+    return True if clf.predict(feature)[0] == 1 else False
+
+def im_mask_to_center_radius(im_mask, surpress_when_large=True, surpress_paper=True):
     # find contours
-    contours = cv2.findContours(im_mask, cv2.RETR_EXTERNAL,
+    contours = cv2.findContours(im_mask.copy(), cv2.RETR_EXTERNAL,
                                 cv2.CHAIN_APPROX_SIMPLE)[-2]
+    # contours = tuple(contours)
 
     # get centers and radiuses
     centers = []
     radiuses = []
 
-    for countour in contours:
-        center, radius = cv2.minEnclosingCircle(countour)
-        centers.append((int(center[0]), int(center[1])))  # a tuple
-        radiuses.append(int(radius))  # an int
+    if len(contours) > 0:
+        # fit circles
+        for contour in contours:
+            center, radius = cv2.minEnclosingCircle(contour)
+            centers.append((int(center[0]), int(center[1])))  # a tuple
+            radiuses.append(int(radius))  # an int
+        # print len(contours), len(centers), len(radiuses)
 
-    if surpress_when_large and len(radiuses) > 0:
-        max_radius = max(radiuses)
-        if max_radius * 2 > im_mask.shape[0] * 0.4:
-            centers_new = []
-            radiuses_new = []
-            for center, radius in zip(centers, radiuses):
-                if radius * 2 > im_mask.shape[0] * 0.05:
-                    centers_new.append(center)
-                    radiuses_new.append(radius)
-            centers = centers_new
-            radiuses = radiuses_new
+        # sort all by largest radius
+        sorted_inds = np.argsort(radiuses).tolist()[::-1]
+        contours = [contours[ind] for ind in sorted_inds]
+        centers = [centers[ind] for ind in sorted_inds]
+        radiuses = [radiuses[ind] for ind in sorted_inds]
 
-    if supress_sv:
-        pass
-        # elimate v that are smaller than global mean
-        # v_mean = np.mean(im_hsv[:, :, 2])
-        # centers_new = []
-        # radiuses_new = []
-        # im_mean_mask = np.zeros(im_hsv.shape[:2]).astype(np.uint8)
-        # for center, radius in zip(centers, radiuses):
-        # reset
-        #     im_mean_mask[:] = 0
-        # mask to "1" at the ball location
-        #     cv2.circle(im_mean_mask, center, radius, color=1, thickness=-1)
-        # area
-        #     area = np.sum(im_mean_mask)
-        # get mean, element wise product
-        #     im_mean_mask = im_mean_mask * im_hsv[:, :, 2]
-        #     v_mean_local = np.sum(im_mean_mask) / float(area)
-        #     if v_mean_local >= v_mean * 1:
-        #         centers_new.append(center)
-        #         radiuses_new.append(radius)
-        # print len(radiuses), len(radiuses_new)
-        # centers = centers_new
-        # radiuses = radiuses_new
+        # # white area ~= contour area
+        # im_sum_mask = np.zeros_like(im_mask).astype(np.uint8)
+        # cv2.circle(im_sum_mask, center, radius, color=1., thickness=-1)
+        # im_product = im_mask * im_sum_mask
+        # white_area = np.sum(im_product) / 255
+        # # print "np.max(im_sum_mask)", np.max(im_sum_mask) # 1
+        # # print "np.max(im_mask)", np.max(im_mask) # 255
+        # # print "np.unique(im_mask)", np.unique(im_mask) # [0, 255]
+        # contour_area = cv2.contourArea(contour)
+        # print white_area, contour_area, center, radius
+        # cv2.imshow('im_mask', im_mask)
+        # cv2.imshow('im_sum_mask', im_sum_mask * 255)
+
+        # pick the largest one for now
+        # if surpress_paper
+        # contour = contours[0]
+        # center = centers[0]
+        # radius = radiuses[0]
+
+        # surpress papaer
+        if surpress_paper:
+            for contour, center, radius in zip(contours, centers, radiuses):
+                if is_ball(contour):
+                    return ([center], [radius])
+            return ([], [])
+
+        # surpress when large
+        if surpress_when_large and len(radiuses) > 0:
+            pass
+            # max_radius = max(radiuses)
+            # if max_radius * 2 > im_mask.shape[0] * 0.4:
+            #     centers_new = []
+            #     radiuses_new = []
+            #     for center, radius in zip(centers, radiuses):
+            #         if radius * 2 > im_mask.shape[0] * 0.05:
+            #             centers_new.append(center)
+            #             radiuses_new.append(radius)
+            #     centers = centers_new
+            #     radiuses = radiuses_new
 
     return (centers, radiuses)
 
 
-def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
-                         supress_sv=False):
+def hsv_to_ball_center_radius(im_hsv, hsv_lows, hsv_highs,
+                              surpress_when_large=True, surpress_paper=True):
     """
     Detect ball of from bgr image, returns centers and radius for circles
     """
@@ -112,10 +165,51 @@ def hsv_to_center_radius(im_hsv, hsv_lows, hsv_highs, surpress_when_large=True,
     im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
 
     # return centers radius
-    return im_mask_to_center_radius(im_mask, surpress_when_large, supress_sv)
+    return im_mask_to_center_radius(im_mask,
+                                    surpress_when_large=surpress_when_large,
+                                    surpress_paper=surpress_paper)
 
 
-def plot_center_radius(im, centers, radiuses, color="orange"):
+def hsv_to_bucket_target(im_hsv, hsv_lows, hsv_highs):
+    """
+    when the bucket fill up the whole picture:
+        return center as the center of the whole image
+    when bucket is not found:
+        return [(), ()]
+    other wise:
+        return [(center_x, center_y), radius]
+    """
+    im_mask = hsv_to_im_mask(im_hsv, bucket_hsv_lows, bucket_hsv_highs,
+                             is_bucket=True)
+
+    im_mask = cv2.medianBlur(im_mask, 23)
+    # cv2.imshow('bucket_mask', im_mask)
+
+    # find contours
+    contours, hierarchy = cv2.findContours(
+        im_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # print (len(contours))
+
+    if len(contours) > 0:
+        # find contour with max area
+        areas = [cv2.contourArea(cnt) for cnt in contours]
+        max_idx = np.argmax(areas)
+        cnt = contours[max_idx]
+
+        im_height = float(im_mask.shape[0])
+        x, y, w, h = cv2.boundingRect(cnt)
+        d = 22.72 / (h / im_height)
+        x = int(x + w / 2)
+        y = int(y + h / 2)
+        w = int(w)
+        # print d
+
+        return {'x': x, 'y': y, 'w': w, 'h': h, 'd': d}
+    else:
+        return None
+
+
+def plot_center_radius(im, centers, radiuses, color=None):
     """
     Plot circles of centers and radius to im
     """
@@ -123,73 +217,185 @@ def plot_center_radius(im, centers, radiuses, color="orange"):
     for center, radius in zip(centers, radiuses):
         if radius > 2:
             if color == "orange":
-                cv2.circle(im, center, radius, (0, 160, 255), 2)
+                cv2.circle(im, center, radius, orange_color, 2)
             elif color == "green":
-                cv2.circle(im, center, radius, (0, 255, 0), 2)
+                cv2.circle(im, center, radius, green_color, 2)
                 pass
             else:
-                cv2.circle(im, center, radius, (255, 255, 255), 2)
+                cv2.circle(im, center, radius, white_color, 2)
     return im
 
 
-def get_ball_coordinate(center0, center1, radius0, radius1):
+def plot_targets(im, targets):
     """
-    x: horizontal
-    y: depth
-    z: vertical
+    targets['green'] = {'x': xxx, 'y': xxx, 'size': xxx}
+    targets['orange'] = {'x': xxx, 'y': xxx, 'size': xxx}
+    targets['bucket'] = {'x': xxx, 'y': xxx, 'size': xxx}
     """
-    # constants
-    # f = 10.  # focal length, in cm
-    # T = 13.5  # baseline, in cm
+    if targets['green'] is not None:
+        cv2.line(im,
+                 (targets['green']['x'] - targets['green']['size'],
+                  targets['green']['y']),
+                 (targets['green']['x'] + targets['green']['size'],
+                  targets['green']['y']),
+                 color=green_color, thickness=2)
+        cv2.line(im,
+                 (targets['green']['x'],
+                  targets['green']['y'] - targets['green']['size']),
+                 (targets['green']['x'],
+                  targets['green']['y'] + targets['green']['size']),
+                 color=green_color, thickness=2)
+        cv2.putText(im, '%.2f' % targets['green']['d'],
+                    (targets['green']['x'], targets['green']['y']),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
-    # coefficients
-    # kx = 50.
-    # ky = 100.
-    # kz = 0.0005
+    if targets['orange'] is not None:
+        cv2.line(im,
+                 (targets['orange']['x'] - targets['orange']['size'],
+                  targets['orange']['y']),
+                 (targets['orange']['x'] + targets['orange']['size'],
+                  targets['orange']['y']),
+                 color=orange_color, thickness=2)
+        cv2.line(im,
+                 (targets['orange']['x'],
+                  targets['orange']['y'] - targets['orange']['size']),
+                 (targets['orange']['x'],
+                  targets['orange']['y'] + targets['orange']['size']),
+                 color=orange_color, thickness=2)
+        cv2.putText(im, '%.2f' % targets['orange']['d'],
+                    (targets['orange']['x'], targets['orange']['y']),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
-    # radius
-    # radius = (radius0 + radius1) / 2.0  # average radius
+    if targets['bucket'] is not None:
+        x = targets['bucket']['x']
+        y = targets['bucket']['y']
+        w = targets['bucket']['w']
+        h = targets['bucket']['h']
+        d = targets['bucket']['d']
+        half_w = int(w / 2)
+        half_h = int(h / 2)
+        cv2.rectangle(im,
+                      (x - half_w, y - half_h),
+                      (x + half_w, y + half_h),
+                      (0, 255, 0), 2)
+        cv2.putText(im, '%.2f' % d, (x, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+        # cv2.line(im,
+        #          (targets['bucket']['x'] - targets['bucket']
+        #           ['size'], targets['bucket']['y']),
+        #          (targets['bucket']['x'] + targets['bucket']
+        #           ['size'], targets['bucket']['y']),
+        #          color=white_color, thickness=2)
+        # cv2.line(im,
+        #          (targets['bucket']['x'], targets['bucket']
+        #           ['y'] - targets['bucket']['size']),
+        #          (targets['bucket']['x'], targets['bucket']
+        #           ['y'] + targets['bucket']['size']),
+        #          color=white_color, thickness=2)
 
-    # calculate x, y, z
-    # y = f * T * ky / (abs(center0[1] - center1[1]) * radius + 1e-6)
-    # x = (center0[0] - center1[0]) * kx * y
-    # z = (240 - center1[1]) * kz * y
-
-    x = (center0[0] + center1[0]) / 2.0 - 320.0
-    x = center0[0] - 320.0
-    y = 100. / ((radius0 + radius1) / 2.0)
-    z = (center0[1] + center1[1]) / 2.0 - 240.0
-    z = center0[1] - 240.0
-
-    x = x / 100.
-    y = y * 0.3
-    z = z / 100.
-    return (x, y, z)
+    return im
 
 
-def get_ball_coordinates(center, radius):
-    x = center[0] - 160.0
-    y = 100. / radius
-    z = center[1] - 120.0
-
-    x = x / 100.
-    y = y * 0.3
-    z = z / 100.
-    return (x, y, z)
-
-
-def make_valid(thresholds):
+def ball_radius_to_dist(radius, im_height):
     """
-    input: 3 tuple
+    returns distance in centimeters
     """
-    thresholds = list(thresholds)
-    thresholds[0] = max(0, thresholds[0])
-    thresholds[1] = max(0, thresholds[1])
-    thresholds[2] = max(0, thresholds[2])
-    thresholds[0] = min(179, thresholds[0])
-    thresholds[1] = min(255, thresholds[1])
-    thresholds[2] = min(255, thresholds[2])
-    return tuple(thresholds)
+    # print radius, im_height
+    return 2.5 / (radius / float(im_height))
+
+
+def arm_hsv_to_targets(im_hsv,
+                       green_hsv_lows=green_hsv_lows,
+                       green_hsv_highs=green_hsv_highs,
+                       orange_hsv_lows=orange_hsv_lows,
+                       orange_hsv_highs=orange_hsv_highs,
+                       bucket_hsv_lows=bucket_hsv_lows,
+                       bucket_hsv_highs=bucket_hsv_highs,
+                       surpress_paper=False):
+    """
+    hsv_lows, hsv_highs and everything else use default setting for now
+    """
+    surpress_paper = False
+
+    # green ball
+    green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                              hsv_lows=green_hsv_lows,
+                                                              hsv_highs=green_hsv_highs,
+                                                              surpress_paper=surpress_paper)
+    if len(green_radiuses) > 0:
+        green_centers = [c for (r, c) in sorted(zip(green_radiuses, green_centers),
+                                                reverse=True)]
+        green_radiuses = sorted(green_radiuses, reverse=True)
+        green_dict = {'x': green_centers[0][0],
+                      'y': green_centers[0][1],
+                      'size': green_radiuses[0],
+                      'd': ball_radius_to_dist(green_radiuses[0], im_hsv.shape[0])}
+    else:
+        green_dict = None
+
+    # orange ball
+    orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                hsv_lows=orange_hsv_lows,
+                                                                hsv_highs=orange_hsv_highs,
+                                                                surpress_paper=surpress_paper)
+    if len(orange_radiuses) > 0:
+        orange_centers = [c for (r, c) in sorted(zip(orange_radiuses, orange_centers),
+                                                 reverse=True)]
+        orange_radiuses = sorted(orange_radiuses, reverse=True)
+        orange_dict = {'x': orange_centers[0][0],
+                       'y': orange_centers[0][1],
+                       'size': orange_radiuses[0],
+                       'd': ball_radius_to_dist(orange_radiuses[0], im_hsv.shape[0])}
+    else:
+        orange_dict = None
+
+    return {'green': green_dict, 'orange': orange_dict, 'bucket': None}
+
+
+def hsv_to_targets(im_hsv,
+                   green_hsv_lows=green_hsv_lows,
+                   green_hsv_highs=green_hsv_highs,
+                   orange_hsv_lows=orange_hsv_lows,
+                   orange_hsv_highs=orange_hsv_highs,
+                   bucket_hsv_lows=bucket_hsv_lows,
+                   bucket_hsv_highs=bucket_hsv_highs):
+    """
+    hsv_lows, hsv_highs and everything else use default setting for now
+    """
+    # green ball
+    green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                              hsv_lows=green_hsv_lows,
+                                                              hsv_highs=green_hsv_highs)
+    if len(green_radiuses) > 0:
+        green_centers = [c for (r, c) in sorted(zip(green_radiuses, green_centers),
+                                                reverse=True)]
+        green_radiuses = sorted(green_radiuses, reverse=True)
+        green_dict = {'x': green_centers[0][0],
+                      'y': green_centers[0][1],
+                      'size': green_radiuses[0],
+                      'd': ball_radius_to_dist(green_radiuses[0], im_hsv.shape[0])}
+    else:
+        green_dict = None
+
+    # orange ball
+    orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                hsv_lows=orange_hsv_lows,
+                                                                hsv_highs=orange_hsv_highs)
+    if len(orange_radiuses) > 0:
+        orange_centers = [c for (r, c) in sorted(zip(orange_radiuses, orange_centers),
+                                                 reverse=True)]
+        orange_radiuses = sorted(orange_radiuses, reverse=True)
+        orange_dict = {'x': orange_centers[0][0],
+                       'y': orange_centers[0][1],
+                       'size': orange_radiuses[0],
+                       'd': ball_radius_to_dist(orange_radiuses[0], im_hsv.shape[0])}
+    else:
+        orange_dict = None
+
+    # bucket
+    bucket_dict = hsv_to_bucket_target(im_hsv, bucket_hsv_lows, bucket_hsv_highs)
+
+    return {'green': green_dict, 'orange': orange_dict, 'bucket': bucket_dict}
 
 
 if __name__ == '__main__':
@@ -200,6 +406,9 @@ if __name__ == '__main__':
     while(True):
         # read frame
         (_, im_bgr) = camera.read()
+
+        im_bgr = cv2.resize(im_bgr,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_CUBIC)
+        # print im_bgr.shape
 
         if len(sys.argv) > 1 and sys.argv[1] == '-s':
             save_name = str(int(time.time())) + '.npy'
@@ -212,20 +421,24 @@ if __name__ == '__main__':
         im_hsv = cv2.cvtColor(im_bgr, cv2.COLOR_BGR2HSV)
 
         # get centers and radiuses
-        green_centers, green_radiuses = hsv_to_center_radius(im_hsv,
-                                                             hsv_lows=green_hsv_lows,
-                                                             hsv_highs=green_hsv_highs)
+        green_centers, green_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                  hsv_lows=green_hsv_lows,
+                                                                  hsv_highs=green_hsv_highs)
         # plot center and radius
         im_bgr = plot_center_radius(im_bgr, green_centers, green_radiuses,
                                     color="green")
 
         # get centers and radiuses
-        orange_centers, orange_radiuses = hsv_to_center_radius(im_hsv,
-                                                               hsv_lows=orange_hsv_lows,
-                                                               hsv_highs=orange_hsv_highs)
+        orange_centers, orange_radiuses = hsv_to_ball_center_radius(im_hsv,
+                                                                    hsv_lows=orange_hsv_lows,
+                                                                    hsv_highs=orange_hsv_highs)
         # plot center and radius
         im_bgr = plot_center_radius(im_bgr, orange_centers, orange_radiuses,
                                     color="orange")
+
+        # draw targests
+        targets = hsv_to_targets(im_hsv)
+        im_bgr = plot_targets(im_bgr, targets)
 
         # display the resulting frame
         cv2.imshow('frame', im_bgr)
@@ -236,7 +449,7 @@ if __name__ == '__main__':
         if len(sys.argv) > 1 and sys.argv[1] == '-s':
             time.sleep(0.2)
 
-        # time.sleep(0.5)
+        # time.sleep(0.1)
 
     # when everything done, release the camera
     camera.release()

@@ -13,6 +13,8 @@ therefore,
 """
 
 import numpy as np
+import scipy
+import scipy.misc
 import cv2
 import time
 import sys
@@ -30,12 +32,6 @@ def append_sample(event, x, y, flags, param):
     global hsv_samples, im_hsv, im_bgr
     if event == cv2.EVENT_LBUTTONUP:
         hsv = im_hsv[y, x, :].copy()
-        # if hsv[0] > 50 and hsv[1] > 5 and hsv[2] > 5:
-        #     hsv_samples.append(hsv)
-        #     print "[appended] x: %s, y: %s, hsv %s" % (x, y, hsv)
-        #     hsv_lows, hsv_highs = hsv_threshold_from_sample(hsv_samples)
-        #     print "[current low] %s" % (hsv_lows,)
-        #     print "[current high] %s" % (hsv_highs,)
         if hsv[0] > 2 and hsv[1] > 5 and hsv[2] > 5:
             hsv_samples.append(hsv)
             print "[appended] x: %s, y: %s, hsv %s" % (x, y, hsv)
@@ -96,6 +92,11 @@ if __name__ == '__main__':
         # im_mask = hsv_to_im_mask(im_hsv, hsv_lows, hsv_highs)
         im_mask = hsv_to_im_mask_plot_intermediate(im_hsv, hsv_lows, hsv_highs)
 
+        # timestamp = str(int(time.time()))
+        # np.save(timestamp + '.npy', im_mask)
+        # scipy.misc.imsave(timestamp + '.png', im_mask)
+        # time.sleep(1)
+
         # get greencenters and radiuses
         centers, radiuses = im_mask_to_center_radius(im_mask)
 
@@ -111,7 +112,8 @@ if __name__ == '__main__':
         #     break
 
         key = cv2.waitKey(30)
-        # print "key", key
+        if key != -1:
+            print "key", key
         if key == 1113864:
             print "received backspace"
             if len(hsv_samples) > 0:
