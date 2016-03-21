@@ -1,7 +1,6 @@
 # Robot Design Overview
-**Link to the videos**
 
-**Robot's capabilities**
+## Robot's capabilities
 
 - Detect orange and green balls and select closest target
 - Distinguish balls from color papers
