@@ -1,4 +1,16 @@
 # Robot Design Overview
+**Link to the videos**
+
+**Robot's capabilities**
+
+- Detect orange and grenn balls and select closest target
+- Distinguish balls from color papers
+- Drive towards to the ball
+- Picku up the ball with robotic arm
+- Front and back avoid obstacle
+- Detect bucket
+- Drive towards the bucket
+- Drop the ball into the bucket with robotic arm
 
 ## 1 Hardware
 
@@ -22,15 +34,25 @@
 Here, we describe the responsibility of each hardware components
 
 - Raspberry Pi 1
-    - Connected to bottom USB **camera**, ball detection for bottom camera
-    - Connected to middle USB **camera**, ball detection for middle camera
+    - Connected to bottom USB **camera** and ball detection for bottom camera
+    - Connected to middle USB **camera** and ball detection for middle camera
+    - Connected to **iRobot** and controls the iRobot
+    - Runs
+        - 2 camera nodes
+        - Ball detection node
+        - iRobot control node (the main state machine)
 - Raspberry Pi 2
     - Connected to **mbed**, reading values for 4 **potentiometers**
     - Connected to **Arduino**
         - Connected to 4 motors via **Arduino Motor Shield**
         - Connected to 2 **ultrasonic distance sensors**
     - Connected to arm USB **camera**, ball detection for arm camera
-    - Runs ROS Master node
+    - Runs
+        - ROS Master node
+        - Motor control node
+        - Ball dtection node
+        - Voltage receiver node
+        - Ultrasonic distance sensor node
 
 ## 2 Software
 ### 2.1 State machine
