@@ -1,17 +1,19 @@
 <launch>
-
-    <!--<node name="arduino_cmd_sender" pkg="hw2" type="arm_cmd_send.py"/> -->
-
+    <!-- arduino -->
     <node name="arduino_rosserial" pkg="rosserial_python" type="serial_node.py" >
         <param name="~port" value="/dev/ttyACM0" />
     </node>
 
+    <!-- mbed -->
     <node name="mbed_rosserial" pkg="rosserial_python" type="serial_node.py">
         <param name="~port" value="/dev/ttyACM1" />
         <param name="~baud" value="57600" />
     </node>
+
+    <!-- controller -->
     <node name="arm_feedback_controller" pkg="arm_control" type="arm_feedback_controller.py"> </node>
 
+    <!-- arm camera gscam -->
     <arg name="arm_cam_name" value="arm_cam" />
     <env name="GSCAM_CONFIG" value="v4l2src device=/dev/video0 ! video/x-raw-yuv,framerate=15/1,width=320,height=240 ! ffmpegcolorspace " />
     <node pkg="gscam" type="gscam" name="$(arg arm_cam_name)">
@@ -19,11 +21,6 @@
         <remap from="camera/image_raw" to="$(arg arm_cam_name)/image_raw" />
     </node>
 
-    <!-- <node name="rqt_image_view" pkg="rqt_image_view" type="rqt_image_view" respawn="false" output="screen">
-     <param name="autosize" value="true" />
-    </node>-->
-
+    <!-- arm ball detect -->
     <node pkg="ball_detect" name="arm_ball_detect" type="arm_ball_detect.py" />
-
-
 </launch>
