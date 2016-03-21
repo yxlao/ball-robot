@@ -227,7 +227,7 @@ def avoid():
             back_up()
             avoid_state = "back_up"
     elif avoid_state == "back_up":
-         if current_time - command_start_time > 1.5:
+         if current_time - command_start_time > 1:
             turn_right()
             avoid_state = "turn_left"
     elif avoid_state == "turn_left":
