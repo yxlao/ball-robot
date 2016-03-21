@@ -1,5 +1,3 @@
-![structure.png](https://bitbucket.org/repo/g6j85L/images/62233650-structure.png)
-
 The system architecture wiki page can be found at https://bitbucket.org/ucsd_team_one/robot-central/wiki/System%20Architecture
 
 Wiki pages:
