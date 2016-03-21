@@ -36,14 +36,14 @@ Here, we describe the responsibility of each hardware components
 - Raspberry Pi 1
     - Connected to bottom USB **camera** and ball detection for bottom camera
     - Connected to middle USB **camera** and ball detection for middle camera
-    - Connected to **iRobot** and controls the iRobot
+    - Connected to **iRobot** via USB and controls the iRobot
     - Runs
         - 2 camera nodes
         - Ball detection node
         - iRobot control node (the main state machine)
 - Raspberry Pi 2
-    - Connected to **mbed**, reading values for 4 **potentiometers**
-    - Connected to **Arduino**
+    - Connected to **mbed** via USB and read values for 4 **potentiometers**
+    - Connected to **Arduino** via USB
         - Connected to 4 motors via **Arduino Motor Shield**
         - Connected to 2 **ultrasonic distance sensors**
     - Connected to arm USB **camera**, ball detection for arm camera
