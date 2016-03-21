@@ -1,10 +1,8 @@
 <launch>
-    
-    <node name="state_mode_keyboard" pkg="create_driver" type="state_mode_keyboard" output="screen"/>
-    
+    <node name="state_mode_keyboard" pkg="create_driver" type="state_mode_keyboard" output="screen" />
     <node name="create_driver" pkg="create_driver" type="create_driver">
-      <param name="port" value="/dev/ttyUSB0" />
-      <!-- <param name="port" value="/dev/pts/28" /> -->
-      <param name="mode" value="safe" />
+        <param name="port" value="/dev/ttyUSB0" />
+        <!-- <param name="port" value="/dev/pts/28" /> -->
+        <param name="mode" value="safe" />
     </node>
 </launch>
