@@ -60,9 +60,8 @@ Here, we describe the responsibility of each hardware components
 We designed hierarchal state machines, where each main states can have multiple
 sub states (for example the `avoid` and `explore` states). The robot the
 internal states and external sensor inputs determines the robots action, and
-ultimately changes the internal states.
-
-#### 2.1.1 List of states
+ultimately changes the internal states. For more details, please take a look
+at `create_driver/creat_state_machine.py`.
 
 - `find_ball`
 - `drive`
