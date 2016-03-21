@@ -3,10 +3,10 @@
 
 **Robot's capabilities**
 
-- Detect orange and grenn balls and select closest target
+- Detect orange and green balls and select closest target
 - Distinguish balls from color papers
 - Drive towards to the ball
-- Picku up the ball with robotic arm
+- Pick up the ball with robotic arm
 - Front and back avoid obstacle
 - Detect bucket
 - Drive towards the bucket
@@ -55,9 +55,40 @@ Here, we describe the responsibility of each hardware components
         - Ultrasonic distance sensor node
 
 ## 2 Software
+
 ### 2.1 State machine
+We designed hierarchal state machines, where each main states can have multiple
+sub states (for example the `avoid` and `explore` states). The robot the
+internal states and external sensor inputs determines the robots action, and
+ultimately changes the internal states.
+
+#### 2.1.1 List of states
+
+- `find_ball`
+- `drive`
+- `turn_right`
+- `turn_left`
+- `back`
+- `avoid`
+    - `stop`
+    - `back_up`
+    - `turn_left`
+    - `turn_right`
+    - `drive`
+- `explore`
+    - `explore_drive`
+    - `explore_turn`
+- `fine_position`
+- `pick_up`
+- `find_bucket`
+- `stop`
+
 ### 2.2 Ball detection
+
 ### 2.3 Arm control
+
 ## 3 Code structure
+
 ## 4 Notes on launching
+
 ## 5 Time-line and checkpoints
