@@ -64,7 +64,7 @@ if __name__ == '__main__':
         if len(sys.argv) > 1 and sys.argv[1] == '-s':
             time.sleep(0.2)
 
-        time.sleep(0.01)
+        time.sleep(0.02)
 
     # when everything done, release the camera
     camera.release()

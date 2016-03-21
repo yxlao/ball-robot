@@ -57,6 +57,7 @@ avoid_state = "stop"
 stop_all_movement = False
 
 ball_in_claw = False
+last_state = "stop"
 
 
 
@@ -142,7 +143,7 @@ def fine_left_turn():
 
 def fine_approach():
     drive(speed=SLOW_DRIVE_SPEED)
-    for i in xrange(3):
+    for i in xrange(2):
         rate3.sleep()
     stop()
     for i in xrange(10):
@@ -150,6 +151,7 @@ def fine_approach():
 
 def explore():
     global last_command, explore_duration, explore_state, command_start_time
+    rate3.sleep()
     if last_command == "explore":
         turn_right()
         explore_duration = random.random() * 8
@@ -168,8 +170,8 @@ def explore():
 def fine_position():
     global last_command, command_start_time, state, stop_all_movement, time_since_ball_in_center, rate3
     if -0.2 < lower_cam_ball_coords.x and lower_cam_ball_coords.x < 0.45:
-        if lower_cam_ball_coords.y < 11:
-            if lower_cam_ball_coords.y < 7:
+        if lower_cam_ball_coords.y < 9:
+            if lower_cam_ball_coords.y < 5:
                 back_up(speed=SLOW_DRIVE_SPEED)
                 time_since_ball_in_center = rospy.get_time()
             else:
@@ -179,7 +181,7 @@ def fine_position():
                     state = "pick_up"
                     pick_up_pub.publish('true')
                     stop_all_movement=True
-        elif lower_cam_ball_coords.y < 19:
+        elif lower_cam_ball_coords.y < 24:
             fine_approach()
         else:
             drive(speed=SLOW_DRIVE_SPEED)
@@ -215,7 +217,7 @@ def fine_bucket_position():
 
 
 def avoid():
-    global avoid_state, ball_in_claw, done_avoiding_obstacle, state, last_command
+    global avoid_state, ball_in_claw, done_avoiding_obstacle, state, last_command, last_state
     current_time = rospy.get_time()
     if last_command == "avoid":
         avoid_state = "stop"
@@ -234,20 +236,20 @@ def avoid():
             avoid_state = "drive"
     elif avoid_state == "drive":
         if current_time - command_start_time > 2:
-            if ball_in_claw:
+            if ball_in_claw == True:
                 state = "find_bucket"
             else:
-                state = "explore"
-                last_command = "explore"
+                state = last_state
             avoid_state = "stop"
             done_avoiding_obstacle = True
 
 
 def ir_bumper_callback(msg):
-    global done_avoiding_obstacle, state, last_command
-    if msg.state and done_avoiding_obstacle and state != "pick_up":
+    global done_avoiding_obstacle, state, last_command, last_state
+    if False:#msg.state and done_avoiding_obstacle and state != "pick_up":
         state = "avoid"
         last_command = "avoid"
+        last_state = state
         done_avoiding_obstacle = False
 
 
@@ -258,7 +260,7 @@ def ball_in_sight_callback(msg):
             ball_in_sight = False
             ball_in_sight_changed = True
     elif msg.data == "true":
-        if (not lower_cam_ball_in_sight) and done_avoiding_obstacle and state != "pick_up" and state !="find_bucket" :
+        if (not lower_cam_ball_in_sight) and done_avoiding_obstacle and state != "pick_up" and state !="find_bucket"  and state != "avoid":
             state = "explore"
         if ball_in_sight == True:
             a = 1
@@ -268,7 +270,7 @@ def ball_in_sight_callback(msg):
             ball_in_sight_changed = True
 
 def lower_cam_ball_in_sight_callback(msg):
-    global lower_cam_ball_in_sight, lower_cam_ball_in_sight_changed,state, time_since_ball_in_center
+    global lower_cam_ball_in_sight, lower_cam_ball_in_sight_changed, state, time_since_ball_in_center
     if msg.data == "false":
         if lower_cam_ball_in_sight == True:
             lower_cam_ball_in_sight = False
@@ -286,28 +288,29 @@ def lower_cam_ball_in_sight_callback(msg):
                 return
             if state != "fine_position":
                 time_since_ball_in_center = rospy.get_time()
-
+            state_pub.publish("lower cam ball detected" + state)
             state = "fine_position"
             lower_cam_ball_in_sight = True
             lower_cam_ball_in_sight_changed = True
 
 def front_ultrasonic_callback(msg):
-    global avoid_state, bucket_in_sight, rate1, state, should_drop_ball_pub, stop_all_movement
+    global avoid_state, bucket_in_sight, rate1, state, should_drop_ball_pub, stop_all_movement, last_state
     if msg.data != 0:
-        if msg.data < 20 and state == "find_bucket" and abs(bucket_coords.x) < 0.5 and bucket_in_sight: # and abs(bucket_coords.x) < 0.5:
+        if msg.data < 15 and state == "find_bucket" and abs(bucket_coords.x) < 0.7 and bucket_in_sight: # and abs(bucket_coords.x) < 0.5:
             should_drop_ball_pub.publish("true")
             state = "stop"
             stop_all_movement = True
             rate1.sleep()
-            state = "explore"
-        elif msg.data < 30 and state != "pick_up" and not (state == "find_bucket" and bucket_in_sight):
+            #state = "explore"
+        elif msg.data < 20 and state != "pick_up" and not (state == "find_bucket" and bucket_in_sight) and not (state == "avoid" and avoid_state != "drive"):
+            last_state = state
             state = "avoid"
             avoid_state = "stop"
 
 def back_ultrasonic_callback(msg):
     global state, back_obstructed
     if msg.data < 20 and msg.data > 0:
-        back_obstructed = True
+        back_obstructed = False
     else:
         back_obstructed = False
 
@@ -352,7 +355,7 @@ def ball_in_claw_callback(msg):
         ball_in_claw = True
     else:
         if rospy.get_time() - time_ball_last_in_claw > 3:
-             ball_in_claw = False
+            ball_in_claw = False
 
 
 
@@ -438,14 +441,14 @@ def run_state_machine():
             fine_position()
     elif state == "find_bucket":
         if not ball_in_claw:
-            state = "find_ball"
+            state = "explore"
+            last_command = "explore"
             should_drop_ball_pub.publish("truefast")
             return
         if bucket_in_sight:
             fine_bucket_position()
         else:
-            if last_command != "turn_right":
-                explore()
+            explore()
 
 
 

@@ -1,8 +1,10 @@
 import numpy as np
 from sklearn import linear_model
 from os.path import expanduser
+from sklearn import ensemble
 
-clf = linear_model.LogisticRegression()
+# clf = linear_model.LogisticRegression()
+clf = ensemble.GradientBoostingClassifier()
 
 def get_accuracy(labels_predict, labels):
     return np.sum(labels_predict == labels) / float(len(labels))
