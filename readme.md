@@ -181,7 +181,7 @@ Manual Commands for Debug
     - Drive to a set coordinate
     - Be able to turn until a ball is located and then stop turning.
     - Be able to verify that the ball is still there when we're driving to it
-Week 8:
+- Week 8:
     - Computer vision -> ignore big obstacles of the same color but different
       size / shape
     - Consistently track the same ball when multiple balls are in the frame
