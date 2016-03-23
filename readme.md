@@ -155,45 +155,12 @@ Manual Commands for Debug
     S D F G C
     X
 
-## 5 Checkpoints from Week 6
+## 5 Misc
 
-- Week 6
-    - All sensors working.
-    - Attach potentiometers to the relevant joints of the arm and wire them.
-    - Be able to at least approximate the angle of each of the joints of the arm.
-    - Be able to pass all sensor information through to the odroid
-    - Be able to move arm to a certain position.
-    - Be able to calculate the angle each joint
-    - Be able to accurately approximate the location in space of each joint,
-      at least relative to the previous joint.
-    - Wire potentiometers up to Mbed.
-    - Set up and process information from a third camera.
-    - Ultimate goal: be able to pick up a stationary ball.
-- Week 7: Robot control
-    - Visualize all arm joints as transforms in rviz
-    - Obstacle avoidance: be able to navigate around a certain object in the way.
-    - Response to bump sensors, cliff sensors, etc.
-    - Bump sensor -> back up, turn, try to drive around it, maybe rotate to re-
-      find ball
-    - Cliff sensor -> back up and turn, move over a bit and then try to resume
-      path
-    - Proximity sensor -> look for ball?
-    - Driving toward a ball and stop in front of it.
-    - Drive to a set coordinate
-    - Be able to turn until a ball is located and then stop turning.
-    - Be able to verify that the ball is still there when we're driving to it
-- Week 8:
-    - Computer vision -> ignore big obstacles of the same color but different
-      size / shape
-    - Consistently track the same ball when multiple balls are in the frame
-    - Reset state machine after dropping off ball
-    - Robot control-what to do with respect to other robots?
-    - Final arm mount
-    - Be able to find and go to goal / bucket
-    - Raise ball to a certain height in front of the robot and then drop it (to
-      simulate putting it into a basket)
-    - By this time we want to have all of the components working so we can piece
-      it all together.
-- Week 9:
-    - Detect ball vs paper
-    - Last-minute debugging
+### Backup and restore sd card
+
+    # to backup
+    $ sudo dd bs=4M if=/dev/sdb | gzip > lubuntu_feb_18.img.gz
+    $ watch -n5 sudo pkill -usr1 dd
+    # to restore
+    gunzip --stdout lubuntu_feb_18.img.gz | sudo dd bs=4M of=/dev/sdb
