@@ -1,4 +1,5 @@
-# Robot Design Overview
+# Ball Robot
+A robot that can drive to the ball, pick it up and put it into the basket
 
 ## Robot's capabilities
 
