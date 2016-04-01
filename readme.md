@@ -1,4 +1,6 @@
 # Ball Robot
+![robot](https://cloud.githubusercontent.com/assets/1501945/14213494/1a2451d0-f7ed-11e5-91e6-54b4bf534c53.jpg)
+
 A robot that can drive to the ball, pick it up and put it into the basket
 
 ## Robot's capabilities
