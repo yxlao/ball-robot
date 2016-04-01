@@ -1,0 +1,9 @@
+[submodule "gscam"]
+	path = gscam
+	url = https://github.com/ros-drivers/gscam.git
+[submodule "rosserial"]
+	path = rosserial
+	url = https://github.com/ros-drivers/rosserial.git
+[submodule "usb_cam"]
+	path = usb_cam
+	url = https://github.com/bosch-ros-pkg/usb_cam.git
